@@ -1,0 +1,192 @@
+# Measurable goals for the Catalog Service and the agent.
+#
+# Every goal has a structured threshold, the exact command that produces the number and the
+# artifact where the number is written. A goal whose command cannot be written is not a goal.
+# This file is sealed by docs/thresholds.lock (sha256). Changing a threshold means a new
+# proposal, at least two measured attempts recorded in docs/JOURNAL.md, and a new lock.
+#
+# Validated by: uv run pytest tests/test_goals_schema.py
+
+status: proposal            # proposal -> ratified (when thresholds.lock is generated)
+version: 1
+phases:                     # 0 foundation · 1 catalog service · 2 agent · 3 extensions · 4 delivery
+  core: [0, 1, 2, 4]
+  extension: [3]            # extension goals never block a core phase
+
+reference_hardware:
+  service: "Contabo VPS, 4 vCPU, 7.8 GB RAM, Ubuntu 24.04, Coolify + Traefik"
+  client: "Developer laptop (Apple Silicon) on a residential connection in Spain"
+
+latency_protocol: "20 warm-up requests discarded, then 200 requests per run, 3 runs; the reported value is the maximum of the three p95s"
+
+tokenizer: "o200k_base (tiktoken), the encoding used by the gpt-4.1 family"
+
+comparison:                 # applies to level-2 interface evals (v1 vs v2 of the tool descriptions)
+  method: bootstrap
+  paired: true
+  n_resamples: 10000
+  seed: 20261029
+  multiple_comparison: holm
+  block_rule: "metric below its absolute threshold OR the 95% CI of the paired difference against the last green baseline lies entirely below zero"
+
+goals:
+  # ---------- Phase 1 · Catalog Service ----------
+  - id: G-INGEST-CLEAN
+    name: The client's export ingests with no decision left pending
+    threshold: {op: "==", value: 0, unit: count}
+    command: "make ingest"
+    artifact: "data/build/ingest-report.json :: pending_decisions"
+    blocking_from_phase: 1
+    kind: core
+    requires: []
+
+  - id: G-INGEST-STOPS
+    name: Every seeded-anomaly fixture stops the ingest and reports exactly its anomalies
+    threshold: {op: "==", value: 1.0, unit: ratio}
+    command: "make eval-ingest"
+    artifact: "evals/reports/ingest-latest.json :: exact_detection_rate"
+    blocking_from_phase: 1
+    kind: core
+    requires: []
+
+  - id: G-L1-EXACT
+    name: Level-1 tool cases return exactly the expected product IDs
+    threshold: {op: "==", value: 1.0, unit: ratio}
+    command: "make eval-l1"
+    artifact: "evals/reports/l1-latest.json :: exact_match_rate"
+    blocking_from_phase: 1
+    kind: core
+    requires: []
+
+  - id: G-RESP-TOKENS-DEFAULT
+    name: Largest list or search response at the default page size, in tokens
+    threshold: {op: "<=", value: 800, unit: tokens}
+    command: "make eval-l1"
+    artifact: "evals/reports/l1-latest.json :: max_tokens_default_page"
+    blocking_from_phase: 1
+    kind: core
+    requires: []
+
+  - id: G-RESP-TOKENS-MAX
+    name: Largest list or search response at the maximum page size, in tokens
+    threshold: {op: "<=", value: 1500, unit: tokens}
+    command: "make eval-l1"
+    artifact: "evals/reports/l1-latest.json :: max_tokens_max_page"
+    blocking_from_phase: 1
+    kind: core
+    requires: []
+
+  - id: G-SPEC-LINT
+    name: OpenAPI rule violations (missing descriptions, examples, operationIds, $ref, non-inline enums)
+    threshold: {op: "==", value: 0, unit: count}
+    command: "make spec-lint"
+    artifact: "evals/reports/spec-lint-latest.json :: violations"
+    blocking_from_phase: 1
+    kind: core
+    requires: []
+
+  - id: G-AUTH
+    name: Data endpoints called without a valid key that are rejected with 401
+    threshold: {op: "==", value: 1.0, unit: ratio}
+    command: "make test"
+    artifact: "evals/reports/auth-latest.json :: rejected_rate"
+    blocking_from_phase: 1
+    kind: core
+    requires: []
+    proposal_allowed: false
+
+  - id: G-SECRETS
+    name: Secrets found in the repository that are not in the reviewed baseline
+    threshold: {op: "==", value: 0, unit: count}
+    command: "make secrets"
+    artifact: "evals/reports/secrets-latest.json :: new_findings"
+    blocking_from_phase: 1
+    kind: core
+    requires: []
+    proposal_allowed: false
+
+  - id: G-COVERAGE
+    name: Line coverage over the packages under mandatory TDD (domain, ingest)
+    threshold: {op: ">=", value: 85, unit: percent}
+    command: "make test"
+    artifact: "evals/reports/coverage-latest.json :: line_percent"
+    blocking_from_phase: 1
+    kind: core
+    requires: []
+
+  - id: G-LATENCY-P95
+    name: p95 latency of the deployed list and search endpoints, measured from the client machine
+    threshold: {op: "<=", value: 300, unit: ms}
+    command: "make latency URL=<public base url>"
+    artifact: "evals/reports/latency-latest.json :: p95_ms_max_of_runs"
+    blocking_from_phase: 1
+    kind: core
+    requires: []
+
+  # ---------- Phase 2 · Agent ----------
+  - id: G-L2-TOOL
+    name: Level-2 cases where the model picks the expected tool (or correctly calls none)
+    threshold: {op: ">=", value: 0.90, unit: ratio}
+    command: "make eval-l2"
+    artifact: "evals/reports/l2-latest.json :: tool_accuracy"
+    blocking_from_phase: 2
+    kind: core
+    requires: [OPENAI_API_KEY]
+    paired_with: G-L2-NEG-FALSE-CALL
+
+  - id: G-L2-ARGS
+    name: Level-2 cases with the right tool where the arguments are also right
+    threshold: {op: ">=", value: 0.85, unit: ratio}
+    command: "make eval-l2"
+    artifact: "evals/reports/l2-latest.json :: args_accuracy"
+    blocking_from_phase: 2
+    kind: core
+    requires: [OPENAI_API_KEY]
+
+  - id: G-L2-NEG-FALSE-CALL
+    name: Off-topic level-2 cases where the model calls a catalogue tool anyway
+    threshold: {op: "<=", value: 0.05, unit: ratio}
+    command: "make eval-l2"
+    artifact: "evals/reports/l2-latest.json :: negative_false_call_rate"
+    blocking_from_phase: 2
+    kind: core
+    requires: [OPENAI_API_KEY]
+    paired_with: G-L2-TOOL
+
+  - id: G-SIM-CORE
+    name: The six scenarios from the brief that pass in the platform's Simulations
+    threshold: {op: "==", value: 1.0, unit: ratio}
+    command: "manual: import evals/simulations/scenarios.csv in the platform, run, export results to evals/reports/simulations-latest.csv; then make sim-report"
+    artifact: "evals/reports/simulations-latest.json :: core_pass_rate"
+    blocking_from_phase: 2
+    kind: core
+    requires: [platform access]
+
+  # ---------- Phase 3 · Extensions (never block) ----------
+  - id: G-MCP-PARITY
+    name: Level-1 cases where the MCP server returns the same result as the REST API
+    threshold: {op: "==", value: 1.0, unit: ratio}
+    command: "make eval-mcp"
+    artifact: "evals/reports/mcp-latest.json :: parity_rate"
+    blocking_from_phase: null
+    kind: extension
+    requires: []
+
+  - id: G-MUTATION
+    name: Mutants killed in the domain and ingest packages
+    threshold: {op: ">=", value: 70, unit: percent}
+    command: "make mutation"
+    artifact: "evals/reports/mutation-latest.json :: killed_percent"
+    blocking_from_phase: null
+    kind: extension
+    requires: [new dev dependency: mutation tool]
+
+  # ---------- Phase 4 · Delivery ----------
+  - id: G-PUBLIC-CHECK
+    name: Public checks that pass from outside (spec reachable, 401 without key, 200 with key, test page up)
+    threshold: {op: "==", value: 1.0, unit: ratio}
+    command: "make check-public URL=<public base url>"
+    artifact: "evals/reports/public-latest.json :: pass_rate"
+    blocking_from_phase: 4
+    kind: core
+    requires: []
