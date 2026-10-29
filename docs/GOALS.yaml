@@ -7,7 +7,7 @@
 #
 # Validated by: uv run pytest tests/test_goals_schema.py
 
-status: proposal            # proposal -> ratified (when thresholds.lock is generated)
+status: ratified            # ratified 2026-10-30; sealed by docs/thresholds.lock
 version: 1
 phases:                     # 0 foundation · 1 catalog service · 2 agent · 3 extensions · 4 delivery
   core: [0, 1, 2, 4]
@@ -114,6 +114,16 @@ goals:
     kind: core
     requires: []
 
+  - id: G-ARCH-LAYERS
+    name: Forbidden imports between layers (domain -> api/mcp/web frameworks, api <-> mcp)
+    threshold: {op: "==", value: 0, unit: count}
+    command: "make test"
+    artifact: "evals/reports/arch-latest.json :: violations"
+    blocking_from_phase: 1
+    kind: core
+    requires: []
+    proposal_allowed: false
+
   - id: G-LATENCY-P95
     name: p95 latency of the deployed list and search endpoints, measured from the client machine
     threshold: {op: "<=", value: 300, unit: ms}
@@ -153,6 +163,15 @@ goals:
     requires: [OPENAI_API_KEY]
     paired_with: G-L2-TOOL
 
+  - id: G-L2-REPRODUCIBLE
+    name: Published level-2 numbers that differ when re-scored offline from the recorded model responses
+    threshold: {op: "==", value: 0, unit: count}
+    command: "make eval-l2"
+    artifact: "evals/reports/l2-latest.json :: replay_mismatches"
+    blocking_from_phase: 2
+    kind: core
+    requires: []
+
   - id: G-SIM-CORE
     name: The six scenarios from the brief that pass in the platform's Simulations
     threshold: {op: "==", value: 1.0, unit: ratio}
@@ -172,14 +191,14 @@ goals:
     kind: extension
     requires: []
 
-  - id: G-MUTATION
-    name: Mutants killed in the domain and ingest packages
-    threshold: {op: ">=", value: 70, unit: percent}
-    command: "make mutation"
-    artifact: "evals/reports/mutation-latest.json :: killed_percent"
+  - id: G-MCP-CONFORMANCE
+    name: MCP protocol checks that pass over Streamable HTTP (initialize, tools/list, tools/call, errors, auth)
+    threshold: {op: "==", value: 1.0, unit: ratio}
+    command: "make eval-mcp"
+    artifact: "evals/reports/mcp-latest.json :: conformance_rate"
     blocking_from_phase: null
     kind: extension
-    requires: [new dev dependency: mutation tool]
+    requires: []
 
   # ---------- Phase 4 · Delivery ----------
   - id: G-PUBLIC-CHECK
