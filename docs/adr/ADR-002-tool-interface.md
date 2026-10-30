@@ -1,6 +1,6 @@
 # ADR-002 · The tool interface: four read-only tools written for a model
 
-- **Status:** proposed · 2026-10-30
+- **Status:** accepted · 2026-10-30
 - **Deciders:** Samuel Viciana
 - **Related:** ADR-001 (cleaned catalogue), JOURNAL day 2 block 2 (100-conversation stress test)
 

@@ -40,6 +40,7 @@ cases:
 | `undeclared_cross_listing` | Two IDs identical in every field except category, not declared |
 | `stale_decision` | A declared cross-listed pair that is no longer identical, or with only one of its IDs left (both gone is reported as an unused decision, not a stop) |
 | `invalid_value` | A required field missing, a number that does not parse or is out of range, a recipient or occasion outside the allowed list, `gift_wrap` not yes/no |
+| `instruction_like_text` | Free text written to steer a model ("ignore previous instructions", "system prompt", role tags). Product copy reaches the agent verbatim, so this is a prompt injection through the data (added 2026-10-30) |
 | `schema_mismatch` | Missing or unexpected columns |
 | `mass_removal` | More products removed than the allowed share, compared with the current catalogue |
 

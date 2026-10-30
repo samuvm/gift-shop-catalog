@@ -40,3 +40,21 @@ def parse_number[T: (int, float)](value: str | None, kind: type[T]) -> T | None:
         return kind(text)
     except ValueError:
         raise ValueError(f"{text!r} is not a valid {kind.__name__}") from None
+
+
+# Phrases written to steer a language model, not to describe a product. Product copy reaches
+# the agent verbatim, so an export that carries them is a prompt injection through the data.
+_INSTRUCTION_PATTERNS = re.compile(
+    r"\b(ignore|disregard|forget)\b.{0,20}\b(previous|prior|above|earlier|all)\b.{0,20}"
+    r"\b(instructions?|prompts?|rules)\b"
+    r"|\bsystem\s+prompt\b"
+    r"|\byou\s+are\s+now\b"
+    r"|\bas\s+an\s+ai\b"
+    r"|</?\s*(system|assistant|user|instructions?)\s*>",
+    re.IGNORECASE,
+)
+
+
+def looks_like_instruction(text: str) -> bool:
+    """True when the text contains phrasing aimed at a language model rather than a shopper."""
+    return bool(_INSTRUCTION_PATTERNS.search(text))

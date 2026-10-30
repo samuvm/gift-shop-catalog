@@ -1,6 +1,6 @@
 {
   "exact_detection_rate": 1.0,
-  "n_fixtures": 10,
+  "n_fixtures": 11,
   "fixtures": [
     {
       "fixture": "clean_export",
@@ -162,6 +162,28 @@
           "invalid_value",
           [
             "JW-002"
+          ]
+        ]
+      ],
+      "status": "stopped",
+      "notes": ""
+    },
+    {
+      "fixture": "injected_description",
+      "passed": true,
+      "expected": [
+        [
+          "instruction_like_text",
+          [
+            "HL-005"
+          ]
+        ]
+      ],
+      "reported": [
+        [
+          "instruction_like_text",
+          [
+            "HL-005"
           ]
         ]
       ],

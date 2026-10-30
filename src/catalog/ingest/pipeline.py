@@ -12,7 +12,14 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from catalog.domain.models import Availability, Product
 from catalog.ingest.decisions import Category, Decisions
-from catalog.ingest.rules import category_key, clean, parse_number, parse_yes_no, split_multi
+from catalog.ingest.rules import (
+    category_key,
+    clean,
+    looks_like_instruction,
+    parse_number,
+    parse_yes_no,
+    split_multi,
+)
 
 EXPECTED_COLUMNS = (
     "product_id", "name", "category", "subcategory", "brand", "price_eur", "stock", "rating",
@@ -37,6 +44,8 @@ LISTING_COLUMNS = ("product_id", "category", "subcategory")
 # Derived text is left out of the diff: it changes whenever its sources do.
 NOT_DIFFED = ("search_text", "search_text_compact")
 ID_PATTERN = re.compile(r"^[A-Z]{2}-\d{3}$")
+# Free text that reaches the agent verbatim, checked for prompt-injection phrasing.
+TEXT_COLUMNS = ("name", "subcategory", "brand", "tags", "color", "material", "description")
 
 
 class _Record(BaseModel):
@@ -231,6 +240,9 @@ def _parse_row(
                 detail = f"{pid} is in {category.name}, whose IDs start with {category.id_prefix}-"
                 anomalies.append(Anomaly(code="prefix_mismatch", product_ids=[pid], detail=detail))
 
+    if steering := [c for c in TEXT_COLUMNS if values[c] and looks_like_instruction(values[c] or "")]:
+        detail = f"text aimed at a language model in {steering}; the agent reads product copy verbatim"
+        anomalies.append(Anomaly(code="instruction_like_text", product_ids=[pid], detail=detail))
     if problems:
         anomalies.append(Anomaly(code="invalid_value", product_ids=[pid], detail="; ".join(problems)))
     if (
