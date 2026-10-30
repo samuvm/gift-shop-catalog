@@ -27,6 +27,12 @@ secrets: ## Secrets in tracked files that are not in the reviewed baseline (G-SE
 run: ## Serve locally on :8000 (needs CATALOG_API_KEY in the environment or .env)
 	set -a; [ -f .env ] && . ./.env; set +a; $(UV) uvicorn catalog.api.app:app_from_env --factory --port 8000
 
+latency: ## p95 of list and search calls against a deployed URL (G-LATENCY-P95); make latency URL=https://...
+	set -a; [ -f .env ] && . ./.env; set +a; $(UV) python scripts/remote_checks.py latency $(URL)
+
+check-public: ## Spec, auth and test page from outside (G-PUBLIC-CHECK); make check-public URL=https://...
+	set -a; [ -f .env ] && . ./.env; set +a; $(UV) python scripts/remote_checks.py public $(URL)
+
 gate-fast: lint typecheck test ## Everything that must stay green after each change
 
 ingest: ## CSV + data/decisions.yaml -> data/build/catalog.json + ingest-report.json (exit 1 = decision needed)
@@ -41,4 +47,4 @@ golden-l1: ## Rebuild level-1 cases from the reference semantics (evals/golden/l
 audit-csv: ## Independent audit of the raw export (stdlib only)
 	python3 -I scripts/audit_csv.py data/gift-shop-catalog.csv
 
-.PHONY: help lint typecheck test spec-lint eval-l1 secrets run gate-fast ingest eval-ingest golden-l1 audit-csv
+.PHONY: help lint typecheck test spec-lint eval-l1 secrets run latency check-public gate-fast ingest eval-ingest golden-l1 audit-csv
