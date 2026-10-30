@@ -496,7 +496,7 @@ of the order.
   out-of-stock and over-budget blocks when recipient or occasion is set.
 - l1-005 needed no code. The error already named *home-living* and *Garden* in its `hint`, but
   the review sheet never showed it. Error cases now record the hint.
-- Tests first: 16 new domain tests, then the code. The reference implementation was updated
+- Tests first: 13 new domain tests plus 4 for the API, the vocabulary and storage, then the code. The reference implementation was updated
   separately and agrees with the service on all 74 cases.
 - Level-1 v3: 74 cases (one new case for `her,couple`). 44 keep their approval and 30 go to
   review.
