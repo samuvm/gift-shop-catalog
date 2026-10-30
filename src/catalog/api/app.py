@@ -19,11 +19,11 @@ from catalog.domain.catalog import Catalog
 from catalog.domain.errors import CatalogError
 from catalog.service import Context, error_body, execute
 from catalog.storage import read_catalog, read_vocabulary
+from catalog.tools import RECIPIENT_PATTERN
 
 ROOT = Path(__file__).resolve().parents[3]
 STATUS = {"unknown_category": 404, "unknown_subcategory": 404, "product_not_found": 404}
 
-Recipient = Literal["anyone", "him", "her", "couple", "kids"]
 Occasion = Literal["birthday", "christmas", "anniversary", "housewarming", "thank-you", "graduation"]
 SortParam = Literal["relevance", "rating", "popularity", "price_asc", "price_desc"]
 
@@ -104,7 +104,7 @@ def create_app(
         subcategory: Annotated[str | None, Query(max_length=50)] = None,
         min_price: Annotated[float | None, Query(ge=0)] = None,
         max_price: Annotated[float | None, Query(ge=0)] = None,
-        recipient: Recipient | None = None,
+        recipient: Annotated[str | None, Query(max_length=40, pattern=RECIPIENT_PATTERN)] = None,
         occasion: Occasion | None = None,
         max_shipping_days: Annotated[int | None, Query(ge=0, le=14)] = None,
         exclude: Annotated[str | None, Query(max_length=200)] = None,
@@ -120,7 +120,7 @@ def create_app(
         query: Annotated[str | None, Query(max_length=100)] = None,
         min_price: Annotated[float | None, Query(ge=0)] = None,
         max_price: Annotated[float | None, Query(ge=0)] = None,
-        recipient: Recipient | None = None,
+        recipient: Annotated[str | None, Query(max_length=40, pattern=RECIPIENT_PATTERN)] = None,
         occasion: Occasion | None = None,
         max_shipping_days: Annotated[int | None, Query(ge=0, le=14)] = None,
         exclude: Annotated[str | None, Query(max_length=200)] = None,

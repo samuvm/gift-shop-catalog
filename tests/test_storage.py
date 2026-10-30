@@ -4,7 +4,11 @@ from pathlib import Path
 
 from catalog.storage import encode_catalog, read_catalog, read_vocabulary
 
-SEARCH = {"phrases": {"noise cancelling": "anc"}, "synonyms": [["headphone", "earbud"]]}
+SEARCH = {
+    "phrases": {"noise cancelling": "anc"},
+    "synonyms": [["headphone", "earbud"]],
+    "generic": ["set"],
+}
 
 
 def test_vocabulary_round_trips(tmp_path: Path) -> None:
@@ -13,6 +17,7 @@ def test_vocabulary_round_trips(tmp_path: Path) -> None:
     vocabulary = read_vocabulary(tmp_path / "catalog.json")
     assert vocabulary.terms("noise cancelling earbuds") == ["anc", "earbud"]
     assert vocabulary.group("earbud") == {"headphone", "earbud"}
+    assert vocabulary.terms("tea set") == ["tea"]
     assert read_catalog(tmp_path / "catalog.json")[1] == []
 
 

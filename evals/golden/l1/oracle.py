@@ -1,4 +1,5 @@
-"""Reference semantics of the four tools (ADR-002, ADR-005), written independently of the service.
+"""Reference semantics of the four tools (ADR-002, ADR-005, ADR-006), written independently of the
+service.
 
 Stdlib only and reads the served catalogue directly. It exists to produce the expected answers
 of the level-1 cases; the service is then checked against them. Two implementations that agree
@@ -90,6 +91,12 @@ def vocabulary() -> tuple[dict[str, str], dict[str, set[str]]]:
     return phrases, groups
 
 
+def generic() -> set[str]:
+    """Packaging words ("set", "kit"): dropped from a query that has another word (ADR-006)."""
+    search = json.loads(CATALOG.read_text(encoding="utf-8")).get("search") or {}
+    return {stem(w) for w in search.get("generic", [])}
+
+
 def stem(word: str) -> str:
     """English plural to singular, crudely: knives -> knife, glasses -> glass, accessories -> accessory."""
     if len(word) <= 3:
@@ -109,6 +116,19 @@ def words(text: str) -> set[str]:
 
 
 def terms(query: str | None) -> list[str]:
+    every = all_terms(query)
+    specific = [t for t in every if t not in generic()]
+    return specific or every
+
+
+def main_word(query: str | None) -> str | None:
+    """With two or more words, the last specific one names the product (ADR-006, rule 1)."""
+    every = all_terms(query)
+    specific = [t for t in every if t not in generic()]
+    return specific[-1] if len(every) >= 2 and specific else None
+
+
+def all_terms(query: str | None) -> list[str]:
     phrases, _ = vocabulary()
     text = " ".join(re.findall(r"[a-z0-9]+", (query or "").lower()))
     for phrase in sorted(phrases, key=lambda k: (-len(k), k)):
@@ -128,7 +148,12 @@ def field_text(p: Product, field: str) -> str:
 def fields_hit(p: Product, term: str) -> list[tuple[str, float]]:
     _, groups = vocabulary()
     group = groups.get(term, {term})
-    return [(f, w) for f, w in FIELD_WEIGHTS if group & words(field_text(p, f))]
+    out = []
+    for f, w in FIELD_WEIGHTS:
+        found = words(field_text(p, f))
+        if group & found:
+            out.append((f, w if term in found else w / 2))  # a synonym alone counts half (ADR-006)
+    return out
 
 
 def match(p: Product, query_terms: list[str], df: dict[str, int], n: int) -> tuple[float, ...] | None:
@@ -155,7 +180,7 @@ def passes(p: Product, a: dict[str, Any], skip: str | None = None) -> bool:
         return False
     if on("max_price") and p["price_eur"] > a["max_price"]:
         return False
-    if on("recipient") and p["recipient"] not in (a["recipient"], "anyone"):
+    if on("recipient") and p["recipient"] not in (*recipients(a), "anyone"):
         return False
     if on("occasion") and a["occasion"] not in p["occasions"]:
         return False
@@ -172,12 +197,19 @@ def passes(p: Product, a: dict[str, Any], skip: str | None = None) -> bool:
 NONE = (0, 0, 0.0, 0.0)
 
 
-def rank_key(
-    p: Product, m: tuple[float, ...], sort: str, recipient: str | None, tiered: bool
-) -> tuple[Any, ...]:
+def recipients(a: dict[str, Any]) -> list[str]:
+    """'her,couple' -> ['her', 'couple'] (ADR-006, rule 6)."""
+    seen: dict[str, None] = {}
+    for r in (a.get("recipient") or "").split(","):
+        if r.strip():
+            seen.setdefault(r.strip().lower(), None)
+    return list(seen)
+
+
+def rank_key(p: Product, m: tuple[float, ...], sort: str, wanted: list[str], tiered: bool) -> tuple[Any, ...]:
     rating = p["rating"] if p["rating"] is not None else -1.0
     reviews = p["reviews_count"] or 0
-    exact = 1 if recipient is not None and p["recipient"] == recipient else 0
+    exact = 1 if p["recipient"] in wanted else 0
     strong, anyw, rarity, s = m
     by = {
         "relevance": (-strong, -anyw, -exact, -rarity, -s, -rating, -reviews),
@@ -190,17 +222,24 @@ def rank_key(
     return (*tier, *by, p["product_id"])
 
 
-def _list(pool: list[Product], a: dict[str, Any], query_terms: list[str] | None) -> dict[str, Any]:
+def _list(
+    pool: list[Product], a: dict[str, Any], query_terms: list[str] | None, main: str | None = None
+) -> dict[str, Any]:
     """Shared core of browse and search: filter, rank, page, and the information blocks."""
     if query_terms:
         df = {t: sum(1 for p in pool if fields_hit(p, t)) for t in query_terms}
         found = [(p, match(p, query_terms, df, len(pool))) for p in pool]
         scored = [(p, m) for p, m in found if m is not None]
+        # The main word, when some product has it in a strong field, narrows the list (ADR-006).
+        named = {p["product_id"] for p in pool if main and any(f in STRONG for f, _ in fields_hit(p, main))}
+        if named:
+            scored = [(p, m) for p, m in scored if p["product_id"] in named]
     else:
         scored = [(p, NONE) for p in pool]
     sort = a.get("sort") or ("relevance" if query_terms else "rating")
     # Exact recipient first only in the default orders (ADR-005, rule 7).
-    recipient = a.get("recipient") if a.get("sort") in (None, "relevance") else None
+    recipient = recipients(a) if a.get("sort") in (None, "relevance") else []
+    narrowed = bool(recipients(a) or a.get("occasion"))
     tiered = bool(query_terms) and sort != "relevance"
 
     def key(pm: tuple[Product, Any]) -> tuple[Any, ...]:
@@ -216,15 +255,20 @@ def _list(pool: list[Product], a: dict[str, Any], query_terms: list[str] | None)
     hits = sorted(matching(), key=key)
     page = hits[offset : offset + limit]
     out: dict[str, Any] = {"product_ids": [p["product_id"] for p, _ in page], "total_matches": len(hits)}
+    if query_terms:
+        missing = {p["product_id"]: [t for t in query_terms if not fields_hit(p, t)] for p, _ in page}
+        if any(missing.values()):
+            out["missing_terms"] = {k: v for k, v in missing.items() if v}
 
-    # Out-of-stock matches are news when the shopper asked for something, or sees the last page.
+    # Out-of-stock matches are news when the shopper asked for something, said who or what it is for
+    # (ADR-006), or sees the last page.
     last_page = offset + limit >= len(hits)
-    if not want_oos and (query_terms or last_page):
+    if not want_oos and (query_terms or narrowed or last_page):
         oos = sorted([(p, s) for p, s in scored if passes(p, a) and not in_stock(p)], key=key)
         if oos:
             out["out_of_stock_matches"] = [p["product_id"] for p, _ in oos[:3]]
 
-    if query_terms and a.get("max_price") is not None:
+    if (query_terms or narrowed) and a.get("max_price") is not None:
         best = max((s for _, s in page), default=NONE)
         over = [
             (p, s)
@@ -234,7 +278,15 @@ def _list(pool: list[Product], a: dict[str, Any], query_terms: list[str] | None)
             and p["price_eur"] > a["max_price"]
             and s >= best
         ]
-        over.sort(key=lambda ps: (tuple(-x for x in ps[1]), ps[0]["price_eur"], ps[0]["product_id"]))
+        # Best matches, then the recipients asked for, then the nearest above the budget.
+        over.sort(
+            key=lambda ps: (
+                tuple(-x for x in ps[1]),
+                0 if ps[0]["recipient"] in recipient else 1,
+                ps[0]["price_eur"],
+                ps[0]["product_id"],
+            )
+        )
         if over:
             out["over_budget_matches"] = [p["product_id"] for p, _ in over[:2]]
 
@@ -286,7 +338,8 @@ def get_products_by_category(a: dict[str, Any]) -> dict[str, Any]:
     ps = load()
     slug = resolve_category(a["category"], ps)
     if slug is None:
-        return {"error_code": "unknown_category", "did_you_mean": category_guesses(a["category"], ps)}
+        guesses, hint = category_guesses(a["category"], ps)
+        return {"error_code": "unknown_category", "did_you_mean": guesses, "hint": hint}
     pool = [p for p in ps if p["category_slug"] == slug]
     if a.get("subcategory"):
         subs = {p["subcategory"].lower() for p in pool}
@@ -296,7 +349,11 @@ def get_products_by_category(a: dict[str, Any]) -> dict[str, Any]:
             listed = {
                 p["subcategory"] for p in pool if asked & (words(p["name"]) | words(" ".join(p["tags"])))
             }
-            return {"error_code": "unknown_subcategory", "did_you_mean": sorted(listed)}
+            return {
+                "error_code": "unknown_subcategory",
+                "did_you_mean": sorted(listed),
+                "hint": "Use one of allowed_values, or leave subcategory out.",
+            }
         pool = [p for p in pool if p["subcategory"].lower() == a["subcategory"].lower()]
     return _list(pool, a, None)
 
@@ -304,7 +361,7 @@ def get_products_by_category(a: dict[str, Any]) -> dict[str, Any]:
 def search_products(a: dict[str, Any]) -> dict[str, Any]:
     ps = [p for p in load() if p["search_primary"]]
     query_terms = terms(a.get("query"))
-    out = _list(ps, a, query_terms or None)
+    out = _list(ps, a, query_terms or None, main_word(a.get("query")))
     unmatched = [t for t in query_terms if not any(fields_hit(p, t) for p in ps)]
     if unmatched:
         out["unmatched_terms"] = unmatched
@@ -316,7 +373,12 @@ def get_product_details(a: dict[str, Any]) -> dict[str, Any]:
     pid = normalise_id(a["product_id"])
     product = next((p for p in ps if p["product_id"] == pid), None)
     if product is None:
-        return {"error_code": "product_not_found", "did_you_mean": id_guesses(a["product_id"], ps)}
+        return {
+            "error_code": "product_not_found",
+            "did_you_mean": id_guesses(a["product_id"], ps),
+            "hint": "Product ids look like 'KD-001'. To find a product by name or description, use "
+            "search_products.",
+        }
     out: dict[str, Any] = {"product_id": product["product_id"]}
     if not in_stock(product):
         twins = {product["product_id"], *product["also_listed_as"]}
@@ -354,21 +416,25 @@ def resolve_category(value: str, ps: list[Product]) -> str | None:
     return hits[0] if len(hits) == 1 else None
 
 
-def category_guesses(value: str, ps: list[Product]) -> list[str]:
-    """A subcategory name points to its one category; otherwise the closest spellings."""
+def category_guesses(value: str, ps: list[Product]) -> tuple[list[str], str]:
+    """A subcategory name points to its one category and names the call; otherwise the closest
+    spellings."""
     key = re.sub(r"\s+", " ", value.strip().lower()).replace(" and ", " & ")
-    owners = {p["category_slug"] for p in ps if words(p["subcategory"]) & words(key)}
-    if len(owners) == 1:
-        return sorted(owners)
+    owners = sorted(
+        {(p["category_slug"], p["subcategory"]) for p in ps if words(p["subcategory"]) & words(key)}
+    )
+    if len({slug for slug, _ in owners}) == 1:
+        slug, sub = owners[0]
+        return [slug], f"Call get_products_by_category with category {slug!r} and subcategory {sub!r}."
     by_slug = {p["category_slug"]: p["category"] for p in ps}
     by_name = {name.lower(): slug for slug, name in by_slug.items()}
     close = difflib.get_close_matches(key, sorted(by_slug) + list(by_name), n=3)
-    return sorted({by_name.get(c, c) for c in close})
+    return sorted({by_name.get(c, c) for c in close}), "Use one of allowed_values, or call get_categories."
 
 
 def id_guesses(value: str, ps: list[Product]) -> list[str]:
     """Products whose name holds every word given; otherwise ids that look alike."""
-    asked = terms(value)
+    asked = all_terms(value)
     by_name = [
         p["product_id"]
         for p in sorted(ps, key=lambda p: p["product_id"])

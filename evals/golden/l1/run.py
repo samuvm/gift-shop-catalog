@@ -17,7 +17,7 @@ from urllib.parse import quote, urlencode
 import tiktoken
 
 ROOT = Path(__file__).resolve().parents[3]
-CASES = ROOT / "evals" / "golden" / "l1" / "v2.jsonl"
+CASES = ROOT / "evals" / "golden" / "l1" / "v3.jsonl"
 REPORT = ROOT / "evals" / "reports" / "l1-latest.json"
 ENCODING = tiktoken.get_encoding("o200k_base")
 PATHS = {
@@ -40,7 +40,8 @@ def url_for(tool: str, args: dict[str, Any]) -> str:
 
 def summarise(tool: str, status: int, body: dict[str, Any]) -> dict[str, Any]:
     if status >= 400:
-        return {"error_code": body["error"]["code"], "did_you_mean": body["error"].get("did_you_mean", [])}
+        e = body["error"]
+        return {"error_code": e["code"], "did_you_mean": e.get("did_you_mean", []), "hint": e["hint"]}
     if tool == "get_categories":
         return {"categories": {c["slug"]: c for c in body["categories"]}}
     if tool == "get_product_details":
@@ -58,6 +59,9 @@ def summarise(tool: str, status: int, body: dict[str, Any]) -> dict[str, Any]:
     for key in ("suggestions", "unmatched_terms"):
         if key in body:
             out[key] = body[key]
+    missing = {p["product_id"]: p["missing_terms"] for p in body["products"] if "missing_terms" in p}
+    if missing:
+        out["missing_terms"] = missing
     return out
 
 

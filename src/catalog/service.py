@@ -51,7 +51,12 @@ def _meta(ctx: Context) -> dict[str, Any]:
 
 def list_body(r: ListResult, ctx: Context) -> dict[str, Any]:
     body: dict[str, Any] = {
-        "products": [item(p) for p in r.products],
+        "products": [
+            {**item(p), "missing_terms": r.missing_terms[p.product_id]}
+            if p.product_id in r.missing_terms
+            else item(p)
+            for p in r.products
+        ],
         "meta": {
             "total_matches": r.total_matches,
             "returned": len(r.products),
@@ -105,7 +110,7 @@ def _filters(args: dict[str, Any]) -> Filters:
     return Filters(
         min_price=args.get("min_price"),
         max_price=args.get("max_price"),
-        recipient=args.get("recipient"),
+        recipient=[r for r in (args.get("recipient") or "").split(",") if r.strip()],
         occasion=args.get("occasion"),
         max_shipping_days=args.get("max_shipping_days"),
         exclude=exclude,

@@ -237,7 +237,7 @@
                   ],
                   "meta": {
                     "today": "2026-10-30",
-                    "catalog_version": "3eb1a818"
+                    "catalog_version": "ff49cc34"
                   }
                 }
               }
@@ -377,7 +377,7 @@
       "get": {
         "operationId": "get_products_by_category",
         "summary": "Browse one category, with optional filters.",
-        "description": "Lists products in one category. Use it when the shopper names or picks a category ('something for the kitchen', 'show me jewellery') or asks for more of one. To find products from a description across all categories, use search_products instead.\n\nReturns up to `limit` products (default 5), in stock, best rated first unless `sort` says otherwise. Each product has its price, availability, rating, who it suits, occasions, shipping days, gift wrap and the shop's short description. For brand, colour, material and stock units, call get_product_details.\n\nRead the extra fields when present: out_of_stock_matches (matching products that are out of stock), suggestions (a filter change that would return more, and how many) and note (how an input was read).",
+        "description": "Lists products in one category. Use it when the shopper names or picks a category ('something for the kitchen', 'show me jewellery') or asks for more of one. To find products from a description across all categories, use search_products instead.\n\nReturns up to `limit` products (default 5), in stock, best rated first unless `sort` says otherwise. Each product has its price, availability, rating, who it suits, occasions, shipping days, gift wrap and the shop's short description. For brand, colour, material and stock units, call get_product_details.\n\nRead the extra fields when present: out_of_stock_matches (matching products that are out of stock), over_budget_matches (just above max_price, when recipient or occasion is set), suggestions (a filter change that would return more, and how many) and note (how an input was read).",
         "parameters": [
           {
             "name": "category",
@@ -435,16 +435,11 @@
             "name": "recipient",
             "in": "query",
             "required": false,
-            "description": "Who the gift is for. Products marked 'anyone' are always included, after the ones for exactly this recipient. Leave it out when unknown. For a partner (an anniversary, for example), also try 'couple'.",
+            "description": "Who the gift is for: anyone, him, her, couple or kids, or several separated by commas. Products marked 'anyone' are always included, after the ones for the recipients asked for. Leave it out when unknown. For a partner (an anniversary, for example), pass 'her,couple' or 'him,couple'.",
             "schema": {
               "type": "string",
-              "enum": [
-                "anyone",
-                "him",
-                "her",
-                "couple",
-                "kids"
-              ]
+              "pattern": "^ *(anyone|him|her|couple|kids) *(, *(anyone|him|her|couple|kids) *)*$",
+              "maxLength": 40
             }
           },
           {
@@ -613,6 +608,13 @@
                           "description": {
                             "type": "string",
                             "description": "The shop's own copy. Caveats live here."
+                          },
+                          "missing_terms": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "Search words this product does not match. Present only when some are missing: check them before recommending it."
                           }
                         },
                         "required": [
@@ -806,7 +808,7 @@
                       "max_price": 60.0
                     },
                     "today": "2026-10-30",
-                    "catalog_version": "3eb1a818"
+                    "catalog_version": "ff49cc34"
                   }
                 }
               }
@@ -1007,7 +1009,7 @@
       "get": {
         "operationId": "search_products",
         "summary": "Search the whole catalogue from a description of what the shopper wants.",
-        "description": "Finds products in every category. Use it for requests such as 'a chef's knife under 100', 'something for a coffee lover' or 'a housewarming gift around 50'. Without a query it lists the whole catalogue with the given filters, for 'your best rated' or 'the cheapest thing you have'.\n\nWrite the query in English catalogue words: product types, materials, uses or hobbies ('knife', 'candle', 'coffee', 'noise cancelling headphones', 'yoga'). Do not pass the shopper's literal phrasing or language. Put budget, recipient, occasion and deadline in the filters, not in the query. If the first query finds little, try a broader word or a synonym.\n\nResults are keyword matches. Products that match more of the words, in their name, subcategory or tags, come first; matches only in the description, colour or material come last. Category names are not searched: use get_products_by_category for a whole category. Results are in stock only by default, and each product appears once. Read the extra fields when present: over_budget_matches (better matches above max_price, with the gap in EUR), out_of_stock_matches, unmatched_terms (words that match nothing: the shop does not carry that brand or item) and suggestions.",
+        "description": "Finds products in every category. Use it for requests such as 'a chef's knife under 100', 'something for a coffee lover' or 'a housewarming gift around 50'. Without a query it lists the whole catalogue with the given filters, for 'your best rated' or 'the cheapest thing you have'.\n\nWrite the query in English catalogue words: product types, materials, uses or hobbies ('knife', 'candle', 'coffee', 'noise cancelling headphones', 'yoga'). Do not pass the shopper's literal phrasing or language. Put budget, recipient, occasion and deadline in the filters, not in the query. If the first query finds little, try a broader word or a synonym.\n\nResults are keyword matches. Put the kind of product last ('leather notebook', 'wireless speaker'): with two or more words, only products whose name, subcategory or tags contain the last one are returned, when there are any. Words such as 'set' or 'kit' only count on their own. Products that match more of the words come first; matches only in the description, colour or material come last. Each product lists missing_terms when it lacks some of the words. Category names are not searched: use get_products_by_category for a whole category. Results are in stock only by default, and each product appears once. Read the extra fields when present: over_budget_matches (better matches above max_price, with the gap in EUR), out_of_stock_matches, unmatched_terms (words that match nothing: the shop does not carry that brand or item) and suggestions.",
         "parameters": [
           {
             "name": "query",
@@ -1043,16 +1045,11 @@
             "name": "recipient",
             "in": "query",
             "required": false,
-            "description": "Who the gift is for. Products marked 'anyone' are always included, after the ones for exactly this recipient. Leave it out when unknown. For a partner (an anniversary, for example), also try 'couple'.",
+            "description": "Who the gift is for: anyone, him, her, couple or kids, or several separated by commas. Products marked 'anyone' are always included, after the ones for the recipients asked for. Leave it out when unknown. For a partner (an anniversary, for example), pass 'her,couple' or 'him,couple'.",
             "schema": {
               "type": "string",
-              "enum": [
-                "anyone",
-                "him",
-                "her",
-                "couple",
-                "kids"
-              ]
+              "pattern": "^ *(anyone|him|her|couple|kids) *(, *(anyone|him|her|couple|kids) *)*$",
+              "maxLength": 40
             }
           },
           {
@@ -1221,6 +1218,13 @@
                           "description": {
                             "type": "string",
                             "description": "The shop's own copy. Caveats live here."
+                          },
+                          "missing_terms": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "Search words this product does not match. Present only when some are missing: check them before recommending it."
                           }
                         },
                         "required": [
@@ -1385,7 +1389,10 @@
                       ],
                       "shipping_days": 3,
                       "gift_wrap": true,
-                      "description": "The knife people actually reach for most. Pairs with the gyuto."
+                      "description": "The knife people actually reach for most. Pairs with the gyuto.",
+                      "missing_terms": [
+                        "chef"
+                      ]
                     },
                     {
                       "product_id": "KD-003",
@@ -1402,19 +1409,22 @@
                       ],
                       "shipping_days": 3,
                       "gift_wrap": false,
-                      "description": "1000/3000 grit combination stone with a non-slip base. Comes with a card explaining the angle."
+                      "description": "1000/3000 grit combination stone with a non-slip base. Comes with a card explaining the angle.",
+                      "missing_terms": [
+                        "chef"
+                      ]
                     }
                   ],
                   "meta": {
-                    "total_matches": 3,
+                    "total_matches": 2,
                     "returned": 2,
-                    "next_offset": 2,
+                    "next_offset": null,
                     "applied": {
                       "query": "chef knife",
                       "max_price": 100.0
                     },
                     "today": "2026-10-30",
-                    "catalog_version": "3eb1a818"
+                    "catalog_version": "ff49cc34"
                   },
                   "over_budget_matches": [
                     {
@@ -1847,7 +1857,7 @@
                   },
                   "meta": {
                     "today": "2026-10-30",
-                    "catalog_version": "3eb1a818"
+                    "catalog_version": "ff49cc34"
                   },
                   "in_stock_alternatives": [
                     {

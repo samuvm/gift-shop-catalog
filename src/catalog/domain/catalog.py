@@ -6,7 +6,7 @@ import re
 from collections.abc import Callable, Iterable
 from typing import Any, Literal, NamedTuple
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from catalog.domain.errors import ProductNotFound, UnknownCategory, UnknownSubcategory
 from catalog.domain.models import Product
@@ -48,14 +48,29 @@ class _Model(BaseModel):
 class Filters(_Model):
     min_price: float | None = None
     max_price: float | None = None
-    recipient: str | None = None
+    recipient: list[str] = Field(default_factory=list)
     occasion: str | None = None
     max_shipping_days: int | None = None
     exclude: list[str] = Field(default_factory=list)
     include_out_of_stock: bool = False
 
+    @field_validator("recipient", mode="before")
+    @classmethod
+    def _split(cls, value: Any) -> Any:
+        """'her, couple' or ['her', 'couple']: several recipients at once (ADR-006)."""
+        if value is None:
+            return []
+        if isinstance(value, str):
+            value = value.split(",")
+        return list(dict.fromkeys(v.strip().lower() for v in value if v.strip()))
+
     def active(self) -> dict[str, Any]:
         return {k: v for k, v in self.model_dump().items() if v not in (None, [], False)}
+
+    @property
+    def narrowed(self) -> bool:
+        """The shopper said who or what it is for: the blocks for near misses apply (ADR-006)."""
+        return bool(self.recipient or self.occasion)
 
 
 class Ref(_Model):
@@ -84,6 +99,7 @@ class ListResult(_Model):
     out_of_stock_matches: list[Ref] = Field(default_factory=list)
     over_budget_matches: list[OverBudget] = Field(default_factory=list)
     unmatched_terms: list[str] = Field(default_factory=list)
+    missing_terms: dict[str, list[str]] = Field(default_factory=dict)
     suggestions: list[Suggestion] = Field(default_factory=list)
     notes: list[str] = Field(default_factory=list)
 
@@ -135,7 +151,7 @@ def _passes(p: Product, f: Filters, skip: str | None = None) -> bool:
     checks: dict[str, Callable[[], bool]] = {
         "min_price": lambda: f.min_price is None or p.price_eur >= f.min_price,
         "max_price": lambda: f.max_price is None or p.price_eur <= f.max_price,
-        "recipient": lambda: f.recipient is None or p.recipient in (f.recipient, "anyone"),
+        "recipient": lambda: not f.recipient or p.recipient in (*f.recipient, "anyone"),
         "occasion": lambda: f.occasion is None or f.occasion in p.occasions,
         "max_shipping_days": lambda: f.max_shipping_days is None or p.shipping_days <= f.max_shipping_days,
         "exclude": lambda: not any(term in _exclusion_text(p) for term in f.exclude),
@@ -264,10 +280,17 @@ class Catalog:
     ) -> ListResult:
         pool = [p for p in self._products if p.search_primary]
         terms = self._vocabulary.terms(query)
-        applied: dict[str, Any] = {"query": query} if query else {}
-        result = self._list(pool, terms or None, filters or Filters(), sort, limit, offset, applied, [])
         unmatched = [t for t in terms if not any(self._hits(p, t) for p in pool)]
-        return result.model_copy(update={"unmatched_terms": unmatched}) if unmatched else result
+        main = self._vocabulary.main_word(query)
+        applied: dict[str, Any] = {"query": query} if query else {}
+        f = filters or Filters()
+        result = self._list(pool, terms or None, f, sort, limit, offset, applied, [], main)
+        missing = {
+            p.product_id: lacking
+            for p in result.products
+            if (lacking := [t for t in terms if not self._hits(p, t)])
+        }
+        return result.model_copy(update={"unmatched_terms": unmatched, "missing_terms": missing})
 
     # ---------- get_product_details
 
@@ -324,14 +347,20 @@ class Catalog:
     # ---------- shared list logic
 
     def _hits(self, p: Product, term: str) -> list[tuple[str, float]]:
-        """The fields where a query word, or a synonym of it, appears in this product."""
+        """The fields where a query word, or a synonym of it, appears in this product. A field that
+        has only a synonym counts half (ADR-006): "earbuds" finds headphones, but earbuds first."""
         group = self._vocabulary.group(term)
         fields = self._field_words[p.product_id]
-        return [(f, w) for f, w in FIELD_WEIGHTS if fields[f] & group]
+        return [(f, w if term in fields[f] else w / 2) for f, w in FIELD_WEIGHTS if fields[f] & group]
 
-    def _matches(self, pool: list[Product], terms: list[str]) -> dict[str, Match]:
+    def _matches(self, pool: list[Product], terms: list[str], main: str | None = None) -> dict[str, Match]:
+        """Match per product. Rarity counts over the whole pool. With a main word that some product has
+        in a strong field, only those products match (ADR-006)."""
         hits = {p.product_id: {t: self._hits(p, t) for t in terms} for p in pool}
         df = {t: sum(1 for h in hits.values() if h[t]) for t in terms}
+        if main is not None:
+            named = {p.product_id for p in pool if any(f in STRONG for f, _ in self._hits(p, main))}
+            hits = {pid: h for pid, h in hits.items() if pid in named} if named else hits
         found = {}
         for pid, by_term in hits.items():
             matched = [t for t in terms if by_term[t]]
@@ -370,20 +399,21 @@ class Catalog:
         offset: int,
         applied: dict[str, Any],
         notes: list[str],
+        main: str | None = None,
     ) -> ListResult:
         if limit > MAX_LIMIT:
             notes = [*notes, f"limit {limit} is above the maximum; returned at most {MAX_LIMIT}."]
         limit, offset = max(1, min(limit, MAX_LIMIT)), max(0, offset)
         order: Sort = sort or ("relevance" if terms else "rating")
         # Exact recipient first only in the default orders; an explicit sort is taken literally.
-        recipient = f.recipient if order in ("relevance", "rating") and sort != "rating" else None
+        recipient = f.recipient if order in ("relevance", "rating") and sort != "rating" else []
         tiered = bool(terms) and order != "relevance"
-        found = self._matches(pool, terms) if terms else {p.product_id: NO_QUERY for p in pool}
+        found = self._matches(pool, terms, main) if terms else {p.product_id: NO_QUERY for p in pool}
         scored = [(p, found[p.product_id]) for p in pool if p.product_id in found]
 
         def key(pm: tuple[Product, Match]) -> tuple[Any, ...]:
             p, m = pm
-            return self._rank(p, m, order, recipient is not None and p.recipient == recipient, tiered)
+            return self._rank(p, m, order, p.recipient in recipient, tiered)
 
         def matching(skip: str | None = None) -> list[tuple[Product, Match]]:
             return [
@@ -396,15 +426,24 @@ class Catalog:
         next_offset = offset + limit if offset + limit < len(hits) else None
 
         out_of_stock: list[Ref] = []
-        if not f.include_out_of_stock and (terms or next_offset is None):
+        if not f.include_out_of_stock and (terms or f.narrowed or next_offset is None):
             gone = sorted(((p, m) for p, m in scored if _passes(p, f) and not in_stock(p)), key=key)
             out_of_stock = [_ref(p) for p, _ in gone[:MAX_OUT_OF_STOCK]]
 
         over_budget: list[OverBudget] = []
-        if terms and f.max_price is not None:
+        if f.max_price is not None and (terms or f.narrowed):
             best = max((m for _, m in page), default=NO_QUERY)
             over = [(p, m) for p, m in matching(skip="max_price") if p.price_eur > f.max_price and m >= best]
-            over.sort(key=lambda pm: (tuple(-x for x in pm[1]), pm[0].price_eur, pm[0].product_id))
+            # The best matches first, then the recipients asked for (ADR-005 rule 7), then the nearest
+            # above the budget.
+            over.sort(
+                key=lambda pm: (
+                    tuple(-x for x in pm[1]),
+                    -(pm[0].recipient in recipient),
+                    pm[0].price_eur,
+                    pm[0].product_id,
+                )
+            )
             over_budget = [
                 OverBudget(**_ref(p).model_dump(), over_by_eur=round(p.price_eur - f.max_price, 2))
                 for p, _ in over[:MAX_OVER_BUDGET]

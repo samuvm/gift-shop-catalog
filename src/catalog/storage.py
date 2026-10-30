@@ -43,4 +43,4 @@ def read_catalog(path: Path) -> tuple[dict[str, str], list[Product]]:
 
 def read_vocabulary(path: Path) -> Vocabulary:
     search = json.loads(path.read_text(encoding="utf-8")).get("search") or {}
-    return Vocabulary(search.get("phrases"), search.get("synonyms") or [])
+    return Vocabulary(search.get("phrases"), search.get("synonyms") or [], search.get("generic") or [])

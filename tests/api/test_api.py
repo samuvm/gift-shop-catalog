@@ -101,7 +101,16 @@ class TestEnvelope:
             "price_eur": 149.0,
             "over_by_eur": 49.0,
         }
-        assert body["suggestions"][0] == {"change": "max_price", "to": 149.0, "would_match": 4}
+        assert body["suggestions"][0] == {"change": "max_price", "to": 149.0, "would_match": 3}  # ADR-006
+
+    def test_several_recipients_and_missing_terms(self, client: TestClient, headers: dict[str, str]) -> None:
+        body = client.get(
+            "/products/search?query=leather%20notebook&recipient=her,couple", headers=headers
+        ).json()
+        assert body["meta"]["applied"]["recipient"] == ["her", "couple"]
+        assert {p["product_id"]: p.get("missing_terms") for p in body["products"]}["BS-004"] == ["leather"]
+        bad = client.get("/products/search?recipient=wife", headers=headers)
+        assert (bad.status_code, bad.json()["error"]["code"]) == (400, "invalid_parameter")
 
     def test_details_include_stock_units_and_alternatives_when_out(
         self, client: TestClient, headers: dict[str, str]

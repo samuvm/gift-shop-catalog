@@ -52,3 +52,9 @@ search:   # shopper words the catalogue spells differently (ADR-005). Taken from
     - [scented, scent, fragrance, aroma, smell]   # "smell" in the conversations; "scented" and "fragrance" in the catalogue
     - [planter, plant]                            # "plant" pots in the conversations; planters in the catalogue
     - [flask, thermos, thermo]                    # "thermo" in the conversations; a flask in the catalogue
+    # Added after the second review (ADR-006); both spellings appear in the conversations.
+    - [wood, wooden]                              # "olive wood board", "wooden blocks"; the catalogue tags both
+    - [notebook, journal]                         # a leather journal cover holds notebooks; shoppers ask for either
+  generic:                       # how a product is packaged, not what it is (ADR-006): dropped when
+                                 # the query has another word, so "tea set" searches for tea
+    [set, kit, pack, pair, collection, bundle, trio, duo]   # "box" is left out: it can be the product

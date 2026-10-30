@@ -22,6 +22,8 @@ SLUGS = [
     "tech-gadgets",
 ]
 RECIPIENTS = ["anyone", "him", "her", "couple", "kids"]
+# One recipient or several, comma-separated ("her,couple"), as exclude takes several words (ADR-006).
+RECIPIENT_PATTERN = rf"^ *({'|'.join(RECIPIENTS)}) *(, *({'|'.join(RECIPIENTS)}) *)*$"
 OCCASIONS = ["birthday", "christmas", "anniversary", "housewarming", "thank-you", "graduation"]
 SORTS = ["relevance", "rating", "popularity", "price_asc", "price_desc"]
 AVAILABILITY = ["in_stock", "low_stock", "out_of_stock", "unlimited"]
@@ -61,10 +63,10 @@ FILTERS = [
     Param(
         "recipient",
         "query",
-        {"type": "string", "enum": RECIPIENTS},
-        "Who the gift is for. Products marked 'anyone' are always included, after the ones for exactly "
-        "this recipient. Leave it out when unknown. For a partner (an anniversary, for example), also try "
-        "'couple'.",
+        {"type": "string", "pattern": RECIPIENT_PATTERN, "maxLength": 40},
+        "Who the gift is for: anyone, him, her, couple or kids, or several separated by commas. Products "
+        "marked 'anyone' are always included, after the ones for the recipients asked for. Leave it out "
+        "when unknown. For a partner (an anniversary, for example), pass 'her,couple' or 'him,couple'.",
     ),
     Param(
         "occasion",
@@ -177,11 +179,22 @@ META = _obj(
         "catalog_version": {"type": "string"},
     }
 )
+LIST_ITEM = {
+    **ITEM,
+    "properties": {
+        **ITEM["properties"],
+        "missing_terms": {
+            **STRINGS,
+            "description": "Search words this product does not match. Present only when some are missing: "
+            "check them before recommending it.",
+        },
+    },
+}
 LIST_RESPONSE = {
     "type": "object",
     "required": ["products", "meta"],
     "properties": {
-        "products": {"type": "array", "items": ITEM},
+        "products": {"type": "array", "items": LIST_ITEM},
         "meta": META,
         "out_of_stock_matches": {
             "type": "array",
@@ -320,7 +333,8 @@ GET_PRODUCTS_BY_CATEGORY = Tool(
         "and the shop's short description. For brand, colour, material and stock units, call "
         "get_product_details.\n\n"
         "Read the extra fields when present: out_of_stock_matches (matching products that are out of stock), "
-        "suggestions (a filter change that would return more, and how many) and note (how an input was read)."
+        "over_budget_matches (just above max_price, when recipient or occasion is set), suggestions (a "
+        "filter change that would return more, and how many) and note (how an input was read)."
     ),
     params=[
         Param(
@@ -355,10 +369,13 @@ SEARCH_PRODUCTS = Tool(
         "'candle', 'coffee', 'noise cancelling headphones', 'yoga'). Do not pass the shopper's literal "
         "phrasing or language. Put budget, recipient, occasion and deadline in the filters, not in the "
         "query. If the first query finds little, try a broader word or a synonym.\n\n"
-        "Results are keyword matches. Products that match more of the words, in their name, subcategory or "
-        "tags, come first; matches only in the description, colour or material come last. Category names "
-        "are not searched: use get_products_by_category for a whole category. Results are in stock only by "
-        "default, and each product appears once. Read the extra "
+        "Results are keyword matches. Put the kind of product last ('leather notebook', 'wireless speaker'): "
+        "with two or more words, only products whose name, subcategory or tags contain the last one are "
+        "returned, when there are any. Words such as 'set' or 'kit' only count on their own. Products that "
+        "match more of the words come first; matches only in the description, colour or material come last. "
+        "Each product lists missing_terms when it lacks some of the words. Category names are not searched: "
+        "use get_products_by_category for a whole category. Results are in stock only by default, and each "
+        "product appears once. Read the extra "
         "fields when present: over_budget_matches (better matches above max_price, with the gap in EUR), "
         "out_of_stock_matches, unmatched_terms (words that match nothing: the shop does not carry that "
         "brand or item) and suggestions."

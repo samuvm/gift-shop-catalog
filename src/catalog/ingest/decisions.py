@@ -40,10 +40,11 @@ class QualityRules(_Strict):
 
 
 class SearchVocabulary(_Strict):
-    """Shopper words the catalogue spells differently (ADR-005)."""
+    """Shopper words the catalogue spells differently (ADR-005), and packaging words (ADR-006)."""
 
     phrases: dict[str, str] = Field(default_factory=dict)
     synonyms: list[list[str]] = Field(default_factory=list)
+    generic: list[str] = Field(default_factory=list)
 
 
 class Decisions(_Strict):
@@ -77,6 +78,13 @@ def _check_search(search: SearchVocabulary) -> None:
             raise ValueError(f"search.phrases {phrase!r}: must be two or more lower-case words")
         if not _WORD.fullmatch(word):
             raise ValueError(f"search.phrases {phrase!r}: {word!r} must be one lower-case word")
+    for word in search.generic:
+        if not _WORD.fullmatch(word):
+            raise ValueError(f"search.generic {word!r}: must be one lower-case word")
+        if search.generic.count(word) > 1:
+            raise ValueError(f"search.generic: {word!r} is listed twice")
+        if word in seen:
+            raise ValueError(f"search: {word!r} is both generic and in a synonym group")
 
 
 def load_decisions(text: str) -> Decisions:

@@ -5,7 +5,7 @@ semantics), then a person reviews every case in REVIEW.md against the catalogue 
 frozen. A case whose arguments and expected result are unchanged since the previous version keeps
 its approval; every other case goes back to review, with the previous comment shown next to it.
 
-Usage: uv run python evals/golden/l1/build.py   (writes v2.jsonl and REVIEW.md next to this file)
+Usage: uv run python evals/golden/l1/build.py   (writes v<VERSION>.jsonl and REVIEW.md next to this file)
 """
 
 import json
@@ -16,7 +16,7 @@ from typing import Any
 from oracle import TOOLS, load
 
 HERE = Path(__file__).resolve().parent
-VERSION = 2
+VERSION = 3
 REVIEWER, REVIEWED_AT = "Samuel Viciana", "2026-10-30"  # who approved the previous version
 C, B, S, D = "get_categories", "get_products_by_category", "search_products", "get_product_details"
 
@@ -179,6 +179,8 @@ CASES: list[tuple[str, dict[str, Any], str]] = [
         "held out: browse, recipient and budget",
     ),
     (S, {"query": "anniversary", "recipient": "him,couple", "max_price": 120}, "held out: two recipients"),
+    # --- after the held-out cases, so their ids stay as registered.
+    (S, {"query": "anniversary", "recipient": "her,couple", "max_price": 100}, "a partner: her and couple"),
 ]
 
 
@@ -212,7 +214,7 @@ def main() -> None:
         kept = (
             old is not None
             and (old["tool"], old["args"], old["expect"]) == (tool, args, expect)
-            and old_comments.get(cid, "").strip() == "ok"
+            and re.fullmatch(r"ok( \(v\d+\))?", old_comments.get(cid, "").strip()) is not None
         )
         case = {
             "id": cid,

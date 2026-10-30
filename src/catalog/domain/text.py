@@ -41,15 +41,20 @@ def query_terms(query: str | None) -> list[str]:
 
 
 class Vocabulary:
-    """Shopper words the catalogue spells differently (ADR-005), decided by a person in decisions.yaml.
+    """Shopper words the catalogue spells differently (ADR-005, ADR-006), decided by a person in
+    decisions.yaml.
 
     `phrases` rewrites a multi-word phrase into one catalogue word before the query is split
     ("noise cancelling" -> "anc"). `synonyms` groups words that mean the same thing to a shopper;
-    a query word matches any word of its group.
+    a query word matches any word of its group. `generic` words ("set", "kit") say how a product is
+    packaged, not what it is: they are dropped when the query has another word.
     """
 
     def __init__(
-        self, phrases: Mapping[str, str] | None = None, synonyms: Iterable[Iterable[str]] = ()
+        self,
+        phrases: Mapping[str, str] | None = None,
+        synonyms: Iterable[Iterable[str]] = (),
+        generic: Iterable[str] = (),
     ) -> None:
         normalised = ((" ".join(_WORD.findall(k.lower())), v.lower()) for k, v in (phrases or {}).items())
         self._phrases = sorted(normalised, key=lambda kv: (-len(kv[0]), kv[0]))
@@ -58,12 +63,24 @@ class Vocabulary:
             stems = frozenset(stem(w.lower()) for w in group)
             for s in stems:
                 self._groups[s] = stems
+        self._generic = frozenset(stem(w.lower()) for w in generic)
 
-    def terms(self, query: str | None) -> list[str]:
+    def _words(self, query: str | None) -> list[str]:
         text = " ".join(_WORD.findall((query or "").lower()))
         for phrase, word in self._phrases:
             text = re.sub(rf"\b{re.escape(phrase)}\b", word, text)
         return query_terms(text)
+
+    def terms(self, query: str | None) -> list[str]:
+        found = self._words(query)
+        specific = [t for t in found if t not in self._generic]
+        return specific or found
+
+    def main_word(self, query: str | None) -> str | None:
+        """The word that names the product: the last specific one, when the query has two or more."""
+        found = self._words(query)
+        specific = [t for t in found if t not in self._generic]
+        return specific[-1] if len(found) > 1 and specific else None
 
     def group(self, term: str) -> frozenset[str]:
         return self._groups.get(term, frozenset({term}))

@@ -382,8 +382,18 @@ def relevance() -> Catalog:
             ),
             product("HL-041", name="Brass Frame", subcategory="Decor", price_eur=39),
             product("HL-042", name="Reed Diffuser", subcategory="Fragrance", price_eur=46, tags=["scented"]),
+            product("HL-043", name="Oak Tray", subcategory="Trays", rating=4.0, tags=["oak"]),
+            product("HL-044", name="Walnut Tray", subcategory="Trays", rating=3.9, tags=["walnut"]),
+            product("HL-045", name="Oak Shelf", subcategory="Shelves", tags=["oak"]),
+            product("HL-046", name="Oak Clock", subcategory="Clocks", tags=["oak"]),
+            product("HL-047", name="Leather Strap", subcategory="Watches", rating=4.9, recipient="couple"),
+            product("HL-048", name="Notebook", subcategory="Paper", rating=4.1, recipient="her"),
         ],
-        vocabulary=Vocabulary(phrases={"noise cancelling": "anc"}, synonyms=[["headphone", "earbud"]]),
+        vocabulary=Vocabulary(
+            phrases={"noise cancelling": "anc"},
+            synonyms=[["headphone", "earbud"]],
+            generic=["kit", "set"],
+        ),
     )
 
 
@@ -398,10 +408,10 @@ class TestRelevance:
         assert (ids(result), result.unmatched_terms) == ([], ["kitchen"])
 
     def test_matching_more_words_ranks_first(self, relevance: Catalog) -> None:
-        assert ids(relevance.search("fig candle"))[:3] == ["HL-031", "HL-030", "HL-032"]
+        assert ids(relevance.search("fig candle")) == ["HL-031", "HL-030"]
 
     def test_a_rarer_word_outranks_a_common_one(self, relevance: Catalog) -> None:
-        assert ids(relevance.search("garden kit"))[0] == "HL-036"
+        assert ids(relevance.search("oak walnut tray")) == ["HL-044", "HL-043"]
 
     def test_explicit_sort_keeps_strong_matches_first(self, relevance: Catalog) -> None:
         assert ids(relevance.search("knife", sort="price_asc")) == ["KD-010", "KD-011"]
@@ -412,7 +422,8 @@ class TestRelevance:
         assert result.unmatched_terms == []
 
     def test_a_synonym_counts_as_a_match_for_unmatched_terms(self, relevance: Catalog) -> None:
-        assert ids(relevance.search("earbuds")) == ["HL-037", "HL-038"]
+        result = relevance.search("earbuds")
+        assert (set(ids(result)), result.unmatched_terms) == ({"HL-037", "HL-038"}, [])
 
     def test_without_a_vocabulary_words_match_literally(self, catalog: Catalog) -> None:
         assert catalog.search("earbuds").unmatched_terms == ["earbud"]
@@ -422,6 +433,71 @@ class TestRelevance:
         assert ids(audio)[0] == "HL-039"
         by_rating = relevance.search(None, filters=Filters(recipient="her"), sort="rating")
         assert ids(by_rating)[0] != "HL-039"
+
+
+class TestMainWord:
+    """ADR-006: with two or more words, the last one names the product."""
+
+    def test_products_without_the_main_word_are_left_out(self, relevance: Catalog) -> None:
+        result = relevance.search("fig candle")
+        assert "HL-032" not in ids(result)  # a fig perfume is not a candle
+        assert [p.product_id for p in result.out_of_stock_matches] == ["HL-040"]
+
+    def test_the_main_word_must_be_in_a_strong_field(self, relevance: Catalog) -> None:
+        assert ids(relevance.search("slate knife")) == ["KD-010"]  # the board mentions knives
+
+    def test_a_single_word_is_not_narrowed(self, relevance: Catalog) -> None:
+        assert ids(relevance.search("knife")) == ["KD-010", "KD-011"]
+
+    def test_a_main_word_no_product_has_does_not_narrow(self, relevance: Catalog) -> None:
+        result = relevance.search("fig gizmo")
+        assert set(ids(result)) == {"HL-031", "HL-032"}
+        assert result.unmatched_terms == ["gizmo"]
+
+    def test_the_modifier_alone_is_not_enough(self, relevance: Catalog) -> None:
+        assert ids(relevance.search("leather notebook")) == ["HL-048"]
+
+    def test_generic_words_are_dropped_when_another_word_remains(self, relevance: Catalog) -> None:
+        assert ids(relevance.search("garden kit")) == ["HL-036"]
+        assert set(ids(relevance.search("kit"))) == {"HL-033", "HL-034", "HL-035"}
+
+    def test_the_main_word_matches_through_its_synonyms(self, relevance: Catalog) -> None:
+        assert set(ids(relevance.search("wireless earbuds"))) == {"HL-037", "HL-038"}
+
+    def test_the_word_itself_outranks_its_synonym(self, relevance: Catalog) -> None:
+        assert ids(relevance.search("earbuds")) == ["HL-038", "HL-037"]
+        assert ids(relevance.search("headphones")) == ["HL-037", "HL-038"]
+
+    def test_missing_terms_name_the_query_words_a_product_lacks(self, relevance: Catalog) -> None:
+        result = relevance.search("fig candle")
+        assert result.missing_terms == {"HL-030": ["fig"]}
+        assert relevance.search("knife").missing_terms == {}
+
+
+class TestRecipientAndOccasion:
+    """ADR-006: several recipients at once, and the blocks a recipient or occasion filter brings."""
+
+    def test_several_recipients_are_accepted_and_ranked_first(self, relevance: Catalog) -> None:
+        result = relevance.search("strap notebook", filters=Filters(recipient="her, couple"))
+        assert result.applied["recipient"] == ["her", "couple"]
+        both = relevance.search(None, filters=Filters(recipient=["her", "couple"]))
+        assert ids(both)[:3] == ["HL-047", "HL-039", "HL-048"]
+
+    def test_a_filtered_browse_reports_out_of_stock_on_every_page(self, catalog: Catalog) -> None:
+        first = catalog.browse("kitchen-dining", filters=Filters(recipient="anyone"), limit=1)
+        assert first.next_offset is not None
+        assert [p.product_id for p in first.out_of_stock_matches] == ["KD-007"]
+
+    def test_a_filtered_listing_without_query_reports_over_budget(self, catalog: Catalog) -> None:
+        result = catalog.browse("home-living", filters=Filters(recipient="her", max_price=60))
+        assert [(p.product_id, p.over_by_eur) for p in result.over_budget_matches] == [
+            ("HL-009", 125.0),  # for her, as asked, before the nearer one for anyone
+            ("HL-010", 4.0),
+        ]
+
+    def test_an_unfiltered_listing_reports_neither(self, catalog: Catalog) -> None:
+        result = catalog.browse("home-living", filters=Filters(max_price=60), limit=1)
+        assert (result.over_budget_matches, result.out_of_stock_matches) == ([], [])
 
 
 class TestSmallerRules:

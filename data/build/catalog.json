@@ -1,9 +1,9 @@
 {
   "version": {
     "source_sha256": "3e32e993f5d198a35ea8148cd8d02236718589a3700ebf34b35be99dd47aead6",
-    "decisions_sha256": "8d27afda8b2e809f93895fdc2f40dc96225ed02cab9cd2c798613ea6e573524e",
+    "decisions_sha256": "baf58b9f4932085fda8acf5ea6e274fa9ea667ea6f5145a60ad083fa9c034a6c",
     "products_sha256": "6b3c871eac48be71b874195b81281b9d1a01b9e57ce60acb347226edf142a630",
-    "served_sha256": "3eb1a818d8be58d960045485d8125c8e18805f9d2b89c9ec10a3b887bd88f3a0"
+    "served_sha256": "ff49cc34ad41ac9c3d3c26e18473dfcb286abe69131f0a10f652df24e36ecb1c"
   },
   "search": {
     "phrases": {
@@ -38,7 +38,25 @@
         "flask",
         "thermos",
         "thermo"
+      ],
+      [
+        "wood",
+        "wooden"
+      ],
+      [
+        "notebook",
+        "journal"
       ]
+    ],
+    "generic": [
+      "set",
+      "kit",
+      "pack",
+      "pair",
+      "collection",
+      "bundle",
+      "trio",
+      "duo"
     ]
   },
   "products": [

@@ -60,6 +60,9 @@ def test_unknown_keys_are_rejected(raw: dict[str, object]) -> None:
         ({"synonyms": [["headphone", "earbud"], ["earbud", "airpod"]]}, "in two groups"),
         ({"phrases": {"noise": "anc"}}, "two or more lower-case words"),
         ({"phrases": {"noise cancelling": "a n c"}}, "one lower-case word"),
+        ({"generic": ["gift set"]}, "search.generic"),
+        ({"generic": ["set", "set"]}, "twice"),
+        ({"generic": ["set"], "synonyms": [["set", "kit"]]}, "generic and in a synonym group"),
     ],
 )
 def test_malformed_search_vocabulary_is_rejected(
