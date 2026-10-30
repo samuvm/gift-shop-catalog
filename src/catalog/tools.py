@@ -179,17 +179,14 @@ META = _obj(
         "catalog_version": {"type": "string"},
     }
 )
-LIST_ITEM = {
-    **ITEM,
-    "properties": {
-        **ITEM["properties"],
-        "missing_terms": {
-            **STRINGS,
-            "description": "Search words this product does not match. Present only when some are missing: "
-            "check them before recommending it.",
-        },
-    },
+MISSING_TERMS = {
+    **STRINGS,
+    "description": "Search words that do not appear in this product's record. Present only when some "
+    "are missing. It means the shop's data does not say so, not that the product lacks it: check the "
+    "description before recommending it for that word.",
 }
+LIST_ITEM = {**ITEM, "properties": {**ITEM["properties"], "missing_terms": MISSING_TERMS}}
+NEAR_MISS = {**REF, "properties": {**REF["properties"], "missing_terms": MISSING_TERMS}}
 LIST_RESPONSE = {
     "type": "object",
     "required": ["products", "meta"],
@@ -198,14 +195,18 @@ LIST_RESPONSE = {
         "meta": META,
         "out_of_stock_matches": {
             "type": "array",
-            "items": REF,
+            "items": NEAR_MISS,
             "description": "Products that match but are out of stock. Present only when relevant. "
             "Say they are "
             "out of stock; never say the shop does not sell them.",
         },
         "over_budget_matches": {
             "type": "array",
-            "items": _obj({**REF["properties"], "over_by_eur": {"type": "number"}}),
+            "items": {
+                **NEAR_MISS,
+                "properties": {**NEAR_MISS["properties"], "over_by_eur": {"type": "number"}},
+                "required": [*REF["required"], "over_by_eur"],
+            },
             "description": "Better matches that max_price left out, with how far over budget they are.",
         },
         "unmatched_terms": {

@@ -237,7 +237,7 @@
                   ],
                   "meta": {
                     "today": "2026-10-30",
-                    "catalog_version": "ff49cc34"
+                    "catalog_version": "f1f1dbad"
                   }
                 }
               }
@@ -614,7 +614,7 @@
                             "items": {
                               "type": "string"
                             },
-                            "description": "Search words this product does not match. Present only when some are missing: check them before recommending it."
+                            "description": "Search words that do not appear in this product's record. Present only when some are missing. It means the shop's data does not say so, not that the product lacks it: check the description before recommending it for that word."
                           }
                         },
                         "required": [
@@ -684,6 +684,13 @@
                           },
                           "price_eur": {
                             "type": "number"
+                          },
+                          "missing_terms": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "Search words that do not appear in this product's record. Present only when some are missing. It means the shop's data does not say so, not that the product lacks it: check the description before recommending it for that word."
                           }
                         },
                         "required": [
@@ -707,6 +714,13 @@
                           },
                           "price_eur": {
                             "type": "number"
+                          },
+                          "missing_terms": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "Search words that do not appear in this product's record. Present only when some are missing. It means the shop's data does not say so, not that the product lacks it: check the description before recommending it for that word."
                           },
                           "over_by_eur": {
                             "type": "number"
@@ -808,7 +822,7 @@
                       "max_price": 60.0
                     },
                     "today": "2026-10-30",
-                    "catalog_version": "ff49cc34"
+                    "catalog_version": "f1f1dbad"
                   }
                 }
               }
@@ -1224,7 +1238,7 @@
                             "items": {
                               "type": "string"
                             },
-                            "description": "Search words this product does not match. Present only when some are missing: check them before recommending it."
+                            "description": "Search words that do not appear in this product's record. Present only when some are missing. It means the shop's data does not say so, not that the product lacks it: check the description before recommending it for that word."
                           }
                         },
                         "required": [
@@ -1294,6 +1308,13 @@
                           },
                           "price_eur": {
                             "type": "number"
+                          },
+                          "missing_terms": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "Search words that do not appear in this product's record. Present only when some are missing. It means the shop's data does not say so, not that the product lacks it: check the description before recommending it for that word."
                           }
                         },
                         "required": [
@@ -1317,6 +1338,13 @@
                           },
                           "price_eur": {
                             "type": "number"
+                          },
+                          "missing_terms": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "Search words that do not appear in this product's record. Present only when some are missing. It means the shop's data does not say so, not that the product lacks it: check the description before recommending it for that word."
                           },
                           "over_by_eur": {
                             "type": "number"
@@ -1424,7 +1452,7 @@
                       "max_price": 100.0
                     },
                     "today": "2026-10-30",
-                    "catalog_version": "ff49cc34"
+                    "catalog_version": "f1f1dbad"
                   },
                   "over_budget_matches": [
                     {
@@ -1857,7 +1885,7 @@
                   },
                   "meta": {
                     "today": "2026-10-30",
-                    "catalog_version": "ff49cc34"
+                    "catalog_version": "f1f1dbad"
                   },
                   "in_stock_alternatives": [
                     {

@@ -49,14 +49,14 @@ def _meta(ctx: Context) -> dict[str, Any]:
     return {"today": ctx.today.isoformat(), "catalog_version": ctx.catalog_version}
 
 
+def _with_missing(entry: dict[str, Any], r: ListResult) -> dict[str, Any]:
+    lacking = r.missing_terms.get(entry["product_id"])
+    return {**entry, "missing_terms": lacking} if lacking else entry
+
+
 def list_body(r: ListResult, ctx: Context) -> dict[str, Any]:
     body: dict[str, Any] = {
-        "products": [
-            {**item(p), "missing_terms": r.missing_terms[p.product_id]}
-            if p.product_id in r.missing_terms
-            else item(p)
-            for p in r.products
-        ],
+        "products": [_with_missing(item(p), r) for p in r.products],
         "meta": {
             "total_matches": r.total_matches,
             "returned": len(r.products),
@@ -66,9 +66,9 @@ def list_body(r: ListResult, ctx: Context) -> dict[str, Any]:
         },
     }
     if r.out_of_stock_matches:
-        body["out_of_stock_matches"] = [m.model_dump() for m in r.out_of_stock_matches]
+        body["out_of_stock_matches"] = [_with_missing(m.model_dump(), r) for m in r.out_of_stock_matches]
     if r.over_budget_matches:
-        body["over_budget_matches"] = [m.model_dump() for m in r.over_budget_matches]
+        body["over_budget_matches"] = [_with_missing(m.model_dump(), r) for m in r.over_budget_matches]
     if r.unmatched_terms:
         body["unmatched_terms"] = r.unmatched_terms
     if r.suggestions:

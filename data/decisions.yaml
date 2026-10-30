@@ -55,6 +55,7 @@ search:   # shopper words the catalogue spells differently (ADR-005). Taken from
     # Added after the second review (ADR-006); both spellings appear in the conversations.
     - [wood, wooden]                              # "olive wood board", "wooden blocks"; the catalogue tags both
     - [notebook, journal]                         # a leather journal cover holds notebooks; shoppers ask for either
+    - [wireless, bluetooth]                       # after the third review: the portable speaker says "bluetooth"; "wireless" in the conversations
   generic:                       # how a product is packaged, not what it is (ADR-006): dropped when
                                  # the query has another word, so "tea set" searches for tea
     [set, kit, pack, pair, collection, bundle, trio, duo]   # "box" is left out: it can be the product

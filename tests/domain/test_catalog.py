@@ -500,6 +500,29 @@ class TestRecipientAndOccasion:
         assert (result.over_budget_matches, result.out_of_stock_matches) == ([], [])
 
 
+class TestThirdReview:
+    """ADR-007: information the agent would otherwise read wrongly."""
+
+    def test_unknown_subcategory_with_one_lead_names_the_call(self, catalog: Catalog) -> None:
+        with pytest.raises(UnknownSubcategory) as err:
+            catalog.browse("kitchen-dining", subcategory="Pots")
+        assert err.value.hint == (
+            "Call get_products_by_category with category 'kitchen-dining' and subcategory 'Coffee'."
+        )
+
+    def test_an_exclusion_is_never_suggested_for_removal(self, catalog: Catalog) -> None:
+        result = catalog.search("throw", filters=Filters(exclude=["alpaca"]))
+        assert ids(result) == ["HL-010"]
+        assert all(s.change != "exclude" for s in result.suggestions)
+
+    def test_near_misses_carry_missing_terms_too(self, relevance: Catalog) -> None:
+        result = relevance.search("fig candle", filters=Filters(max_price=45))
+        assert [p.product_id for p in result.out_of_stock_matches] == ["HL-040"]
+        assert "HL-040" not in result.missing_terms  # it is a fig candle
+        cheap = relevance.search("brass candle", filters=Filters(max_price=45))
+        assert cheap.missing_terms["HL-040"] == ["brass"]
+
+
 class TestSmallerRules:
     def test_unknown_subcategory_points_to_where_the_word_is_listed(self, catalog: Catalog) -> None:
         with pytest.raises(UnknownSubcategory) as err:

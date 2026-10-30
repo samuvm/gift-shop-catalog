@@ -69,7 +69,8 @@ FIELD_WEIGHTS = (
 STRONG = {"name", "subcategory", "tags", "occasions", "brand"}
 # Not the description: it names materials to compare or deny them ("the everyday version of the alpaca").
 EXCLUDE_FIELDS = ("name", "subcategory", "tags", "material")
-REMOVABLE = ("min_price", "max_price", "recipient", "occasion", "max_shipping_days", "exclude")
+# An exclusion is a deliberate constraint, never suggested for removal (ADR-007).
+REMOVABLE = ("min_price", "max_price", "recipient", "occasion", "max_shipping_days")
 
 Product = dict[str, Any]
 
@@ -255,10 +256,6 @@ def _list(
     hits = sorted(matching(), key=key)
     page = hits[offset : offset + limit]
     out: dict[str, Any] = {"product_ids": [p["product_id"] for p, _ in page], "total_matches": len(hits)}
-    if query_terms:
-        missing = {p["product_id"]: [t for t in query_terms if not fields_hit(p, t)] for p, _ in page}
-        if any(missing.values()):
-            out["missing_terms"] = {k: v for k, v in missing.items() if v}
 
     # Out-of-stock matches are news when the shopper asked for something, said who or what it is for
     # (ADR-006), or sees the last page.
@@ -289,6 +286,19 @@ def _list(
         )
         if over:
             out["over_budget_matches"] = [p["product_id"] for p, _ in over[:2]]
+
+    if query_terms:  # for the page and for the near misses (ADR-006, ADR-007)
+        by_id = {p["product_id"]: p for p in pool}
+        shown = [
+            *out["product_ids"],
+            *out.get("over_budget_matches", []),
+            *out.get("out_of_stock_matches", []),
+        ]
+        missing = {
+            pid: [t for t in query_terms if not fields_hit(by_id[pid], t)] for pid in dict.fromkeys(shown)
+        }
+        if any(missing.values()):
+            out["missing_terms"] = {k: v for k, v in missing.items() if v}
 
     if len(page) < limit:
         suggestions = []
@@ -339,7 +349,13 @@ def get_products_by_category(a: dict[str, Any]) -> dict[str, Any]:
     slug = resolve_category(a["category"], ps)
     if slug is None:
         guesses, hint = category_guesses(a["category"], ps)
-        return {"error_code": "unknown_category", "did_you_mean": guesses, "hint": hint}
+        allowed = sorted({p["category_slug"] for p in ps})
+        return {
+            "error_code": "unknown_category",
+            "allowed_values": allowed,
+            "did_you_mean": guesses,
+            "hint": hint,
+        }
     pool = [p for p in ps if p["category_slug"] == slug]
     if a.get("subcategory"):
         subs = {p["subcategory"].lower() for p in pool}
@@ -349,10 +365,17 @@ def get_products_by_category(a: dict[str, Any]) -> dict[str, Any]:
             listed = {
                 p["subcategory"] for p in pool if asked & (words(p["name"]) | words(" ".join(p["tags"])))
             }
+            hint = (
+                f"Call get_products_by_category with category {slug!r} and subcategory "
+                f"{next(iter(listed))!r}."
+                if len(listed) == 1
+                else "Use one of allowed_values, or leave subcategory out."
+            )
             return {
                 "error_code": "unknown_subcategory",
+                "allowed_values": sorted({p["subcategory"] for p in pool}),
                 "did_you_mean": sorted(listed),
-                "hint": "Use one of allowed_values, or leave subcategory out.",
+                "hint": hint,
             }
         pool = [p for p in pool if p["subcategory"].lower() == a["subcategory"].lower()]
     return _list(pool, a, None)
@@ -375,6 +398,7 @@ def get_product_details(a: dict[str, Any]) -> dict[str, Any]:
     if product is None:
         return {
             "error_code": "product_not_found",
+            "allowed_values": [],
             "did_you_mean": id_guesses(a["product_id"], ps),
             "hint": "Product ids look like 'KD-001'. To find a product by name or description, use "
             "search_products.",

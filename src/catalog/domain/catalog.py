@@ -37,7 +37,8 @@ STRONG = frozenset(f for f, _ in STRONG_FIELDS)
 # Descriptions name materials to compare or deny them ("the everyday version of the alpaca").
 EXCLUDE_FIELDS = ("name", "subcategory", "tags", "material")
 # Filters a suggestion may relax, in the order ties are broken.
-RELAXABLE = ("min_price", "max_price", "recipient", "occasion", "max_shipping_days", "exclude")
+# Not `exclude`: an exclusion is a deliberate constraint (vegan, allergic), never one to relax (ADR-007).
+RELAXABLE = ("min_price", "max_price", "recipient", "occasion", "max_shipping_days")
 _ID = re.compile(r"\s*([A-Za-z]{2})\s*-?\s*(\d{1,3})\s*")
 
 
@@ -258,9 +259,15 @@ class Catalog:
                     if asked
                     & (self._field_words[p.product_id]["name"] | self._field_words[p.product_id]["tags"])
                 }
+                hint = (
+                    f"Call get_products_by_category with category {slug!r} and subcategory "
+                    f"{next(iter(listed))!r}."
+                    if len(listed) == 1
+                    else "Use one of allowed_values, or leave subcategory out."
+                )
                 raise UnknownSubcategory(
                     f"{self._names[slug]} has no subcategory {subcategory!r}.",
-                    "Use one of allowed_values, or leave subcategory out.",
+                    hint,
                     allowed_values=sorted(subs.values()),
                     did_you_mean=sorted(listed),
                 )
@@ -285,10 +292,16 @@ class Catalog:
         applied: dict[str, Any] = {"query": query} if query else {}
         f = filters or Filters()
         result = self._list(pool, terms or None, f, sort, limit, offset, applied, [], main)
+        # For the near misses too: an over-budget "silver" pair that is vermeil must say so (ADR-007).
+        listed = [
+            *(p.product_id for p in result.products),
+            *(r.product_id for r in result.over_budget_matches),
+            *(r.product_id for r in result.out_of_stock_matches),
+        ]
         missing = {
-            p.product_id: lacking
-            for p in result.products
-            if (lacking := [t for t in terms if not self._hits(p, t)])
+            pid: lacking
+            for pid in dict.fromkeys(listed)
+            if (lacking := [t for t in terms if not self._hits(self._by_id[pid], t)])
         }
         return result.model_copy(update={"unmatched_terms": unmatched, "missing_terms": missing})
 

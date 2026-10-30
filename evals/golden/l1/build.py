@@ -16,7 +16,7 @@ from typing import Any
 from oracle import TOOLS, load
 
 HERE = Path(__file__).resolve().parent
-VERSION = 3
+VERSION = 4
 REVIEWER, REVIEWED_AT = "Samuel Viciana", "2026-10-30"  # who approved the previous version
 C, B, S, D = "get_categories", "get_products_by_category", "search_products", "get_product_details"
 
@@ -184,6 +184,21 @@ CASES: list[tuple[str, dict[str, Any], str]] = [
 ]
 
 
+# Comments that ask for a different order or a semantic judgement on a result that did not change.
+# Ranking is frozen (ADR-006): these go to the level-2 evaluation, which decides whether the agent
+# recommends the wrong product because of them. They are shown, not counted as pending.
+DEFERRED = {
+    "l1-038": "a sauna blanket listed for 'throw blanket'",
+    "l1-044": "over-budget earbuds before the dearer headphones",
+    "l1-049": "incense listed for kids (client data says 'anyone')",
+    "l1-062": "chess and backgammon as wooden board games",
+    "l1-063": "incense as a scented gift",
+    "l1-069": "a pepper mill for 'coffee grinder' (marked missing 'coffee')",
+    "l1-070": "a dog toy for 'wooden toy' with recipient kids",
+    "l1-071": "travel items for 'travel pillow' (all marked missing 'pillow')",
+}
+
+
 def previous() -> tuple[dict[str, dict[str, Any]], dict[str, str]]:
     """The previous version's cases and the reviewer's comment on each, by case id."""
     cases_path, review_path = HERE / f"v{VERSION - 1}.jsonl", HERE / f"review-v{VERSION - 1}.md"
@@ -214,7 +229,7 @@ def main() -> None:
         kept = (
             old is not None
             and (old["tool"], old["args"], old["expect"]) == (tool, args, expect)
-            and re.fullmatch(r"ok( \(v\d+\))?", old_comments.get(cid, "").strip()) is not None
+            and re.match(r"ok\b", old_comments.get(cid, "").strip()) is not None
         )
         case = {
             "id": cid,
@@ -250,6 +265,16 @@ def main() -> None:
                 review.append(f"- **{key}**: `{json.dumps(value, ensure_ascii=False)}`")
         if kept:
             review += ["", f"Review: ok (v{VERSION - 1})", ""]
+            continue
+        unchanged = old is not None and (old["tool"], old["args"], old["expect"]) == (tool, args, expect)
+        if unchanged and cid in DEFERRED:
+            review += [
+                "",
+                f"*v{VERSION - 1} comment:* {old_comments[cid].strip()}",
+                "",
+                f"Review: deferred to level 2 (ADR-006 freeze): {DEFERRED[cid]}",
+                "",
+            ]
             continue
         pending.append(cid)
         if old is None:

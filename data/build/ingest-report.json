@@ -9,9 +9,9 @@
   },
   "catalog_version": {
     "source_sha256": "3e32e993f5d198a35ea8148cd8d02236718589a3700ebf34b35be99dd47aead6",
-    "decisions_sha256": "baf58b9f4932085fda8acf5ea6e274fa9ea667ea6f5145a60ad083fa9c034a6c",
+    "decisions_sha256": "5862525bc7d4f61a7869c099579c67b15a375e8af74f42a590900094f9fc90af",
     "products_sha256": "6b3c871eac48be71b874195b81281b9d1a01b9e57ce60acb347226edf142a630",
-    "served_sha256": "ff49cc34ad41ac9c3d3c26e18473dfcb286abe69131f0a10f652df24e36ecb1c"
+    "served_sha256": "f1f1dbad838e3caeb696b6d9c8baaa5b1bdc34a0e4c1573c0568c64051f6c2b0"
   },
   "anomalies": [],
   "quality_warnings": [
