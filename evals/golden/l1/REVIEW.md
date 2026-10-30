@@ -18,7 +18,7 @@ Mark `ok`, or write what is wrong. Prices in EUR; ✗ = out of stock.
 - **pets** 2/3 in stock, €28 to 149 · Cats 0/1, Dogs 2/2
 - **tech-gadgets** 24/25 in stock, €22 to 899 · Audio 6/6, Creative 1/2, Desk 5/5, Home Tech 5/5, Mobile 2/2, Photo 2/2, Reading 2/2, Wearable 1/1
 
-Review: 
+Review: ok
 
 ## l1-002 · `get_products_by_category` `{"category": "kitchen-dining"}`
 *default page: in stock only, best rated first, 5 items*
@@ -31,7 +31,7 @@ Review:
   - `KD-009` Crystal Whisky Glasses, Pair · €89 · ★4.7 (132) · him · ships 4d
 - **total_matches**: `22`
 
-Review: 
+Review: ok
 
 ## l1-003 · `get_products_by_category` `{"category": "Kitchen and Dining"}`
 *category name in another spelling resolves to the slug*
@@ -44,7 +44,7 @@ Review:
   - `KD-009` Crystal Whisky Glasses, Pair · €89 · ★4.7 (132) · him · ships 4d
 - **total_matches**: `22`
 
-Review: 
+Review: ok
 
 ## l1-004 · `get_products_by_category` `{"category": "kitchen"}`
 *one distinctive word resolves to its category*
@@ -57,14 +57,14 @@ Review:
   - `KD-009` Crystal Whisky Glasses, Pair · €89 · ★4.7 (132) · him · ships 4d
 - **total_matches**: `22`
 
-Review: 
+Review: ok
 
 ## l1-005 · `get_products_by_category` `{"category": "garden"}`
 *unknown category is a recoverable error, not an empty list*
 
 - **error_code**: `"unknown_category"`
 
-Review: 
+Review: El error es correcto (no existe categoría `garden`), pero Garden es subcategoría de home-living con 3 productos en stock (HL-019, HL-020, HL-021): el error debería sugerir `home-living` / `Garden` en vez de dejar al agente sin pista.
 
 ## l1-006 · `get_products_by_category` `{"category": "home-living", "subcategory": "candles"}`
 *subcategory filter, case-insensitive; out-of-stock candle reported*
@@ -76,14 +76,14 @@ Review:
 - **out_of_stock_matches**:
   - ✗ `HL-004` Linen Fig Candle · €38 · ★4.7 (289) · her · ships 2d
 
-Review: 
+Review: ok
 
 ## l1-007 · `get_products_by_category` `{"category": "home-living", "subcategory": "Lamps"}`
 *unknown subcategory is a recoverable error*
 
 - **error_code**: `"unknown_subcategory"`
 
-Review: 
+Review: El error es correcto, pero el error debería sugerir la subcategoría `Lighting` (HL-001 y HL-002 son lámparas); un dependiente lo redirigiría ahí.
 
 ## l1-008 · `get_products_by_category` `{"category": "pets", "subcategory": "cats"}`
 *the only cat product is out of stock: empty page, reported, not hidden*
@@ -93,7 +93,7 @@ Review:
 - **out_of_stock_matches**:
   - ✗ `PT-003` Cat Tree, Compact · €119 · ★4.0 (96) · anyone · ships 6d
 
-Review: 
+Review: ok
 
 ## l1-009 · `get_products_by_category` `{"category": "pets", "subcategory": "cats", "include_out_of_stock": true}`
 *include_out_of_stock returns it*
@@ -102,7 +102,7 @@ Review:
   - ✗ `PT-003` Cat Tree, Compact · €119 · ★4.0 (96) · anyone · ships 6d
 - **total_matches**: `1`
 
-Review: 
+Review: ok
 
 ## l1-010 · `get_products_by_category` `{"category": "experiences"}`
 *Experiences holds only the two gift cards*
@@ -112,7 +112,7 @@ Review:
   - `EX-002` Gift Card, 100 EUR · €100 · no reviews (0) · anyone · ships 0d
 - **total_matches**: `2`
 
-Review: 
+Review: ok
 
 ## l1-011 · `get_products_by_category` `{"category": "kitchen-dining", "max_price": 40}`
 *max_price is inclusive*
@@ -121,7 +121,7 @@ Review:
 - **total_matches**: `0`
 - **suggestions**: `[{"change": "max_price", "to": 42.0, "would_match": 1}]`
 
-Review: 
+Review: Resultado correcto (lo más barato de kitchen-dining es KD-024 a €42), pero el caso no prueba lo que dice la descripción: ningún producto cuesta exactamente 40, así que no comprueba que max_price sea inclusivo. Para probarlo usaría `max_price: 42` y esperaría KD-024.
 
 ## l1-012 · `get_products_by_category` `{"category": "kitchen-dining", "min_price": 50, "max_price": 70}`
 *price range*
@@ -134,7 +134,7 @@ Review:
   - `KD-012` Slate Cheese Board Set · €62 · ★4.2 (87) · anyone · ships 3d
 - **total_matches**: `6`
 
-Review: 
+Review: ok
 
 ## l1-013 · `get_products_by_category` `{"category": "jewellery", "recipient": "her"}`
 *recipient includes products for anyone*
@@ -147,7 +147,7 @@ Review:
   - `JW-006` Stacking Rings, Set of Three · €96 · ★4.2 (143) · her · ships 4d
 - **total_matches**: `5`
 
-Review: 
+Review: Falta `out_of_stock_matches` con ✗ `JW-008` Bracelet, Woven Cord (€54, anyone, sin stock): cumple categoría y destinatario y, como en l1-006/l1-008, debería reportarse.
 
 ## l1-014 · `get_products_by_category` `{"category": "home-living", "occasion": "housewarming", "max_price": 50}`
 *occasion plus price*
@@ -160,7 +160,7 @@ Review:
   - `HL-028` Linen Table Runner · €48 · ★4.0 (41) · her · ships 3d
 - **total_matches**: `7`
 
-Review: 
+Review: ok
 
 ## l1-015 · `get_products_by_category` `{"category": "tech-gadgets", "max_shipping_days": 2}`
 *deadline filter*
@@ -173,7 +173,7 @@ Review:
   - `TG-016` Laptop Stand, Folding · €64 · ★4.4 (214) · anyone · ships 2d
 - **total_matches**: `14`
 
-Review: 
+Review: ok
 
 ## l1-016 · `get_products_by_category` `{"category": "beauty-wellness", "exclude": "scent,fragrance,candle"}`
 *exclusions by word*
@@ -186,7 +186,7 @@ Review:
   - `BW-002` Weighted Eye Mask · €42 · ★4.5 (312) · her · ships 2d
 - **total_matches**: `14`
 
-Review: 
+Review: ok
 
 ## l1-017 · `get_products_by_category` `{"category": "kids", "max_price": 30}`
 *nothing under 30 in Kids: empty page and the filter to drop*
@@ -195,7 +195,7 @@ Review:
 - **total_matches**: `0`
 - **suggestions**: `[{"change": "max_price", "to": 34.0, "would_match": 1}]`
 
-Review: 
+Review: ok
 
 ## l1-018 · `get_products_by_category` `{"category": "jewellery", "recipient": "her", "occasion": "anniversary", "max_price": 100}`
 *strict filters return few: suggestion names the filter to drop*
@@ -204,7 +204,7 @@ Review:
 - **total_matches**: `0`
 - **suggestions**: `[{"change": "occasion", "to": null, "would_match": 2}, {"change": "max_price", "to": 128.0, "would_match": 1}]`
 
-Review: 
+Review: ok
 
 ## l1-019 · `get_products_by_category` `{"category": "tech-gadgets", "sort": "price_asc"}`
 *cheapest first*
@@ -217,7 +217,7 @@ Review:
   - `TG-009` Smart Plug, Pack of Four · €54 · ★4.1 (527) · anyone · ships 2d
 - **total_matches**: `24`
 
-Review: 
+Review: ok
 
 ## l1-020 · `get_products_by_category` `{"category": "tech-gadgets", "sort": "price_desc"}`
 *most expensive first*
@@ -230,7 +230,7 @@ Review:
   - `TG-006` E-Reader 7in Glare-Free · €199 · ★4.8 (923) · anyone · ships 2d
 - **total_matches**: `24`
 
-Review: 
+Review: ok
 
 ## l1-021 · `get_products_by_category` `{"category": "books-stationery", "sort": "popularity"}`
 *popularity is review count*
@@ -243,7 +243,7 @@ Review:
   - `BS-009` The Art of Slow Cooking · €42 · ★4.6 (178) · anyone · ships 3d
 - **total_matches**: `15`
 
-Review: 
+Review: ok
 
 ## l1-022 · `get_products_by_category` `{"category": "home-living", "limit": 5, "offset": 5}`
 *second page*
@@ -256,7 +256,7 @@ Review:
   - `HL-010` Waffle Cotton Throw · €78 · ★4.4 (203) · anyone · ships 3d
 - **total_matches**: `26`
 
-Review: 
+Review: ok
 
 ## l1-023 · `get_products_by_category` `{"category": "home-living", "limit": 25}`
 *limit above 10 is clamped to 10*
@@ -274,7 +274,7 @@ Review:
   - `HL-010` Waffle Cotton Throw · €78 · ★4.4 (203) · anyone · ships 3d
 - **total_matches**: `26`
 
-Review: 
+Review: ok
 
 ## l1-024 · `get_products_by_category` `{"category": "home-living", "limit": 10, "offset": 10}`
 *third page of ten; cross-listed HL-021 appears in Home & Living under its HL id*
@@ -292,7 +292,7 @@ Review:
   - `HL-012` Reed Diffuser, Cedar · €46 · ★4.1 (118) · anyone · ships 2d
 - **total_matches**: `26`
 
-Review: 
+Review: Lista correcta (posiciones 11-20), pero la descripción está mal: `limit 10, offset 10` es la segunda página de diez, no la tercera.
 
 ## l1-025 · `get_products_by_category` `{"category": "kitchen-dining", "sort": "price_asc", "limit": 10}`
 *cross-listed products appear in Kitchen & Dining under their KD ids*
@@ -310,7 +310,7 @@ Review:
   - `KD-016` Bread Baking Set · €72 · ★4.4 (121) · anyone · ships 4d
 - **total_matches**: `22`
 
-Review: 
+Review: ok
 
 ## l1-026 · `search_products` `{"query": "chef knife", "max_price": 100}`
 *specific request with no exact answer: the €149 chef's knife is reported over budget*
@@ -324,7 +324,7 @@ Review:
   - `KD-001` Chef's Knife 20cm · €149 · ★4.8 (394) · anyone · ships 3d
 - **suggestions**: `[{"change": "max_price", "to": 149.0, "would_match": 4}]`
 
-Review: 
+Review: Sobra `KD-012` Slate Cheese Board Set: es una tabla de quesos, solo coincide porque incluye cuchillos de queso. Quedaría KD-002, KD-003; total_matches `2`, y la sugerencia `max_price: 149` pasaría a `would_match: 3`.
 
 ## l1-027 · `search_products` `{"query": "chef knife"}`
 *the same request without a budget finds the chef's knife first*
@@ -336,7 +336,7 @@ Review:
   - `KD-012` Slate Cheese Board Set · €62 · ★4.2 (87) · anyone · ships 3d
 - **total_matches**: `4`
 
-Review: 
+Review: Sobra `KD-012` Slate Cheese Board Set (tabla de quesos, no un cuchillo de cocina). Quedaría KD-001, KD-002, KD-003; total_matches `3`.
 
 ## l1-028 · `search_products` `{"query": "city map jigsaw"}`
 *a product asked for by name that is out of stock is reported, not hidden*
@@ -348,7 +348,7 @@ Review:
 - **out_of_stock_matches**:
   - ✗ `GP-007` Jigsaw 1000pc, City Map · €32 · ★4.2 (194) · him · ships 2d
 
-Review: 
+Review: Sobra `BS-010` Atlas of Remote Islands (es un libro, solo coincide por "map"). En su lugar ofrecería otro puzzle: `GP-005` Wooden Puzzle 500pc, Coastline (€78). Quedaría GP-006, GP-005.
 
 ## l1-029 · `search_products` `{"query": "fig candle"}`
 *out-of-stock fig candle reported; the in-stock trio with a fig scent is returned*
@@ -361,7 +361,7 @@ Review:
 - **out_of_stock_matches**:
   - ✗ `HL-004` Linen Fig Candle · €38 · ★4.7 (289) · her · ships 2d
 
-Review: 
+Review: Cambiaría el orden: `HL-005` Trio Votive Set debe ir primero, es la única vela en stock que lleva aroma a higo (coincide con las dos palabras). Después HL-003 (vela sin higo) y al final BW-009, que es un perfume, no una vela (yo incluso lo quitaría).
 
 ## l1-030 · `search_products` `{"query": "housewarming", "max_price": 50}`
 *an occasion word in the query matches tags and text*
@@ -377,7 +377,7 @@ Review:
   - `HL-019` Ceramic Planter, Medium · €52 · ★4.2 (94) · anyone · ships 4d
   - `TG-009` Smart Plug, Pack of Four · €54 · ★4.1 (527) · anyone · ships 2d
 
-Review: 
+Review: ok
 
 ## l1-031 · `search_products` `{"query": "sony noise cancelling headphones"}`
 *a brand the shop does not sell is reported as unmatched*
@@ -388,7 +388,7 @@ Review:
 - **total_matches**: `2`
 - **unmatched_terms**: `["sony"]`
 
-Review: 
+Review: Sobra `TG-023` Noise Machine (máquina de ruido blanco, lo contrario de cancelar ruido). Falta `TG-002` Wireless Earbuds Pro (€189, con ANC), la otra opción con cancelación de ruido. Quedaría TG-001, TG-002.
 
 ## l1-032 · `search_products` `{"query": "iphone"}`
 *nothing matches: empty, unmatched term, no invention*
@@ -397,7 +397,7 @@ Review:
 - **total_matches**: `0`
 - **unmatched_terms**: `["iphone"]`
 
-Review: 
+Review: ok
 
 ## l1-033 · `search_products` `{"query": "cuchillo"}`
 *a non-English word matches nothing: the agent must translate*
@@ -406,7 +406,7 @@ Review:
 - **total_matches**: `0`
 - **unmatched_terms**: `["cuchillo"]`
 
-Review: 
+Review: ok
 
 ## l1-034 · `search_products` `{"query": "asdfghjkl"}`
 *nonsense matches nothing*
@@ -415,7 +415,7 @@ Review:
 - **total_matches**: `0`
 - **unmatched_terms**: `["asdfghjkl"]`
 
-Review: 
+Review: ok
 
 ## l1-035 · `search_products` `{"query": "herb garden kit"}`
 *cross-listed product appears once, under its primary id*
@@ -428,7 +428,7 @@ Review:
   - `KI-004` Junior Science Kit · €62 · ★4.2 (158) · kids · ships 3d
 - **total_matches**: `12`
 
-Review: 
+Review: Cambiaría el orden: tras HL-021 deben ir los productos de jardín, `HL-019` Ceramic Planter, Medium y `HL-020` Aurora Hanging Planter, antes que kits sin relación (KD-008 cócteles, BW-006 barba). Propuesta: HL-021, HL-019, HL-020, KD-015, KI-004.
 
 ## l1-036 · `search_products` `{"query": "amber glass tumbler"}`
 *the second cross-listed product appears once, under its primary id*
@@ -443,7 +443,7 @@ Review:
 - **out_of_stock_matches**:
   - ✗ `KD-007` Cold Brew Carafe · €52 · ★4.1 (74) · anyone · ships 3d
 
-Review: 
+Review: Sobran `BW-004` Vitamin C Serum, `BW-006` Beard Care Kit y `HL-012` Reed Diffuser: solo coinciden por el color "Amber" o el material "Glass", no son vasos. Tras HL-024 y KD-009 ofrecería otros artículos para beber, p. ej. `OT-010` Enamel Camp Mug Pair y `OT-002` Travel Mug. El total de 21 está inflado por esas coincidencias.
 
 ## l1-037 · `search_products` `{"query": "coffee", "max_price": 60}`
 *keyword plus budget across categories*
@@ -459,7 +459,7 @@ Review:
   - `KD-005` Pour-Over Set · €78 · ★4.6 (183) · him · ships 3d
 - **suggestions**: `[{"change": "max_price", "to": 78.0, "would_match": 3}]`
 
-Review: 
+Review: ok
 
 ## l1-038 · `search_products` `{"query": "throw blanket", "exclude": "alpaca,wool,sheepskin"}`
 *vegan-style exclusions on materials*
@@ -472,7 +472,7 @@ Review:
   - `HL-026` Oak Serving Ladder · €110 · no reviews (0) · anyone · ships 6d
 - **total_matches**: `5`
 
-Review: 
+Review: Sobran `HL-001` Aurora Table Lamp ("throws a soft glow"), `HL-017` Woven Storage Basket y `HL-026` Oak Serving Ladder (solo mencionan mantas en la descripción) y `BW-016` Sauna Blanket (es un aparato de sauna, no una manta de sofá). Solo debería quedar `HL-010` Waffle Cotton Throw; total_matches `1`.
 
 ## l1-039 · `search_products` `{"query": "puzzle", "sort": "price_asc"}`
 *explicit sort overrides relevance*
@@ -487,7 +487,7 @@ Review:
 - **out_of_stock_matches**:
   - ✗ `GP-007` Jigsaw 1000pc, City Map · €32 · ★4.2 (194) · him · ships 2d
 
-Review: 
+Review: Sobran `GP-003` Two-Player Card Game y `GP-004` Party Game: son juegos de cartas/fiesta, solo coinciden por el nombre de la categoría "Games & Puzzles". Quedaría GP-006 (€32), GP-008 (€38), GP-012 (€44), GP-005 (€78); total_matches `4`; GP-007 sigue en out_of_stock_matches.
 
 ## l1-040 · `search_products` `{"query": "running"}`
 *a hobby word that lives in tags*
@@ -496,7 +496,7 @@ Review:
   - `TG-003` Open-Ear Sport Buds · €129 · ★4.1 (317) · him · ships 2d
 - **total_matches**: `1`
 
-Review: 
+Review: ok
 
 ## l1-041 · `search_products` `{"query": "pasta"}`
 *pasta matches the pasta kit (the agent decides if the shopper meant money)*
@@ -506,7 +506,7 @@ Review:
   - `KD-015` Pasta Making Kit · €98 · ★4.3 (93) · anyone · ships 4d
 - **total_matches**: `2`
 
-Review: 
+Review: ok
 
 ## l1-042 · `search_products` `{"query": "candle", "include_out_of_stock": true}`
 *include_out_of_stock mixes them into the ranking*
@@ -517,7 +517,7 @@ Review:
   - `HL-005` Trio Votive Set · €54 · ★4.5 (97) · anyone · ships 2d
 - **total_matches**: `3`
 
-Review: 
+Review: ok
 
 ## l1-043 · `search_products` `{"query": "travel", "recipient": "him", "max_shipping_days": 3}`
 *recipient plus deadline*
@@ -532,7 +532,7 @@ Review:
 - **out_of_stock_matches**:
   - ✗ `OT-008` Camping Hammock · €68 · ★4.5 (221) · him · ships 3d
 
-Review: 
+Review: ok
 
 ## l1-044 · `search_products` `{"query": "headphones", "max_price": 150}`
 *every ANC option costs more than 150: over-budget matches*
@@ -543,7 +543,7 @@ Review:
   - `TG-001` Wireless Headphones ANC · €279 · ★4.7 (842) · anyone · ships 2d
 - **suggestions**: `[{"change": "max_price", "to": 279.0, "would_match": 1}]`
 
-Review: 
+Review: Falta `TG-003` Open-Ear Sport Buds (€129): son auriculares y entran en el presupuesto; un dependiente los ofrecería (avisando de que no tienen ANC). Y en over_budget_matches falta `TG-002` Wireless Earbuds Pro (€189, ANC), más cerca del presupuesto que TG-001.
 
 ## l1-045 · `search_products` `{"query": "anniversary", "recipient": "her", "max_price": 100}`
 *an occasion word in the query matches the occasion tags; better matches over budget are reported*
@@ -559,7 +559,7 @@ Review:
   - `HL-026` Oak Serving Ladder · €110 · no reviews (0) · anyone · ships 6d
   - `BW-001` Silk Pillowcase Pair · €119 · ★4.7 (486) · her · ships 3d
 
-Review: 
+Review: Faltan productos `couple` con ocasión anniversary dentro del presupuesto, que son justo los regalos de aniversario: `KD-018` Handmade Pasta Bowls (€74), `BW-015` Turkish Bath Towel Set (€86), `OT-007` Picnic Blanket (€74), `GP-012` Escape Room (€44), `GP-003` Two-Player Card Game (€26). Para aniversario, recipient "her" debería incluir "couple". El 6º en presupuesto (EX-002) es correcto.
 
 ## l1-046 · `search_products` `{}`
 *no query: best rated in the whole catalogue*
@@ -572,7 +572,7 @@ Review:
   - `KD-001` Chef's Knife 20cm · €149 · ★4.8 (394) · anyone · ships 3d
 - **total_matches**: `139`
 
-Review: 
+Review: ok
 
 ## l1-047 · `search_products` `{"sort": "price_asc"}`
 *no query: the cheapest products in the catalogue*
@@ -585,7 +585,7 @@ Review:
   - `TG-013` Switch Sampler Pack · €24 · ★4.3 (127) · him · ships 2d
 - **total_matches**: `139`
 
-Review: 
+Review: ok
 
 ## l1-048 · `search_products` `{"sort": "popularity", "limit": 3}`
 *no query: the most reviewed*
@@ -596,7 +596,7 @@ Review:
   - `TG-001` Wireless Headphones ANC · €279 · ★4.7 (842) · anyone · ships 2d
 - **total_matches**: `139`
 
-Review: 
+Review: ok
 
 ## l1-049 · `search_products` `{"recipient": "kids", "max_price": 40}`
 *no query, filters only*
@@ -609,7 +609,7 @@ Review:
   - `OT-002` Travel Mug, Leakproof · €38 · ★4.4 (512) · anyone · ships 2d
 - **total_matches**: `18`
 
-Review: 
+Review: `KI-003` Illustrated Story Collection debe ir primero: es el único producto para niños bajo €40. Sobra `HL-027` Incense Set (incienso, no apto para niños); los productos "anyone" de adulto (taza de viaje, cuaderno) no deberían ir por delante de los de niños. Añadiría la sugerencia `max_price: 42` → `KI-006` Night Light.
 
 ## l1-050 · `search_products` `{"max_shipping_days": 0}`
 *same-day: only digital gift cards*
@@ -620,7 +620,7 @@ Review:
 - **total_matches**: `2`
 - **suggestions**: `[{"change": "max_shipping_days", "to": null, "would_match": 139}]`
 
-Review: 
+Review: ok
 
 ## l1-051 · `search_products` `{"max_price": 10}`
 *almost nothing under 10*
@@ -630,7 +630,7 @@ Review:
 - **total_matches**: `1`
 - **suggestions**: `[{"change": "max_price", "to": 22.0, "would_match": 3}]`
 
-Review: 
+Review: ok
 
 ## l1-052 · `search_products` `{"min_price": 300}`
 *only the most expensive items*
@@ -643,14 +643,14 @@ Review:
 - **total_matches**: `4`
 - **suggestions**: `[{"change": "min_price", "to": 279.0, "would_match": 5}]`
 
-Review: 
+Review: ok
 
 ## l1-053 · `get_product_details` `{"product_id": "KD-001"}`
 *an in-stock product: no alternatives block*
 
 - **product_id**: `"KD-001"`
 
-Review: 
+Review: ok
 
 ## l1-054 · `get_product_details` `{"product_id": "HL-004"}`
 *out of stock: in-stock alternatives from the same subcategory first*
@@ -661,7 +661,7 @@ Review:
   - `HL-005` Trio Votive Set · €54 · ★4.5 (97) · anyone · ships 2d
   - `HL-016` Brass Picture Frame 13x18 · €39 · ★4.0 (89) · anyone · ships 3d
 
-Review: 
+Review: Sobra `HL-016` Brass Picture Frame (un marco no sustituye a una vela). Como tercera alternativa pondría algo aromático: `HL-012` Reed Diffuser, Cedar (€46) o `HL-027` Incense Set (€28).
 
 ## l1-055 · `get_product_details` `{"product_id": "PT-003"}`
 *out of stock with no sibling in its subcategory: alternatives from its category*
@@ -671,7 +671,7 @@ Review:
   - `PT-001` Dog Bed, Orthopaedic · €149 · ★4.5 (178) · anyone · ships 5d
   - `PT-002` Rope Toy Bundle · €28 · ★4.1 (264) · anyone · ships 2d
 
-Review: 
+Review: ok
 
 ## l1-056 · `get_product_details` `{"product_id": "KD-007"}`
 *out-of-stock coffee product: alternatives closest in price*
@@ -682,7 +682,7 @@ Review:
   - `KD-005` Pour-Over Set · €78 · ★4.6 (183) · him · ships 3d
   - `KD-006` Burr Coffee Grinder, Manual · €115 · ★4.7 (241) · anyone · ships 3d
 
-Review: 
+Review: ok
 
 ## l1-057 · `get_product_details` `{"product_id": "kd-7"}`
 *tolerant id: lower case, no zero padding*
@@ -693,32 +693,32 @@ Review:
   - `KD-005` Pour-Over Set · €78 · ★4.6 (183) · him · ships 3d
   - `KD-006` Burr Coffee Grinder, Manual · €115 · ★4.7 (241) · anyone · ships 3d
 
-Review: 
+Review: ok
 
 ## l1-058 · `get_product_details` `{"product_id": "KD024"}`
 *tolerant id without dash; a cross-listed product resolves by either id*
 
 - **product_id**: `"KD-024"`
 
-Review: 
+Review: ok
 
 ## l1-059 · `get_product_details` `{"product_id": "EX-001"}`
 *unrated digital gift card*
 
 - **product_id**: `"EX-001"`
 
-Review: 
+Review: ok
 
 ## l1-060 · `get_product_details` `{"product_id": "XX-999"}`
 *unknown id is a recoverable error*
 
 - **error_code**: `"product_not_found"`
 
-Review: 
+Review: ok
 
 ## l1-061 · `get_product_details` `{"product_id": "Chef's Knife"}`
 *a name instead of an id is a recoverable error*
 
 - **error_code**: `"product_not_found"`
 
-Review: 
+Review: ok

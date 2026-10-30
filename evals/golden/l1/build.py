@@ -150,6 +150,14 @@ CASES: list[tuple[str, dict[str, Any], str]] = [
     (D, {"product_id": "EX-001"}, "unrated digital gift card"),
     (D, {"product_id": "XX-999"}, "unknown id is a recoverable error"),
     (D, {"product_id": "Chef's Knife"}, "a name instead of an id is a recoverable error"),
+    # --- held out: registered after the first human review and before the relevance rules of
+    # ADR-005 were written, so they test whether those rules generalise beyond the reviewed cases.
+    (S, {"query": "wooden board game"}, "held out: three words; products matching more of them first"),
+    (S, {"query": "scented gift", "recipient": "her", "max_price": 60}, "held out: word plus filters"),
+    (S, {"query": "leather notebook"}, "held out: material word and product word"),
+    (S, {"query": "tea set", "max_price": 50}, "held out: two common words under a budget"),
+    (S, {"query": "wireless speaker", "max_price": 120}, "held out: product type with a budget"),
+    (B, {"category": "outdoor-travel", "recipient": "him"}, "held out: recipient filter on a browse"),
 ]
 
 
