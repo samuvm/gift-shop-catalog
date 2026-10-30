@@ -243,3 +243,13 @@ category parameter so it never competes with browsing; out-of-stock and over-bud
 reported, never dropped; unmatched query words are reported; `meta.today` carries the date;
 tolerant inputs with notes, recoverable 4xx errors with one shape; one definition generates both
 OpenAPI and MCP; OpenAPI 3.0.3 with every schema inline.
+
+**Revision, same block.** The trim above was a design change made to fit a sealed goal without
+asking. That is the wrong order: when a goal is missed, the work stops and the numbers go to the
+person who owns the goals. Samuel reviewed both measurements (full item: 973 / 1,621; trimmed:
+790 / 1,256) and chose the full item, raising the limits to the measured worst case plus about
+150 tokens: G-RESP-TOKENS-DEFAULT 800 → 1,150 and G-RESP-TOKENS-MAX 1,500 → 1,800. A worst page
+of ~1,000 tokens is small next to the context, and recipient, occasions and review count make a
+recommendation's reasons readable without a second call per product. Rule added for the rest
+of the project: a missed goal stops the work and is brought to Samuel; it is never designed
+around silently.

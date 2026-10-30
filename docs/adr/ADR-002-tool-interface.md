@@ -92,11 +92,12 @@ The optional blocks appear only when they carry information:
   filter whose removal would return the most products, and how many.
 - **`meta.today`** gives the date, because the model may not know it and deadlines are common.
 
-A compact item carries only what a recommendation needs in the list:
+A compact item carries every field a recommendation can use without opening the details:
 
 ```json
-{"product_id": "KD-002", "name": "Paring Knife 9cm", "subcategory": "Knives", "price_eur": 69.0,
- "availability": "in_stock", "rating": 4.8, "shipping_days": 3, "gift_wrap": true,
+{"product_id": "KD-002", "name": "Paring Knife 9cm", "category": "Kitchen & Dining", "subcategory": "Knives",
+ "price_eur": 69.0, "availability": "in_stock", "rating": 4.8, "reviews_count": 311,
+ "recipient": "anyone", "occasions": ["thank-you", "housewarming"], "shipping_days": 3, "gift_wrap": true,
  "description": "The knife people actually reach for most. Pairs with the gyuto."}
 ```
 
@@ -105,17 +106,22 @@ with every optional block at its maximum):
 
 | Item shape | Tokens per item | Worst page of 5 | Worst page of 10 |
 |---|---|---|---|
-| Every list-worthy field (with category, recipient, occasions, review count) | ~120 | 973 ✗ | 1,621 ✗ |
-| **Chosen: without those four** | **~86** | **790 ✓** | **1,256 ✓** |
+| **Chosen: the item above** | **~120** | **973** | **1,621** |
+| Without category, recipient, occasions and review count | ~86 | 790 | 1,256 |
 | Without the description as well | ~63 | 643 | 977 |
 
-The first estimate (~90 tokens per item with every field) was wrong by a third, and the full
-shape breaks both sealed limits (≤ 800 and ≤ 1,500). Dropping `category`, `recipient`,
-`occasions` and `reviews_count` costs nothing. The filters the agent applied are echoed once in
-`meta.applied`, so repeating them per item pays for the same fact five times; the rest is in
-the details. The description stays: it is short (142 characters at most), and it is where the
-reasons and caveats live. The margin at the default page is small (10 tokens in the worst case),
-so `note` is capped at 100 characters and the sizes are re-measured on every level-1 case.
+The first estimate (~90 tokens per item) was wrong by a third, and the chosen item broke the
+original limits (≤ 800 and ≤ 1,500). Two options were measured: trim the item, or raise the
+limits. The limits were raised to 1,150 and 1,800, that is the measured worst case plus a
+margin of about 150 tokens. The reasons:
+- A worst page of ~1,000 tokens is small next to the model's context.
+- Recipient, occasions and review count are what make a recommendation reason ("for a
+  housewarming", "311 reviews") readable without a second call per product.
+- One second call per product adds latency to every recommendation in the widget.
+
+The description stays because it is short (142 characters at most) and it is where the reasons
+and caveats live. `note` is capped at 100 characters, and the sizes are re-measured on every
+level-1 case.
 
 `get_product_details` returns every field of the cleaned product, plus:
 
