@@ -69,7 +69,7 @@ Review: ok (v2)
 
 *v2 comment:* Mejor que v1 (ya apunta a `home-living`), pero sigue sin nombrar la subcategoría: debería sugerir `home-living` con subcategory `Garden` (HL-019, HL-020, HL-021); con solo la categoría el agente cae en 26 productos y no ve los de jardín.
 
-Review: 
+Review: ok
 
 ## l1-006 · `get_products_by_category` `{"category": "home-living", "subcategory": "candles"}`
 *subcategory filter, case-insensitive; out-of-stock candle reported*
@@ -92,7 +92,7 @@ Review: ok (v2)
 
 *Approved in v2; the expected result changed.*
 
-Review: 
+Review: `did_you_mean` correcto. El hint es genérico; como en l1-005, nombraría la llamada: "Call get_products_by_category with category 'home-living' and subcategory 'Lighting'." Además remite a `allowed_values`: si ese campo no va en la respuesta, apunta a algo que no existe.
 
 ## l1-008 · `get_products_by_category` `{"category": "pets", "subcategory": "cats"}`
 *the only cat product is out of stock: empty page, reported, not hidden*
@@ -177,7 +177,7 @@ Review: ok (v2)
 
 *v2 comment:* ok (v1)
 
-Review: 
+Review: ok
 
 ## l1-015 · `get_products_by_category` `{"category": "tech-gadgets", "max_shipping_days": 2}`
 *deadline filter*
@@ -226,7 +226,7 @@ Review: ok (v2)
 
 *v2 comment:* ok (v1)
 
-Review: 
+Review: ok
 
 ## l1-019 · `get_products_by_category` `{"category": "tech-gadgets", "sort": "price_asc"}`
 *cheapest first*
@@ -348,7 +348,7 @@ Review: ok (v2)
 
 *v2 comment:* Sin cambios respecto a v1: sigue sobrando `KD-012` Slate Cheese Board Set (tabla de quesos, coincide solo por los cuchillos de queso). Quedaría KD-002, KD-003; total_matches `2`; la sugerencia `max_price: 149` pasaría a `would_match: 3`.
 
-Review: 
+Review: ok
 
 ## l1-027 · `search_products` `{"query": "chef knife"}`
 *the same request without a budget finds the chef's knife first*
@@ -362,7 +362,7 @@ Review:
 
 *v2 comment:* Sin cambios respecto a v1: sigue sobrando `KD-012` Slate Cheese Board Set. Quedaría KD-001, KD-002, KD-003; total_matches `3`.
 
-Review: 
+Review: ok
 
 ## l1-028 · `search_products` `{"query": "city map jigsaw"}`
 *a product asked for by name that is out of stock is reported, not hidden*
@@ -376,7 +376,7 @@ Review:
 
 *v2 comment:* Sin cambios respecto a v1: sigue sobrando `BS-010` Atlas of Remote Islands (libro, solo coincide por "map"). En su lugar `GP-005` Wooden Puzzle 500pc, Coastline (€78). Quedaría GP-006, GP-005.
 
-Review: 
+Review: ok (retiro la propuesta de `GP-005`: no es un jigsaw, el mismo criterio de 035/036 lo deja fuera).
 
 ## l1-029 · `search_products` `{"query": "fig candle"}`
 *out-of-stock fig candle reported; the in-stock trio with a fig scent is returned*
@@ -391,7 +391,7 @@ Review:
 
 *Approved in v2; the expected result changed.*
 
-Review: 
+Review: ok
 
 ## l1-030 · `search_products` `{"query": "housewarming", "max_price": 50}`
 *an occasion word in the query matches tags and text*
@@ -422,7 +422,7 @@ Review: ok (v2)
 
 *v2 comment:* Corregido lo de v1 (fuera TG-023, dentro TG-002), pero ahora sobra `TG-003` Open-Ear Sport Buds: van fuera del oído para oír el tráfico, lo contrario de cancelar ruido. Quedaría TG-001, TG-002; total_matches `2`.
 
-Review: 
+Review: ok (retiro el comentario de v2: con `missing_terms` marcando "anc" en TG-003 queda avisado de que no cancela ruido, igual que acepté en l1-044).
 
 ## l1-032 · `search_products` `{"query": "iphone"}`
 *nothing matches: empty, unmatched term, no invention*
@@ -463,7 +463,7 @@ Review: ok (v2)
 
 *v2 comment:* Orden principal corregido (HL-019 y HL-020 justo tras HL-021). Queda el 4º puesto: sigue `KD-008` Cocktail Kit; pondría `KD-015` Pasta Making Kit y `KI-004` Junior Science Kit, como en v1. Propuesta: HL-021, HL-019, HL-020, KD-015, KI-004.
 
-Review: 
+Review: ok
 
 ## l1-036 · `search_products` `{"query": "amber glass tumbler"}`
 *the second cross-listed product appears once, under its primary id*
@@ -474,7 +474,7 @@ Review:
 
 *v2 comment:* Sigue sobrando `BW-004` Vitamin C Serum (solo coincide por "Amber"/"Glass"). `KD-005` Pour-Over Set y `KD-021` Tea Infuser Pot tampoco son vasos (coinciden por "glass"). Tras HL-024 y KD-009 pondría artículos para beber: `OT-010` Enamel Camp Mug Pair y `OT-002` Travel Mug. `KD-007` Cold Brew Carafe en out_of_stock_matches también coincide solo por "glass"; lo quitaría. El total de 21 sigue inflado.
 
-Review: 
+Review: ok
 
 ## l1-037 · `search_products` `{"query": "coffee", "max_price": 60}`
 *keyword plus budget across categories*
@@ -504,7 +504,7 @@ Review: ok (v2)
 
 *v2 comment:* Sin cambios respecto a v1: sobran `BW-016` Sauna Blanket (aparato de sauna), `HL-001` Aurora Table Lamp ("throws a soft glow"), `HL-026` Oak Serving Ladder y `HL-017` Woven Storage Basket (solo mencionan mantas). Solo debe quedar `HL-010` Waffle Cotton Throw; total_matches `1`.
 
-Review: 
+Review: Sigue sobrando `BW-016` Sauna Blanket: es un aparato de sauna por infrarrojos, no una manta de sofá (mismo caso que el molinillo de pimienta en l1-069). Quedaría solo `HL-010`; total_matches `1`. Y sobra la sugerencia `exclude → null`: las exclusiones son una restricción deliberada (vegana), no un filtro que el dependiente propondría quitar; lo que añade es HL-009 alpaca y OT-007 con lana.
 
 ## l1-039 · `search_products` `{"query": "puzzle", "sort": "price_asc"}`
 *explicit sort overrides relevance*
@@ -576,7 +576,7 @@ Review: ok (v2)
 
 *Approved in v2; the expected result changed.*
 
-Review: 
+Review: Cambiaría el orden de over_budget_matches: `TG-002` Wireless Earbuds Pro (€189, 39 por encima) antes que `TG-001` (€279, 129 por encima), como en v2. Es la que la sugerencia `max_price: 189` ofrece y la primera que enseñaría a quien tiene €150.
 
 ## l1-045 · `search_products` `{"query": "anniversary", "recipient": "her", "max_price": 100}`
 *an occasion word in the query matches the occasion tags; better matches over budget are reported*
@@ -594,7 +594,7 @@ Review:
 
 *v2 comment:* Sin cambios respecto a v1: faltan los productos `couple` con ocasión anniversary dentro del presupuesto, que son justo los regalos de aniversario: `KD-018` Handmade Pasta Bowls (€74), `BW-015` Turkish Bath Towel Set (€86), `OT-007` Picnic Blanket (€74), `GP-012` Escape Room (€44), `GP-003` Two-Player Card Game (€26). Para aniversario, recipient "her" debería incluir "couple".
 
-Review: 
+Review: ok (los productos `couple` que pedía en v1/v2 ya salen en l1-074 con `recipient: "her,couple"`; con "her" a secas este resultado es correcto).
 
 ## l1-046 · `search_products` `{}`
 *no query: best rated in the whole catalogue*
@@ -649,7 +649,7 @@ Review: ok (v2)
 
 *v2 comment:* Mejor que v1: `KI-003` ya va primero. Sigue sobrando `HL-027` Incense Set (incienso, no apto para niños); en su lugar algo "anyone" que sirva a un niño, p. ej. `GP-008` Metal Puzzle Set (€38). Sigue faltando la sugerencia `max_price: 42` → `KI-006` Night Light.
 
-Review: 
+Review: Mejor que v2: `over_budget_matches` con KI-006 y KI-005 cubre lo que faltaba. Sigue sobrando `HL-027` Incense Set (incienso con soporte, no apto para niños); en su lugar `GP-008` Metal Puzzle Set (€38).
 
 ## l1-050 · `search_products` `{"max_shipping_days": 0}`
 *same-day: only digital gift cards*
@@ -758,7 +758,7 @@ Review: ok (v2)
 
 *Approved in v2; the expected result changed.*
 
-Review: 
+Review: ok
 
 ## l1-061 · `get_product_details` `{"product_id": "Chef's Knife"}`
 *a name instead of an id is a recoverable error*
@@ -770,7 +770,7 @@ Review:
 
 *Approved in v2; the expected result changed.*
 
-Review: 
+Review: ok
 
 ## l1-062 · `search_products` `{"query": "wooden board game"}`
 *held out: three words; products matching more of them first*
@@ -788,7 +788,7 @@ Review:
 
 *v2 comment:* Sobra `KI-002` Balance Board en 1º: es un juguete infantil de madera, no un juego de mesa. Faltan `GP-009` Chess Set, Weighted (€145, nogal y arce, el juego de tablero de madera por excelencia) y `GP-010` Backgammon Roll-Up (€89, fichas de madera). Primero `GP-001`, el único que reúne las tres palabras (juego de mesa con piezas de madera). Propuesta: GP-001, GP-009, GP-010, GP-002, GP-003. También sobra `TG-022` en out_of_stock_matches: es una consola, no un juego de mesa.
 
-Review: 
+Review: Mejor que v2 (fuera KI-002). Faltan en la página `GP-009` Chess Set, Weighted (€145, tablero y piezas de nogal y arce, el juego de mesa de madera por excelencia) y `GP-010` Backgammon Roll-Up (€89, madera); irían 2º y 3º, por delante de los juegos de cartas GP-003 y GP-004. Propuesta: GP-001, GP-009, GP-010, GP-002, GP-003. Sigue sobrando `TG-022` en out_of_stock_matches: es una consola, no un juego de mesa.
 
 ## l1-063 · `search_products` `{"query": "scented gift", "recipient": "her", "max_price": 60}`
 *held out: word plus filters*
@@ -805,7 +805,7 @@ Review:
 
 *v2 comment:* Cambiaría el orden: `HL-003` Ember Ceramic Candle debe ir primero (perfumada, ★4.8); `BW-010` Fragrance Discovery Vials no lleva "scented" y tiene la nota más baja, lo bajaría. Propuesta: HL-003, HL-005, BW-005, HL-027, BW-010. Además `BW-014` Bath Soak Collection (€54, her, sales de rosa y eucalipto) debería contar entre los resultados.
 
-Review: 
+Review: Orden corregido (HL-003, HL-005, BW-005 arriba). Cambiaría `HL-013` Room Spray Duo (★3.9) por `HL-027` Incense Set, Japanese (€28, ★4.7): el incienso es un regalo perfumado aunque no lleve la palabra "scented". Propuesta: HL-003, HL-005, BW-005, HL-027, HL-012.
 
 ## l1-064 · `search_products` `{"query": "leather notebook"}`
 *held out: material word and product word*
@@ -819,7 +819,7 @@ Review:
 
 *v2 comment:* Sobran `JW-007` Leather Watch Strap y `OT-004` Weekender Bag: solo coinciden por "leather", no son cuadernos. Tras BS-006, BS-004 y BS-005 pondría otros artículos de papel: `BS-008` Undated Weekly Planner (€38) y `BS-014` Bookbinding Kit (€76, hace cuadernos). Propuesta: BS-006, BS-004, BS-005, BS-008, BS-014. El total de 11 está inflado por los artículos de cuero.
 
-Review: 
+Review: ok (retiro la propuesta de BS-008 y BS-014: no son cuadernos; BS-014 solo menciona "notebooks" en la descripción, como KD-012 con los cuchillos).
 
 ## l1-065 · `search_products` `{"query": "tea set", "max_price": 50}`
 *held out: two common words under a budget*
@@ -833,7 +833,7 @@ Review:
 
 *v2 comment:* Sobran `HL-027` Incense Set (solo coincide porque la descripción dice "green tea"), `HL-023` Terrazzo Coaster Set, `BW-018` Resistance Band Set y `GP-008` Metal Puzzle Set (solo coinciden por "set"). Quedaría solo `KD-022`; total_matches `1`. Falta en over_budget_matches `KD-021` Tea Infuser Pot (€68), el otro artículo de té, con la sugerencia `max_price: 68` → `would_match: 2`.
 
-Review: 
+Review: ok
 
 ## l1-066 · `search_products` `{"query": "wireless speaker", "max_price": 120}`
 *held out: product type with a budget*
@@ -848,7 +848,7 @@ Review:
 
 *v2 comment:* Sobra `TG-014` Vertical Mouse (un ratón, solo coincide por "Wireless"). Quedaría solo `TG-004`; total_matches `1`. `TG-025` tampoco debería ir en over_budget_matches: son altavoces pasivos que necesitan amplificador, no inalámbricos. Y la sugerencia `max_price: 189` sobra: lo que añade es TG-002 (auriculares), no otro altavoz.
 
-Review: 
+Review: `missing_terms` de TG-004 está mal: es Bluetooth, o sea inalámbrico; marcarle "wireless" como ausente haría que el agente diga que no lo es. Sobran `TG-025` en over_budget_matches (altavoces pasivos con cable que necesitan amplificador, no inalámbricos) y la sugerencia `max_price: 899`. Quedaría solo TG-004, sin missing_terms, sin over_budget ni sugerencia.
 
 ## l1-067 · `get_products_by_category` `{"category": "outdoor-travel", "recipient": "him"}`
 *held out: recipient filter on a browse*
@@ -865,7 +865,7 @@ Review:
 
 *v2 comment:* Falta `out_of_stock_matches` con ✗ `OT-008` Camping Hammock (€68, him, sin stock): cumple categoría y destinatario y, como en l1-013, debería reportarse. La lista y el total (7) son correctos.
 
-Review: 
+Review: ok
 
 ## l1-068 · `search_products` `{"query": "silver earrings", "max_price": 80}`
 *held out: material and product word, budget*
@@ -879,7 +879,7 @@ Review:
 
 *New in this version.*
 
-Review: 
+Review: Vacío y presupuesto correctos, pero JW-003 y JW-004 son de vermeil dorado, no de plata: en over_budget_matches deberían llevar `missing_terms` `{"JW-003": ["silver"], "JW-004": ["silver"]}`, o el agente los ofrecerá como pendientes de plata. El catálogo no tiene pendientes de plata.
 
 ## l1-069 · `search_products` `{"query": "coffee grinder"}`
 *held out: the first word is itself a kind of product*
@@ -892,7 +892,7 @@ Review:
 
 *New in this version.*
 
-Review: 
+Review: Sobra `KD-020` Salt & Pepper Mills: un molinillo de pimienta no es un molinillo de café (mismo criterio que los vasos de whisky en 036). Quedaría solo `KD-006`; total_matches `1`, sin missing_terms.
 
 ## l1-070 · `search_products` `{"query": "wooden toy", "recipient": "kids"}`
 *held out: material and product word, recipient*
@@ -908,7 +908,7 @@ Review:
 
 *New in this version.*
 
-Review: 
+Review: Sobra `PT-002` Rope Toy Bundle: es un juguete para perros. Quedaría KI-001, KI-002, KI-006, KI-004; total_matches `4`.
 
 ## l1-071 · `search_products` `{"query": "travel pillow"}`
 *held out: a product word the catalogue may not use*
@@ -926,7 +926,7 @@ Review:
 
 *New in this version.*
 
-Review: 
+Review: El catálogo no tiene almohada de viaje, y una taza, un atlas, unos auriculares, una bolsa y un juego de cartas no lo son: solo coinciden por "travel", falta la palabra que dice qué producto es (al revés que en l1-064). Debería volver vacío (total_matches `0`) y dejar al agente decir que no hay; como mucho, el más cercano para dormir viajando es `BW-002` Weighted Eye Mask. Sobra también `BW-012` en out_of_stock_matches: es una esterilla de acupresión, su cojín no es de viaje.
 
 ## l1-072 · `get_products_by_category` `{"category": "jewellery", "recipient": "her", "max_price": 60}`
 *held out: browse, recipient and budget*
@@ -942,7 +942,7 @@ Review:
 
 *New in this version.*
 
-Review: 
+Review: ok
 
 ## l1-073 · `search_products` `{"query": "anniversary", "recipient": "him,couple", "max_price": 120}`
 *held out: two recipients*
@@ -960,7 +960,7 @@ Review:
 
 *New in this version.*
 
-Review: 
+Review: ok
 
 ## l1-074 · `search_products` `{"query": "anniversary", "recipient": "her,couple", "max_price": 100}`
 *a partner: her and couple*
@@ -978,4 +978,4 @@ Review:
 
 *New in this version.*
 
-Review: 
+Review: ok
