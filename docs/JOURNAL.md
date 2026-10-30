@@ -168,3 +168,78 @@ green run, each resolved differently:
 **A side observation that supports ADR-003.** TG-001's description never says "headphones", but
 its tags do (`headphones|anc|wireless|travel`). The deterministic `search_text` carries them, so
 the gap an LLM enrichment was meant to close was already closed by the client's own data.
+
+## Day 2 · Block 2 · Stress-testing the tool set with 100 synthetic conversations (~25 min)
+
+**Starting point.** A proposal of four tools: the three required ones plus `search_products`.
+Before fixing it, we wanted evidence that it covers how real customers talk.
+
+**Method.** Four agents wrote 25 conversations each, in four directions that do not overlap:
+constraints that change mid-chat; precise customers and hard constraints; off-topic and
+adversarial turns; wordplay and messy language. The agents did not see the tool design. They
+wrote as customers, grounded in real products and prices. The set has 100 conversations and
+671 customer messages, in English, Spanish, Italian and mixed languages, and 40 conversations
+contain bursts of several messages. Each conversation was then mapped to what the agent would
+need from the catalogue. **This is a development set.** It shapes the design, so it will never
+be used to evaluate it; the level-2 cases are written separately.
+
+**What the conversations need** (approximate, by keyword over traps and messages; counts are
+conversations):
+- Delivery against a date: ~31. Wrapping questions: ~32. Several products in one answer
+  (combos, totals, "both"): ~31.
+- A product the customer names that is out of stock: ~19. A caveat that lives only in the
+  description (needs an amplifier, engraving adds a week, starter not included): ~19.
+- Over budget: ~17. Exclusions ("not a candle", vegan, "nothing scented"): ~14. Price ranges:
+  ~11. Ordering ("most popular", "best rated", "cheapest"): ~11. Brands the shop does not sell
+  (AirPods, Kindle, Sony, Lego): ~9. The duplicate listing, noticed by the customer: 5.
+- Off-topic, missing-policy or injection turns that no tool should serve: most of set C.
+
+**Conclusions for the interface.**
+1. No conversation needs a fifth tool. Everything outside the four is data the shop does not
+   have (returns, discounts, shipping costs, order status, restock dates, wrapping price). The
+   honest answer to those is a prompt rule, not a tool.
+2. **A search that hides out-of-stock products by default breaks a common case.** "Do you have
+   the City Map jigsaw?" would come back empty, and the agent would say the shop does not sell
+   it. Out-of-stock matches must be reported separately, never dropped silently.
+3. **Unmatched words are information.** "sony noise cancelling headphones" should return the
+   headphones and say that "sony" matched nothing, so the agent can say "we don't stock Sony;
+   the closest is…".
+4. Missing filters with clear demand: price range, exclusions, maximum shipping days, sort by
+   price, rating or popularity (review count), and subcategory (Pets → Cats).
+5. Strict filters can remove the right answer. In one conversation, "anniversary gift for her
+   under €100" returns nothing because occasion tags are not exhaustive. When results are
+   few, the response should say which single relaxation would return more, and how many.
+6. The agent may not know today's date. Deadlines are common, so responses should carry the
+   server's date, and descriptions must say `shipping_days` is an estimate, not a promise.
+7. Some phrasings no search will ever match ("estoy a dos velas", "media naranja", "nothing she
+   can knock over and set on fire"). Translating them into catalogue words (product types,
+   materials, hobbies, in English) is the agent's job, and the `query` description must say so.
+8. Batch details were considered and rejected. List items already carry price, availability,
+   shipping days and wrapping, which is enough for totals and comparisons. The platform can run
+   several detail calls in parallel, and one product per call keeps the operation unambiguous.
+
+## Day 2 · Block 3 · Interface design, ADR-002 (~30 min)
+
+**Starting point.** Four tools, a compact list item with every field a recommendation might
+use, estimated at ~90 tokens per item.
+
+**What the measurement said.** The estimate was wrong by a third. Measured with `o200k_base` over
+every product, the full item is ~120 tokens, and the worst default page (5 items plus every
+optional block) is 973 tokens, above the sealed limit of 800. The sealed goals do not move, so
+the design did. The filters the agent applied are already echoed once in `meta.applied`, so
+`category`, `recipient`, `occasions` and `reviews_count` left the list item; they stay in the
+details. Result: ~86 tokens per item, worst pages of 790 (≤ 800) and 1,256 (≤ 1,500). Lesson
+kept: size claims in the ADR are measured, not estimated.
+
+**A "guard" tool for injection and off-topic turns was considered and rejected.** It only runs
+when the model decides to call it, so it fails exactly when the model has been manipulated. The
+platform already has that layer before the model: a Security layer that classifies every message
+for jailbreaks and out-of-scope requests, in Shadow or Enforce mode, plus real-time guardrails.
+The plan is to run it in Shadow first and measure it on the adversarial conversations, because
+Enforce on "out of scope" could block mixed messages that also contain a real gift request.
+
+**Decisions** (ADR-002, proposed): four read-only tools with one job each; search has no
+category parameter so it never competes with browsing; out-of-stock and over-budget matches are
+reported, never dropped; unmatched query words are reported; `meta.today` carries the date;
+tolerant inputs with notes, recoverable 4xx errors with one shape; one definition generates both
+OpenAPI and MCP; OpenAPI 3.0.3 with every schema inline.
