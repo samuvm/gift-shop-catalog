@@ -387,3 +387,65 @@ is not speed but stock freshness.
 
 **Discarded:** moving to SQLite now "to be ready". It changes no number the agent sees, and
 every component has to be explained in review.
+
+### Block 8 · The first human review, and search relevance (≈ 1 h 40 min)
+
+**Starting point:** Samuel reviewed all 61 level-1 cases as a shop assistant would. 43 were
+approved as they were and 18 drew a comment.
+
+**Initial approach → conclusion:** I read the comments as possible bugs, so the first step was
+to find, for every product he named, which field produced the match. None was a bug: service
+and reference implementation agreed in 61 of 61. The comments were about the **specification**.
+The keyword scoring of ADR-002 accepted a match anywhere, counted the category name, and
+rewarded neither matching more of the words nor matching the rarer one. A cheese board was
+returned for "chef knife" because its description says "three knives". Every card game was
+returned for "puzzle" because the category is *Games & Puzzles*. That is exactly what a human
+review is for: a reference implementation can only check that the code does what the
+specification says, not that the specification is right.
+
+Before writing anything I prototyped two candidate rule sets against all the search cases:
+
+| Candidate | Effect |
+|---|---|
+| Drop matches found only in the description, colour or material | Cleaner lists, but "coffee" loses the travel mug, an approved case whose only mention of coffee is in its description |
+| Rank those matches last; stop searching the category name; order by strong-field coverage, then any coverage, then rarity | Fixes 029, 035 and 039 as asked; noise moves to the end in 026, 027, 028, 036 and 038; no approved top five changes |
+
+Samuel chose the second, a small reviewed synonym list, and four smaller rules (ADR-005).
+
+**Done:**
+- Committed his review untouched first (`review-v1.md`). Then **registered six held-out
+  cases before writing any rule**, so that something tests whether the rules generalise beyond
+  the cases they were written to fix.
+- ADR-005, then tests first in the domain (13 new tests), then the code, then the reference
+  implementation, changed separately from the code.
+- Vocabulary in `decisions.yaml`: 3 phrases and 5 synonym groups. They were taken from the 100
+  development conversations and the catalogue's tags, not from the reviewed cases. The ingest
+  rejects a malformed vocabulary and warns about a group that no product uses. The served
+  `catalog_version` now covers the vocabulary too (`served_sha256`).
+- Level-1 set v2: 67 cases. 40 keep Samuel's approval because their arguments and expected
+  result did not change. 27 go back to review, each with his previous comment beside it.
+- Unknown-category and unknown-product errors now pin `did_you_mean` in the cases as well.
+  l1-005 already pointed to *home-living*; the case simply never checked it.
+
+**Numbers:**
+
+| Goal | Value | Command |
+|---|---|---|
+| G-L1-EXACT | 67/67 | `make eval-l1` |
+| G-RESP-TOKENS-DEFAULT / MAX | 621 / 1,045 (≤ 1,150 / 1,800) | `make eval-l1` |
+| G-COVERAGE | 99.71% (680/682) | `make test` |
+| G-SPEC-LINT | 0 | `make spec-lint` |
+| G-INGEST-STOPS | 11/11 | `make eval-ingest` |
+| G-SECRETS | 0 new (4 new version hashes reviewed into the baseline) | `make secrets` |
+
+247 tests in 0.9 s. The OpenAPI changed only in three descriptions and the catalogue version.
+
+**What the held-out cases showed** (reported, not fixed: tuning on them would end their use):
+- l1-062 "wooden board game" puts a balance board first. It matches "wooden" and "board"; the
+  board games say "wood", not "wooden". Rarity rewards the rarer word even when the product
+  noun ("game") is the one missing.
+- l1-065 "tea set" under 50: after the one tea, the rest are any product named "set". Generic
+  words such as "set" count as coverage.
+- Cost of no longer searching the category name: in the approved l1-043 ("travel" for him), the
+  out-of-stock camping hammock is no longer reported, because its only link to "travel" was the
+  category *Outdoor & Travel*. The top five did not change.
