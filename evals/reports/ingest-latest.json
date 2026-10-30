@@ -1,0 +1,332 @@
+{
+  "exact_detection_rate": 1.0,
+  "n_fixtures": 10,
+  "fixtures": [
+    {
+      "fixture": "clean_export",
+      "passed": true,
+      "expected": [],
+      "reported": [],
+      "status": "ok",
+      "notes": "the client's export as received"
+    },
+    {
+      "fixture": "category_typo",
+      "passed": true,
+      "expected": [
+        [
+          "unknown_category",
+          [
+            "KD-005"
+          ]
+        ]
+      ],
+      "reported": [
+        [
+          "unknown_category",
+          [
+            "KD-005"
+          ]
+        ]
+      ],
+      "status": "stopped",
+      "notes": ""
+    },
+    {
+      "fixture": "category_moved",
+      "passed": true,
+      "expected": [
+        [
+          "prefix_mismatch",
+          [
+            "TG-003"
+          ]
+        ]
+      ],
+      "reported": [
+        [
+          "prefix_mismatch",
+          [
+            "TG-003"
+          ]
+        ]
+      ],
+      "status": "stopped",
+      "notes": ""
+    },
+    {
+      "fixture": "duplicate_id",
+      "passed": true,
+      "expected": [
+        [
+          "duplicate_id",
+          [
+            "HL-001"
+          ]
+        ]
+      ],
+      "reported": [
+        [
+          "duplicate_id",
+          [
+            "HL-001"
+          ]
+        ]
+      ],
+      "status": "stopped",
+      "notes": ""
+    },
+    {
+      "fixture": "new_cross_listing",
+      "passed": true,
+      "expected": [
+        [
+          "undeclared_cross_listing",
+          [
+            "OT-011",
+            "TG-017"
+          ]
+        ]
+      ],
+      "reported": [
+        [
+          "undeclared_cross_listing",
+          [
+            "OT-011",
+            "TG-017"
+          ]
+        ]
+      ],
+      "status": "stopped",
+      "notes": ""
+    },
+    {
+      "fixture": "declared_pair_diverged",
+      "passed": true,
+      "expected": [
+        [
+          "stale_decision",
+          [
+            "HL-021",
+            "KD-024"
+          ]
+        ]
+      ],
+      "reported": [
+        [
+          "stale_decision",
+          [
+            "HL-021",
+            "KD-024"
+          ]
+        ]
+      ],
+      "status": "stopped",
+      "notes": ""
+    },
+    {
+      "fixture": "comma_decimal_price",
+      "passed": true,
+      "expected": [
+        [
+          "invalid_value",
+          [
+            "BW-001"
+          ]
+        ]
+      ],
+      "reported": [
+        [
+          "invalid_value",
+          [
+            "BW-001"
+          ]
+        ]
+      ],
+      "status": "stopped",
+      "notes": ""
+    },
+    {
+      "fixture": "unknown_recipient",
+      "passed": true,
+      "expected": [
+        [
+          "invalid_value",
+          [
+            "JW-002"
+          ]
+        ]
+      ],
+      "reported": [
+        [
+          "invalid_value",
+          [
+            "JW-002"
+          ]
+        ]
+      ],
+      "status": "stopped",
+      "notes": ""
+    },
+    {
+      "fixture": "column_dropped",
+      "passed": true,
+      "expected": [
+        [
+          "schema_mismatch",
+          []
+        ]
+      ],
+      "reported": [
+        [
+          "schema_mismatch",
+          []
+        ]
+      ],
+      "status": "stopped",
+      "notes": ""
+    },
+    {
+      "fixture": "truncated_export",
+      "passed": true,
+      "expected": [
+        [
+          "mass_removal",
+          [
+            "BS-001",
+            "BS-002",
+            "BS-003",
+            "BS-004",
+            "BS-005",
+            "BS-006",
+            "BS-007",
+            "BS-008",
+            "BS-009",
+            "BS-010",
+            "BS-011",
+            "BS-012",
+            "BS-013",
+            "BS-014",
+            "BS-015",
+            "BS-016",
+            "BW-015",
+            "BW-016",
+            "BW-017",
+            "BW-018",
+            "EX-001",
+            "EX-002",
+            "GP-001",
+            "GP-002",
+            "GP-003",
+            "GP-004",
+            "GP-005",
+            "GP-006",
+            "GP-007",
+            "GP-008",
+            "GP-009",
+            "GP-010",
+            "GP-011",
+            "GP-012",
+            "JW-001",
+            "JW-002",
+            "JW-003",
+            "JW-004",
+            "JW-005",
+            "JW-006",
+            "JW-007",
+            "JW-008",
+            "KI-001",
+            "KI-002",
+            "KI-003",
+            "KI-004",
+            "KI-005",
+            "KI-006",
+            "OT-001",
+            "OT-002",
+            "OT-003",
+            "OT-004",
+            "OT-005",
+            "OT-006",
+            "OT-007",
+            "OT-008",
+            "OT-009",
+            "OT-010",
+            "PT-001",
+            "PT-002",
+            "PT-003"
+          ]
+        ]
+      ],
+      "reported": [
+        [
+          "mass_removal",
+          [
+            "BS-001",
+            "BS-002",
+            "BS-003",
+            "BS-004",
+            "BS-005",
+            "BS-006",
+            "BS-007",
+            "BS-008",
+            "BS-009",
+            "BS-010",
+            "BS-011",
+            "BS-012",
+            "BS-013",
+            "BS-014",
+            "BS-015",
+            "BS-016",
+            "BW-015",
+            "BW-016",
+            "BW-017",
+            "BW-018",
+            "EX-001",
+            "EX-002",
+            "GP-001",
+            "GP-002",
+            "GP-003",
+            "GP-004",
+            "GP-005",
+            "GP-006",
+            "GP-007",
+            "GP-008",
+            "GP-009",
+            "GP-010",
+            "GP-011",
+            "GP-012",
+            "JW-001",
+            "JW-002",
+            "JW-003",
+            "JW-004",
+            "JW-005",
+            "JW-006",
+            "JW-007",
+            "JW-008",
+            "KI-001",
+            "KI-002",
+            "KI-003",
+            "KI-004",
+            "KI-005",
+            "KI-006",
+            "OT-001",
+            "OT-002",
+            "OT-003",
+            "OT-004",
+            "OT-005",
+            "OT-006",
+            "OT-007",
+            "OT-008",
+            "OT-009",
+            "OT-010",
+            "PT-001",
+            "PT-002",
+            "PT-003"
+          ]
+        ]
+      ],
+      "status": "stopped",
+      "notes": "40% of rows missing, vs the current catalogue"
+    }
+  ]
+}

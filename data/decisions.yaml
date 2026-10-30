@@ -1,0 +1,41 @@
+# Judgements a person made once about the client's export. Applied by `make ingest` (ADR-001).
+# Every entry carries its reason. Anything the ingest finds that is not covered here stops it.
+
+version: 1
+
+categories:          # canonical names; the ID prefix must match (152/152 in the 2026-10-29 export)
+  - {name: "Home & Living",      slug: home-living,      id_prefix: HL}
+  - {name: "Kitchen & Dining",   slug: kitchen-dining,   id_prefix: KD}
+  - {name: "Tech & Gadgets",     slug: tech-gadgets,     id_prefix: TG}
+  - {name: "Beauty & Wellness",  slug: beauty-wellness,  id_prefix: BW}
+  - {name: "Books & Stationery", slug: books-stationery, id_prefix: BS}
+  - {name: "Games & Puzzles",    slug: games-puzzles,    id_prefix: GP}
+  - {name: "Outdoor & Travel",   slug: outdoor-travel,   id_prefix: OT}
+  - {name: "Jewellery",          slug: jewellery,        id_prefix: JW}
+  - {name: "Kids",               slug: kids,             id_prefix: KI}
+  - {name: "Pets",               slug: pets,             id_prefix: PT}
+  - {name: "Experiences",        slug: experiences,      id_prefix: EX}
+
+recipients: [anyone, him, her, couple, kids]
+occasions: [birthday, christmas, anniversary, housewarming, thank-you, graduation]
+
+cross_listed:
+  - ids: [HL-021, KD-024]
+    primary: HL-021
+    reason: "Herb Garden Kit, identical in every field but category. Listed in both on purpose; both IDs stay valid."
+  - ids: [HL-024, KD-023]
+    primary: HL-024
+    reason: "Amber Glass Tumbler Set, identical in every field but category. Listed in both on purpose; both IDs stay valid."
+
+stock:
+  unlimited_sentinel: 999   # gift cards: delivered by email, no stock limit
+  low_stock_max: 5          # 1..5 units is shown as low stock
+
+shipping:
+  digital_days: 0           # shipping_days 0 means digital delivery (gift cards)
+
+removal_guard:
+  max_removed_ratio: 0.20   # a bigger drop is likelier a truncated export than a closing-down sale
+
+quality:
+  thin_description_max_chars: 19   # "Great gift." and "A card." say nothing; the next shortest is 36 chars

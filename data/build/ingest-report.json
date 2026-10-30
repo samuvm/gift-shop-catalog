@@ -1,0 +1,105 @@
+{
+  "status": "ok",
+  "pending_decisions": 0,
+  "counts": {
+    "rows": 152,
+    "products": 152,
+    "distinct_products": 150,
+    "categories": 11
+  },
+  "catalog_version": {
+    "source_sha256": "3e32e993f5d198a35ea8148cd8d02236718589a3700ebf34b35be99dd47aead6",
+    "decisions_sha256": "38f758d7dce8ff8378db9a49779c2214273db6ea96d2a79d0056a3dffe4efd34",
+    "products_sha256": "6b3c871eac48be71b874195b81281b9d1a01b9e57ce60acb347226edf142a630"
+  },
+  "anomalies": [],
+  "quality_warnings": [
+    {
+      "code": "missing_rating",
+      "product_ids": [
+        "BS-014",
+        "EX-001",
+        "EX-002",
+        "HL-008",
+        "HL-026"
+      ],
+      "detail": "no rating or review count"
+    },
+    {
+      "code": "missing_occasion",
+      "product_ids": [
+        "BS-015",
+        "HL-013",
+        "TG-020"
+      ],
+      "detail": "no occasion given"
+    },
+    {
+      "code": "thin_description",
+      "product_ids": [
+        "BS-015",
+        "HL-013"
+      ],
+      "detail": "description of 19 characters or fewer: says nothing about the product"
+    }
+  ],
+  "rules_applied": [
+    {
+      "rule": "category_respelled",
+      "product_ids": [
+        "BS-006",
+        "HL-004",
+        "HL-013",
+        "KD-009",
+        "TG-015"
+      ],
+      "detail": "'Home and Living' -> 'Home & Living' (1); 'Tech and Gadgets' -> 'Tech & Gadgets' (1); 'books & stationery' -> 'Books & Stationery' (1); 'home & living' -> 'Home & Living' (1); 'kitchen & dining' -> 'Kitchen & Dining' (1)"
+    },
+    {
+      "rule": "whitespace_trimmed",
+      "product_ids": [
+        "HL-023"
+      ],
+      "detail": "leading, trailing or repeated whitespace removed"
+    }
+  ],
+  "decisions_applied": [
+    {
+      "rule": "cross_listed",
+      "product_ids": [
+        "HL-021",
+        "KD-024"
+      ],
+      "detail": "one product, primary HL-021: Herb Garden Kit, identical in every field but category. Listed in both on purpose; both IDs stay valid."
+    },
+    {
+      "rule": "cross_listed",
+      "product_ids": [
+        "HL-024",
+        "KD-023"
+      ],
+      "detail": "one product, primary HL-024: Amber Glass Tumbler Set, identical in every field but category. Listed in both on purpose; both IDs stay valid."
+    },
+    {
+      "rule": "unlimited_stock",
+      "product_ids": [
+        "EX-001",
+        "EX-002"
+      ],
+      "detail": "stock 999 read as unlimited, not as a count"
+    },
+    {
+      "rule": "digital_delivery",
+      "product_ids": [
+        "EX-001",
+        "EX-002"
+      ],
+      "detail": "shipping_days 0 read as digital delivery"
+    }
+  ],
+  "diff": {
+    "added": [],
+    "removed": [],
+    "changed": {}
+  }
+}

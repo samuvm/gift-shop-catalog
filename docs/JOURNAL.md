@@ -122,3 +122,49 @@ or taxonomy per product, because some descriptions never say what the product is
 byte-identical result on every run. Each seeded-anomaly fixture (unknown category spelling,
 new duplicate, non-numeric price, half the catalogue missing, stale decision) stops the
 ingest and reports exactly that anomaly.
+
+## Day 1 · Block 5 · Working rules and governance (~30 min)
+
+**What was set up.** Working rules for the whole project, a status file, a progress page and
+this journal as the single history. Overlap was removed on purpose: no separate changelog
+(the journal and the README carry the numbers) and no rules file (the testing regime lives in
+`pyproject.toml`, where a script can read it). Commits carry no tool attribution: they describe
+the change, as in any professional repository.
+
+## Day 2 · Fri 30 Oct · Block 1 · Goals sealed, ingest built test-first (~25 min)
+
+**Goals.** Before sealing, the goals were reviewed against an earlier project of ours
+(`data-warden`, an NL→SQL agent with deterministic guards) for ideas that transfer. Three
+did: a rejection should name the rule and the alternative (already the plan for tool errors);
+one core served by REST and MCP with neither importing the other (new goal G-ARCH-LAYERS, plus
+the existing parity goal); and evaluations that reproduce from recorded model responses with no
+API key (new goal G-L2-REPRODUCIBLE). MCP protocol conformance became an extension goal. Its
+audit hash chain and roles were not taken: there is no sensitive data and only one kind of
+caller here. Mutation testing was dropped from the goals: it needs a new dependency and does
+not block anything. 19 goals ratified and sealed (`docs/thresholds.lock`, sha256 `1e247cd7…`).
+
+**Scope check.** We asked whether the data pipeline and the measurement work go beyond what is
+evaluated. Decision: keep the planned scope and order. The data work is where "nobody is going
+to clean it for you" is answered, and the measurement work is what turns "the spec is
+LLM-friendly" into a number.
+
+**Ingest, red then green.** Tests were written first against stub modules, and every one failed
+on `NotImplementedError`, none on imports. Then the implementation. Two failures on the first
+green run, each resolved differently:
+- *Real bug:* a malformed ID (`HL1`) raised both `invalid_value` and `prefix_mismatch`. One
+  problem should give one anomaly; the prefix check now runs only on well-formed IDs.
+- *Over-specified test:* the quality-warning test expected exactly two codes, but a one-row
+  export is also missing the declared cross-listed pairs, which is correctly reported as
+  `unused_decision` (noted, not blocking). The test now expects it, and a new test pins that
+  behaviour on its own.
+
+**Numbers.**
+- `make ingest` on the client's export: status ok, 0 pending decisions, 152 rows, 152 listings,
+  150 distinct products, 11 categories. A second run reports no changes (G-INGEST-CLEAN: 0).
+- `make eval-ingest`: 10 of 10 seeded fixtures report exactly their anomaly, including the
+  unmodified export, which must not stop (G-INGEST-STOPS: 1.0).
+- `make test`: 78 tests, 99% line coverage on the ingest and storage code.
+
+**A side observation that supports ADR-003.** TG-001's description never says "headphones", but
+its tags do (`headphones|anc|wireless|travel`). The deterministic `search_text` carries them, so
+the gap an LLM enrichment was meant to close was already closed by the client's own data.
