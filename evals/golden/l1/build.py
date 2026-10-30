@@ -167,6 +167,18 @@ CASES: list[tuple[str, dict[str, Any], str]] = [
     (S, {"query": "tea set", "max_price": 50}, "held out: two common words under a budget"),
     (S, {"query": "wireless speaker", "max_price": 120}, "held out: product type with a budget"),
     (B, {"category": "outdoor-travel", "recipient": "him"}, "held out: recipient filter on a browse"),
+    # --- held out: registered after the second human review and before the rules of ADR-006 were
+    # written. The six above informed those rules, so these take over as the unseen cases.
+    (S, {"query": "silver earrings", "max_price": 80}, "held out: material and product word, budget"),
+    (S, {"query": "coffee grinder"}, "held out: the first word is itself a kind of product"),
+    (S, {"query": "wooden toy", "recipient": "kids"}, "held out: material and product word, recipient"),
+    (S, {"query": "travel pillow"}, "held out: a product word the catalogue may not use"),
+    (
+        B,
+        {"category": "jewellery", "recipient": "her", "max_price": 60},
+        "held out: browse, recipient and budget",
+    ),
+    (S, {"query": "anniversary", "recipient": "him,couple", "max_price": 120}, "held out: two recipients"),
 ]
 
 
