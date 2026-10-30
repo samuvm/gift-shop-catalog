@@ -449,3 +449,74 @@ Samuel chose the second, a small reviewed synonym list, and four smaller rules (
 - Cost of no longer searching the category name: in the approved l1-043 ("travel" for him), the
   out-of-stock camping hammock is no longer reported, because its only link to "travel" was the
   category *Outdoor & Travel*. The top five did not change.
+
+### Block 9 · The second human review: the limit of keyword rules (≈ 1 h 30 min)
+
+**Starting point:** Samuel reviewed the 27 pending cases of v2. 11 were approved and 16 drew a
+comment. The six held-out cases were all commented on. That was both expected and useful: the
+held-out cases were there to show whether ADR-005 generalised, and it did not fully.
+
+**Initial approach → conclusion:** The dominant pattern was the same in nine comments. A product
+that matches a *modifier* of the query is not what was asked for: a leather watch strap for
+"leather notebook", a mouse for "wireless speaker", a coaster set for "tea set". ADR-005 had
+moved them to the end of the list. The reviewer still struck them out. My first proposal was a
+grammar rule: the last word of the query names the product.
+
+Samuel pushed back on the framing: the fix has to stay deterministic, and the review compares
+results with the brief and the client's CSV, so the CSV may hold a better answer. It does. The
+**first tag of every row is the product type** (115 types across 150 products). I prototyped
+both against all 67 cases before choosing:
+
+| Rule (both deterministic) | Comments fixed | Approved cases broken |
+|---|---|---|
+| CSV product type as a filter | all nine | 5: "chef knife" loses the sharpening stone, "coffee" the travel mug, "pasta" the pasta bowls; "herb garden kit" keeps one product |
+| Last specific word of the query must be in a strong field | all nine | 1: "fig candle" drops a fig perfume |
+| Out-of-stock and over-budget blocks on every request | 067, 049 | about twenty, mostly noise |
+| The same, only when recipient or occasion is set | 067, 049 | 0 (014 and 018 gain a block) |
+
+The CSV type is precise but too narrow: a sharpening stone is tagged `sharpening`, not `knife`.
+I chose the main-word rule. The CSV signal stays documented in ADR-006 as the option rejected.
+
+The second conclusion mattered more. Every rule that removed the reviewer's noise also removed
+something the reviewer wanted elsewhere: the travel mug, the pasta bowls, the planters. What is
+left needs an understanding of the product (open-ear buds do not cancel noise; passive speakers
+are not wireless), and keyword rules cannot supply it. The consumer of the tool is an LLM, which
+does that well, provided it can see *why* a product was listed. So each product now carries
+`missing_terms`, the query words it lacks. After this round **ranking is frozen**. A new rule
+needs evidence from the level-2 evaluation that the agent recommends the wrong product because
+of the order.
+
+**Done:**
+- Committed the review untouched. Then **registered six new held-out cases** (l1-068 to 073)
+  before writing any rule, because the previous six had now informed the rules.
+- ADR-006: main word; generic packaging words in `decisions.yaml` (set, kit, pack, pair,
+  collection, bundle, trio, duo; "box" left out because it can be the product); synonym groups
+  `[wood, wooden]` and `[notebook, journal]`, both found in the development conversations; a
+  synonym match scores half; `missing_terms`; `recipient` takes several values (`her,couple`);
+  out-of-stock and over-budget blocks when recipient or occasion is set.
+- l1-005 needed no code. The error already named *home-living* and *Garden* in its `hint`, but
+  the review sheet never showed it. Error cases now record the hint.
+- Tests first: 16 new domain tests, then the code. The reference implementation was updated
+  separately and agrees with the service on all 74 cases.
+- Level-1 v3: 74 cases (one new case for `her,couple`). 44 keep their approval and 30 go to
+  review.
+
+**Numbers:**
+
+| Goal | Value | Command |
+|---|---|---|
+| G-L1-EXACT | 74/74 over HTTP | `make eval-l1` |
+| G-RESP-TOKENS-DEFAULT / MAX | 620 / 1,044 (≤ 1,150 / 1,800) | `make eval-l1` |
+| G-COVERAGE | 99.58% (714/717) | `make test` |
+| G-SPEC-LINT | 0 | `make spec-lint` |
+| G-SECRETS | 0 new (4 version hashes reviewed into the baseline) | `make secrets` |
+
+271 tests in 1.1 s. In-process search p95 is 0.36 ms on the served catalogue
+(`scripts/scale_probe.py`). The OpenAPI changed in the recipient parameter (a pattern instead of
+an enum, with the values in its description), the new `missing_terms` field, three descriptions
+and the catalogue version.
+
+**What the new held-out cases show** (not tuned on): "travel pillow" names something the shop
+does not carry. No product has "pillow" in a strong field, so the query is not narrowed, and
+every travel item says `missing_terms: ["pillow"]`. That is the honest answer, and the agent can
+read it. "coffee grinder" lists both grinders, the manual one marked as missing "coffee".
