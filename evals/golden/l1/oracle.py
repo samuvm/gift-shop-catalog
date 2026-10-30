@@ -77,7 +77,17 @@ def load() -> list[Product]:
 
 
 def stem(word: str) -> str:
-    return word[:-1] if len(word) > 3 and word.endswith("s") and not word.endswith("ss") else word
+    """English plural to singular, crudely: knives -> knife, glasses -> glass, accessories -> accessory."""
+    if len(word) <= 3:
+        return word
+    for suffix, replacement in (("ies", "y"), ("ives", "ife"), ("ves", "f")):
+        if word.endswith(suffix):
+            return word[: -len(suffix)] + replacement
+    if word.endswith(("sses", "xes", "zes", "ches", "shes")):
+        return word[:-2]
+    if word.endswith("s") and not word.endswith(("ss", "us", "is")):
+        return word[:-1]
+    return word
 
 
 def words(text: str) -> set[str]:

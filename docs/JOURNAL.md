@@ -285,3 +285,28 @@ show whether the model widens its queries.
 
 **Next.** Samuel reviews `evals/golden/l1/REVIEW.md`, case by case. Meanwhile, the domain is
 built test-first against the same semantics.
+
+## Day 2 · Block 5 · Domain built test-first, checked against the reference (~30 min)
+
+**Approach.** 39 unit tests on a hand-built twelve-product catalogue pin the semantics one by one:
+resolution, every filter, sorting, paging, the information blocks, details and alternatives. They
+were written first; all failed on `NotImplementedError`. Then a second check: every level-1 case
+run against the domain on the real catalogue, so two implementations written separately must
+agree.
+
+**What failed on the way, and why:**
+- *Design defect, found by writing the unit tests:* stripping a trailing `s` turns "knives" into
+  "knive", which never matches "knife". The plural rule now handles `-ies`, `-ives`, `-ves` and
+  `-es`, in both the domain and the reference. Three level-1 expectations changed, all for the
+  better: the cheese board with knives now matches "knife", and the whisky glasses match "glass".
+- *Code defect:* for an unknown ID, `difflib` returned equally close guesses in an unhelpful order
+  (KD-007, KD-004, KD-003 for "KD-009"). The guesses are now ordered by closeness, then by ID.
+- *Harness defect:* the level-1 runner passed `exclude` as a string; two cases failed until it was
+  split into a list.
+
+**Numbers.** 61 of 61 level-1 cases agree between the domain and the reference.
+`make test`: 192 tests, 99% line coverage over ingest, domain and storage.
+
+**Caveat.** The reference and the domain have the same author, so their agreement shows that
+the code matches the written semantics, not that the semantics are right. That second check is
+the human review of the level-1 cases, which is pending.

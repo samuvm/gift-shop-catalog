@@ -318,10 +318,11 @@ Review:
 - **product_ids**:
   - `KD-002` Paring Knife 9cm · €69 · ★4.6 (148) · anyone · ships 3d
   - `KD-003` Knife Sharpening Stone · €54 · ★4.5 (96) · him · ships 3d
-- **total_matches**: `2`
+  - `KD-012` Slate Cheese Board Set · €62 · ★4.2 (87) · anyone · ships 3d
+- **total_matches**: `3`
 - **over_budget_matches**:
   - `KD-001` Chef's Knife 20cm · €149 · ★4.8 (394) · anyone · ships 3d
-- **suggestions**: `[{"change": "max_price", "to": 149.0, "would_match": 3}]`
+- **suggestions**: `[{"change": "max_price", "to": 149.0, "would_match": 4}]`
 
 Review: 
 
@@ -332,7 +333,8 @@ Review:
   - `KD-001` Chef's Knife 20cm · €149 · ★4.8 (394) · anyone · ships 3d
   - `KD-002` Paring Knife 9cm · €69 · ★4.6 (148) · anyone · ships 3d
   - `KD-003` Knife Sharpening Stone · €54 · ★4.5 (96) · him · ships 3d
-- **total_matches**: `3`
+  - `KD-012` Slate Cheese Board Set · €62 · ★4.2 (87) · anyone · ships 3d
+- **total_matches**: `4`
 
 Review: 
 
@@ -433,11 +435,11 @@ Review:
 
 - **product_ids**:
   - `HL-024` Amber Glass Tumbler Set · €56 · ★4.5 (86) · anyone · ships 4d
+  - `KD-009` Crystal Whisky Glasses, Pair · €89 · ★4.7 (132) · him · ships 4d
   - `BW-004` Vitamin C Serum 30ml · €64 · ★4.6 (721) · her · ships 2d
   - `BW-006` Beard Care Kit · €68 · ★4.2 (176) · him · ships 3d
   - `HL-012` Reed Diffuser, Cedar · €46 · ★4.1 (118) · anyone · ships 2d
-  - `KD-005` Pour-Over Set · €78 · ★4.6 (183) · him · ships 3d
-- **total_matches**: `20`
+- **total_matches**: `21`
 - **out_of_stock_matches**:
   - ✗ `KD-007` Cold Brew Carafe · €52 · ★4.1 (74) · anyone · ships 3d
 
