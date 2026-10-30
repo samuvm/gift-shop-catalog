@@ -49,7 +49,7 @@ anything.
 | `recipient` | enum `anyone, him, her, couple, kids` | none | `anyone` products are included for every recipient |
 | `occasion` | enum of the 6 occasions | none | The shop's own tags; not exhaustive (the description says so) |
 | `max_shipping_days` | integer 0–14 | none | For deadlines. 0 = digital delivery |
-| `exclude` | comma-separated words | none | Drops products whose name, tags, material or description contain any of them (`candle,leather,silk`) |
+| `exclude` | comma-separated words | none | Drops products whose name, subcategory, tags or material contain any of them (`candle,leather,silk`). Not the description (see amendment) |
 | `include_out_of_stock` | boolean | `false` | Out-of-stock matches are still *reported* (see below), never silently dropped |
 | `sort` | enum `relevance, rating, popularity, price_asc, price_desc` | `relevance` for search with a query, else `rating` | `popularity` = review count. Missing ratings sort last |
 | `limit` | integer 1–10 | 5 | Values above 10 are clamped to 10, with a note; never an error |
@@ -75,7 +75,7 @@ Every list response has the same envelope:
   "out_of_stock_matches": [ {"product_id": "GP-007", "name": "Jigsaw 1000pc, City Map", "price_eur": 32.0} ],
   "over_budget_matches": [ {"product_id": "KD-001", "name": "Chef's Knife 20cm", "price_eur": 149.0, "over_by_eur": 49.0} ],
   "unmatched_terms": ["sony"],
-  "suggestions": [ {"remove": "occasion", "would_match": 4} ],
+  "suggestions": [ {"change": "max_price", "to": 149.0, "would_match": 3} ],
   "note": "One sentence when something needs attention, otherwise absent."
 }
 ```
@@ -200,3 +200,22 @@ All of the above is checked by `make spec-lint` (G-SPEC-LINT) and pinned by a sn
 - The descriptions are the product. They are written first, measured with the level-2 eval
   (v1 vs v2), and changed only with a measured reason.
 - Renaming a tool after the platform is configured breaks the agent, so names are fixed here.
+
+## Amendment · 2026-10-30, while building the level-1 cases
+
+Writing the reference semantics for the level-1 cases exposed four defects before any service
+code existed. Each one is fixed here and pinned by a case:
+
+1. **Exclusions no longer look at the description.** "Vegan: no alpaca, wool or sheepskin"
+   removed the cotton throw (HL-010), because its description says "the everyday version of the
+   alpaca". Descriptions name materials to compare or deny them ("fabric not rubber").
+   Exclusions match name, subcategory, tags and material. (Case l1-038.)
+2. **Occasions are searchable**, at weight 1.5. "housewarming" in a query matched nothing,
+   because occasions were not among the searched fields. (Cases l1-030, l1-045.)
+3. **`out_of_stock_matches` appears only when it is news:** when there is a query, or when the
+   page came back short. On a full page of a plain browse it was noise. (Cases l1-002, l1-008.)
+4. **`suggestions` became more useful.** It now holds up to 3 entries, one per active filter:
+   `{"change": "max_price", "to": 149.0, "would_match": 3}`. For a price filter, `to` is the
+   nearest price that adds a result; for any other filter it is `null`, meaning remove it.
+   "The cheapest thing in Kitchen & Dining is €42" is something the agent can say; "remove
+   max_price for 22 products" is not. (Cases l1-011, l1-018, l1-026.)

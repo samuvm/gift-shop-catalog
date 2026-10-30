@@ -22,7 +22,10 @@ ingest: ## CSV + data/decisions.yaml -> data/build/catalog.json + ingest-report.
 eval-ingest: ## Seeded-anomaly fixtures must stop the ingest with exactly their anomaly (G-INGEST-STOPS)
 	$(UV) python evals/ingest/run.py
 
+golden-l1: ## Rebuild level-1 cases from the reference semantics (evals/golden/l1/oracle.py) + review sheet
+	cd evals/golden/l1 && $(UV) python build.py
+
 audit-csv: ## Independent audit of the raw export (stdlib only)
 	python3 -I scripts/audit_csv.py data/gift-shop-catalog.csv
 
-.PHONY: help lint typecheck test gate-fast ingest eval-ingest audit-csv
+.PHONY: help lint typecheck test gate-fast ingest eval-ingest golden-l1 audit-csv

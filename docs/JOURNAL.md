@@ -253,3 +253,35 @@ of ~1,000 tokens is small next to the context, and recipient, occasions and revi
 recommendation's reasons readable without a second call per product. Rule added for the rest
 of the project: a missed goal stops the work and is brought to Samuel; it is never designed
 around silently.
+
+## Day 2 · Block 4 · Injection rule in the ingest, level-1 cases v1 (~35 min)
+
+**Ingest.** ADR-002 accepted. A new stopping code, `instruction_like_text`, was added test-first:
+product copy reaches the agent verbatim, so an export carrying "ignore previous instructions" is a
+prompt injection through the data. Ordinary copy ("Instructions included", "Do not peek in the
+envelopes") is left alone. 92 tests; `make eval-ingest` 11/11 with a new seeded fixture; the
+client's export still ingests with nothing pending.
+
+**Level-1 cases.** The cases are produced by a reference implementation of ADR-002
+(`evals/golden/l1/oracle.py`): stdlib only, written before the service and independent of it. The
+service will be checked against it. Where the two disagree, a person decides which is right.
+61 cases across the four tools, 12 of them (20%) empty results or errors.
+
+**Building the reference found four design defects, with no service code yet:**
+1. Exclusions read the description, so "no alpaca, wool or sheepskin" removed the *cotton*
+   throw ("the everyday version of the alpaca"). Exclusions now match name, subcategory, tags and
+   material only.
+2. Occasions were not searchable: "housewarming" matched nothing. Added at weight 1.5.
+3. `out_of_stock_matches` on every plain browse was noise. It now appears only with a query or on
+   a short page.
+4. "Remove max_price: 22 products" is less useful to the agent than "the cheapest in Kitchen &
+   Dining is €42". Suggestions now give, per active filter, the nearest price that adds a
+   result (up to 3).
+All four are recorded as an amendment to ADR-002, each pinned by a case.
+
+**Known vocabulary gaps, kept on purpose** (they are the agent's job, per ADR-003): "headphones"
+does not match the earbuds, and "running" only matches the open-ear buds. The level-2 eval will
+show whether the model widens its queries.
+
+**Next.** Samuel reviews `evals/golden/l1/REVIEW.md`, case by case. Meanwhile, the domain is
+built test-first against the same semantics.
