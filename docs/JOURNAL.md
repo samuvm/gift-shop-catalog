@@ -349,3 +349,41 @@ envelope, a snapshot of the served spec, and a lint of the spec against the plat
 221 tests in 0.8 s. The image builds, refuses to start without a key, runs as a non-root user and
 answers health, 401 and search. Still open: the deployment itself (it needs the GitHub repository)
 and whether the platform passes 4xx bodies to the model.
+
+### Block 7 · Repository, and where the catalogue lives (≈ 30 min)
+
+**Starting point:** the code had only existed locally. The deployment needs it on GitHub, and
+one question had been answered in code but never written down: does the service read the CSV,
+or something else, and how far does that hold?
+
+**Done:**
+- Checked the full history before the first push: one author, no secrets (`make secrets`: 0
+  new), no workspace token in any commit. Created the private repository `samuvm/gift-shop-catalog`
+  and pushed `main`. It becomes public at submission.
+- Decided to keep the response token limits at 1,150 / 1,800. The measured peaks (622 / 1,046)
+  leave room for the optional blocks that real searches have not yet filled at the same time.
+- Wrote ADR-004. The CSV is read only by the ingest. The service loads `data/build/catalog.json`
+  at startup and answers every call from memory.
+
+**Initial approach → conclusion:** the first instinct was to write the scale caveat as one line
+("fine for 150 rows, use a database for millions"). A line like that cannot be checked, so I
+measured instead. `scripts/scale_probe.py` builds the catalogue and runs eight searches, on the
+served catalogue and on a ×100 synthetic copy with fresh IDs.
+
+| Catalogue | Build | Peak memory | Search p50 | Search p95 |
+|---|---|---|---|---|
+| 152 (served) | 4 ms | 0.6 MB | 0.13 ms | 0.20 ms |
+| 15,200 (×100) | 356 ms | 64 MB | 14 ms | 35 to 39 ms |
+
+Two runs each, `uv run python scripts/scale_probe.py`. Search is a linear scan, and the
+numbers confirm it: ×100 products, roughly ×100 time and memory.
+
+**Why it stays:** at 152 products the scan costs a fraction of a millisecond. A database would
+add a component without a measurable gain. The design breaks well before millions of rows: at
+tens of thousands it is time for SQLite with FTS5, and beyond that a search engine with
+incremental ingest and live stock. ADR-004 records those steps as estimates extrapolated from
+the measurement, not as measured limits. It also names the real weakness of the snapshot, which
+is not speed but stock freshness.
+
+**Discarded:** moving to SQLite now "to be ready". It changes no number the agent sees, and
+every component has to be explained in review.
