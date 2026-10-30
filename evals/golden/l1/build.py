@@ -1,18 +1,23 @@
 """Build the level-1 golden set: tool + arguments -> exactly what the tool must return.
 
-Each case states the behaviour it pins. Expected values come from `oracle.py` (ADR-002 semantics),
-then a person reviews every case in REVIEW.md against the catalogue before the set is frozen.
+Each case states the behaviour it pins. Expected values come from `oracle.py` (ADR-002 and ADR-005
+semantics), then a person reviews every case in REVIEW.md against the catalogue before the set is
+frozen. A case whose arguments and expected result are unchanged since the previous version keeps
+its approval; every other case goes back to review, with the previous comment shown next to it.
 
-Usage: uv run python evals/golden/l1/build.py   (writes v1.jsonl and REVIEW.md next to this file)
+Usage: uv run python evals/golden/l1/build.py   (writes v2.jsonl and REVIEW.md next to this file)
 """
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
 from oracle import TOOLS, load
 
 HERE = Path(__file__).resolve().parent
+VERSION = 2
+REVIEWER, REVIEWED_AT = "Samuel Viciana", "2026-10-30"  # who approved the previous version
 C, B, S, D = "get_categories", "get_products_by_category", "search_products", "get_product_details"
 
 # (tool, args, what the case pins). Order is the id order; ids are never reused.
@@ -23,13 +28,17 @@ CASES: list[tuple[str, dict[str, Any], str]] = [
     (B, {"category": "kitchen-dining"}, "default page: in stock only, best rated first, 5 items"),
     (B, {"category": "Kitchen and Dining"}, "category name in another spelling resolves to the slug"),
     (B, {"category": "kitchen"}, "one distinctive word resolves to its category"),
-    (B, {"category": "garden"}, "unknown category is a recoverable error, not an empty list"),
+    (B, {"category": "garden"}, "unknown category is a recoverable error that points to the right call"),
     (
         B,
         {"category": "home-living", "subcategory": "candles"},
         "subcategory filter, case-insensitive; out-of-stock candle reported",
     ),
-    (B, {"category": "home-living", "subcategory": "Lamps"}, "unknown subcategory is a recoverable error"),
+    (
+        B,
+        {"category": "home-living", "subcategory": "Lamps"},
+        "unknown subcategory is a recoverable error; the lamps are listed under Lighting",
+    ),
     (
         B,
         {"category": "pets", "subcategory": "cats"},
@@ -42,7 +51,7 @@ CASES: list[tuple[str, dict[str, Any], str]] = [
     ),
     (B, {"category": "experiences"}, "Experiences holds only the two gift cards"),
     # --- browse: filters
-    (B, {"category": "kitchen-dining", "max_price": 40}, "max_price is inclusive"),
+    (B, {"category": "kitchen-dining", "max_price": 42}, "max_price is inclusive: KD-024 costs exactly 42"),
     (B, {"category": "kitchen-dining", "min_price": 50, "max_price": 70}, "price range"),
     (B, {"category": "jewellery", "recipient": "her"}, "recipient includes products for anyone"),
     (B, {"category": "home-living", "occasion": "housewarming", "max_price": 50}, "occasion plus price"),
@@ -63,7 +72,7 @@ CASES: list[tuple[str, dict[str, Any], str]] = [
     (
         B,
         {"category": "home-living", "limit": 10, "offset": 10},
-        "third page of ten; cross-listed HL-021 appears in Home & Living under its HL id",
+        "second page of ten; cross-listed HL-021 appears in Home & Living under its HL id",
     ),
     (
         B,
@@ -161,33 +170,51 @@ CASES: list[tuple[str, dict[str, Any], str]] = [
 ]
 
 
+def previous() -> tuple[dict[str, dict[str, Any]], dict[str, str]]:
+    """The previous version's cases and the reviewer's comment on each, by case id."""
+    cases_path, review_path = HERE / f"v{VERSION - 1}.jsonl", HERE / f"review-v{VERSION - 1}.md"
+    cases = {c["id"]: c for c in map(json.loads, cases_path.read_text(encoding="utf-8").splitlines())}
+    comments = dict(
+        re.findall(r"^## (l1-\d+) .*?^Review: ?(.*?)$", review_path.read_text(encoding="utf-8"), re.M | re.S)
+    )
+    return cases, comments
+
+
 def main() -> None:
     by_id = {p["product_id"]: p for p in load()}
-    lines, review = (
-        [],
-        [
-            "# Level-1 golden set v1 · review sheet",
-            "",
-            "For each case: is the expected result what the tool *should* return for this catalogue?",
-            "Mark `ok`, or write what is wrong. Prices in EUR; ✗ = out of stock.",
-            "",
-        ],
-    )
+    old_cases, old_comments = previous()
+    lines: list[str] = []
+    pending: list[str] = []
+    review = [
+        f"# Level-1 golden set v{VERSION} · review sheet",
+        "",
+        "For each case: is the expected result what the tool *should* return for this catalogue?",
+        "Mark `ok`, or write what is wrong. Prices in EUR; ✗ = out of stock.",
+        f"Cases unchanged since v{VERSION - 1} keep their approval and are marked `ok (v{VERSION - 1})`.",
+        "",
+    ]
     for n, (tool, args, covers) in enumerate(CASES, start=1):
+        cid = f"l1-{n:03d}"
         expect = TOOLS[tool](args)
+        old = old_cases.get(cid)
+        kept = (
+            old is not None
+            and (old["tool"], old["args"], old["expect"]) == (tool, args, expect)
+            and old_comments.get(cid, "").strip() == "ok"
+        )
         case = {
-            "id": f"l1-{n:03d}",
-            "version": 1,
+            "id": cid,
+            "version": VERSION,
             "tool": tool,
             "args": args,
             "expect": expect,
             "covers": covers,
             "provenance": "llm_generated_reviewed_human",
-            "reviewed_by": None,
-            "reviewed_at": None,
+            "reviewed_by": REVIEWER if kept else None,
+            "reviewed_at": REVIEWED_AT if kept else None,
         }
         lines.append(json.dumps(case, ensure_ascii=False))
-        review += [f"## {case['id']} · `{tool}` `{json.dumps(args, ensure_ascii=False)}`", f"*{covers}*", ""]
+        review += [f"## {cid} · `{tool}` `{json.dumps(args, ensure_ascii=False)}`", f"*{covers}*", ""]
         if "categories" in expect:
             for slug, c in expect["categories"].items():
                 subs = ", ".join(
@@ -207,10 +234,20 @@ def main() -> None:
                 review.append("- **product_ids**: *(none)*")
             else:
                 review.append(f"- **{key}**: `{json.dumps(value, ensure_ascii=False)}`")
+        if kept:
+            review += ["", f"Review: ok (v{VERSION - 1})", ""]
+            continue
+        pending.append(cid)
+        if old is None:
+            review += ["", "*New in this version.*"]
+        elif old_comments.get(cid, "").strip() not in ("", "ok"):
+            review += ["", f"*v{VERSION - 1} comment:* {old_comments[cid].strip()}"]
+        else:
+            review += ["", f"*Approved in v{VERSION - 1}; the expected result changed.*"]
         review += ["", "Review: ", ""]
-    (HERE / "v1.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (HERE / f"v{VERSION}.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
     (HERE / "REVIEW.md").write_text("\n".join(review), encoding="utf-8")
-    print(f"{len(lines)} cases -> {HERE.relative_to(HERE.parents[2])}/v1.jsonl, REVIEW.md")
+    print(f"{len(lines)} cases -> v{VERSION}.jsonl · {len(pending)} to review: {', '.join(pending)}")
 
 
 def _line(p: dict[str, Any]) -> str:

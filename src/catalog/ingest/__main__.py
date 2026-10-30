@@ -26,15 +26,17 @@ def build(
     decisions_raw = decisions_path.read_bytes()
     reader = csv.DictReader(io.StringIO(raw.decode("utf-8-sig"), newline=""))
     rows = list(reader)
-    result = run_ingest(
-        rows, list(reader.fieldnames or []), load_decisions(decisions_raw.decode("utf-8")), previous
-    )
+    decisions = load_decisions(decisions_raw.decode("utf-8"))
+    result = run_ingest(rows, list(reader.fieldnames or []), decisions, previous)
 
     catalog = b""
     version: dict[str, str] = {"source_sha256": sha256(raw), "decisions_sha256": sha256(decisions_raw)}
     if result.status == "ok":
         catalog, version = encode_catalog(
-            result.products, version["source_sha256"], version["decisions_sha256"]
+            result.products,
+            version["source_sha256"],
+            version["decisions_sha256"],
+            decisions.search.model_dump(),
         )
     report: dict[str, object] = {
         "status": result.status,

@@ -7,6 +7,7 @@ import pytest
 from catalog.domain.catalog import Catalog, Filters
 from catalog.domain.errors import ProductNotFound, UnknownCategory, UnknownSubcategory
 from catalog.domain.models import Product
+from catalog.domain.text import Vocabulary
 
 CATEGORIES = {"home-living": "Home & Living", "kitchen-dining": "Kitchen & Dining", "pets": "Pets"}
 
@@ -246,9 +247,11 @@ class TestBrowse:
     def test_last_page_has_no_next_offset(self, catalog: Catalog) -> None:
         assert catalog.browse("kitchen-dining", limit=5).next_offset is None
 
-    def test_out_of_stock_is_reported_only_on_a_short_page(self, catalog: Catalog) -> None:
-        full = catalog.browse("kitchen-dining", limit=5)
-        assert full.out_of_stock_matches == []
+    def test_out_of_stock_is_reported_on_the_last_page_only(self, catalog: Catalog) -> None:
+        assert catalog.browse("kitchen-dining", limit=2).out_of_stock_matches == []
+        last = catalog.browse("kitchen-dining", limit=5)
+        assert (len(last.products), last.next_offset) == (5, None)
+        assert [p.product_id for p in last.out_of_stock_matches] == ["KD-007"]
         cats = catalog.browse("pets", subcategory="Cats")
         assert ids(cats) == []
         assert [p.product_id for p in cats.out_of_stock_matches] == ["PT-003"]
@@ -336,3 +339,102 @@ class TestDetails:
         with pytest.raises(ProductNotFound) as err:
             catalog.details("Chef's Knife")
         assert err.value.did_you_mean == ["KD-001"]
+
+
+@pytest.fixture
+def relevance() -> Catalog:
+    """A catalogue shaped to separate the ranking keys of ADR-005 one at a time."""
+    return Catalog(
+        [
+            product("KD-010", name="Paring Knife", subcategory="Knives", rating=4.0, price_eur=60),
+            product(
+                "KD-011",
+                name="Slate Cheese Board",
+                subcategory="Serving",
+                rating=4.9,
+                price_eur=40,
+                description="Slate board and three knives.",
+            ),
+            product("HL-030", name="Ember Candle", subcategory="Candles", rating=4.8, tags=["candle"]),
+            product(
+                "HL-031",
+                name="Votive Trio",
+                subcategory="Candles",
+                rating=4.5,
+                tags=["candle"],
+                description="Fig and cedar.",
+            ),
+            product("HL-032", name="Fig Perfume", subcategory="Fragrance", rating=4.6),
+            product("HL-033", name="Cocktail Kit", subcategory="Bar", rating=4.7),
+            product("HL-034", name="Pasta Kit", subcategory="Cooking", rating=4.6),
+            product("HL-035", name="Beard Kit", subcategory="Grooming", rating=4.5),
+            product("HL-036", name="Ceramic Planter", subcategory="Garden", rating=4.0),
+            product("HL-037", name="Wireless Headphones", subcategory="Audio", rating=4.7, tags=["anc"]),
+            product("HL-038", name="Earbuds Pro", subcategory="Audio", rating=4.5, tags=["anc"]),
+            product("HL-039", name="Noise Machine", subcategory="Audio", rating=4.2, recipient="her"),
+            product(
+                "HL-040",
+                name="Linen Fig Candle",
+                subcategory="Candles",
+                price_eur=38,
+                tags=["candle", "scented"],
+                availability="out_of_stock",
+            ),
+            product("HL-041", name="Brass Frame", subcategory="Decor", price_eur=39),
+            product("HL-042", name="Reed Diffuser", subcategory="Fragrance", price_eur=46, tags=["scented"]),
+        ],
+        vocabulary=Vocabulary(phrases={"noise cancelling": "anc"}, synonyms=[["headphone", "earbud"]]),
+    )
+
+
+class TestRelevance:
+    """ADR-005: strong fields before weak ones, then coverage, rarity, score and rating."""
+
+    def test_a_description_only_match_ranks_after_a_strong_match(self, relevance: Catalog) -> None:
+        assert ids(relevance.search("knife")) == ["KD-010", "KD-011"]
+
+    def test_the_category_name_is_not_searched(self, catalog: Catalog) -> None:
+        result = catalog.search("kitchen")
+        assert (ids(result), result.unmatched_terms) == ([], ["kitchen"])
+
+    def test_matching_more_words_ranks_first(self, relevance: Catalog) -> None:
+        assert ids(relevance.search("fig candle"))[:3] == ["HL-031", "HL-030", "HL-032"]
+
+    def test_a_rarer_word_outranks_a_common_one(self, relevance: Catalog) -> None:
+        assert ids(relevance.search("garden kit"))[0] == "HL-036"
+
+    def test_explicit_sort_keeps_strong_matches_first(self, relevance: Catalog) -> None:
+        assert ids(relevance.search("knife", sort="price_asc")) == ["KD-010", "KD-011"]
+
+    def test_a_phrase_is_rewritten_and_synonyms_match(self, relevance: Catalog) -> None:
+        result = relevance.search("noise cancelling headphones")
+        assert ids(result) == ["HL-037", "HL-038"]
+        assert result.unmatched_terms == []
+
+    def test_a_synonym_counts_as_a_match_for_unmatched_terms(self, relevance: Catalog) -> None:
+        assert ids(relevance.search("earbuds")) == ["HL-037", "HL-038"]
+
+    def test_without_a_vocabulary_words_match_literally(self, catalog: Catalog) -> None:
+        assert catalog.search("earbuds").unmatched_terms == ["earbud"]
+
+    def test_exact_recipient_comes_before_anyone(self, relevance: Catalog) -> None:
+        audio = relevance.search(None, filters=Filters(recipient="her"))
+        assert ids(audio)[0] == "HL-039"
+        by_rating = relevance.search(None, filters=Filters(recipient="her"), sort="rating")
+        assert ids(by_rating)[0] != "HL-039"
+
+
+class TestSmallerRules:
+    def test_unknown_subcategory_points_to_where_the_word_is_listed(self, catalog: Catalog) -> None:
+        with pytest.raises(UnknownSubcategory) as err:
+            catalog.browse("kitchen-dining", subcategory="Pots")
+        assert err.value.did_you_mean == ["Coffee"]
+
+    def test_unknown_subcategory_without_a_lead_suggests_nothing(self, catalog: Catalog) -> None:
+        with pytest.raises(UnknownSubcategory) as err:
+            catalog.browse("kitchen-dining", subcategory="Lamps")
+        assert err.value.did_you_mean == []
+
+    def test_alternatives_from_the_category_prefer_shared_tags(self, relevance: Catalog) -> None:
+        alternatives = relevance.details("HL-040").in_stock_alternatives
+        assert [p.product_id for p in alternatives] == ["HL-030", "HL-031", "HL-042"]

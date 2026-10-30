@@ -18,7 +18,7 @@ from catalog.api import openapi
 from catalog.domain.catalog import Catalog
 from catalog.domain.errors import CatalogError
 from catalog.service import Context, error_body, execute
-from catalog.storage import read_catalog
+from catalog.storage import read_catalog, read_vocabulary
 
 ROOT = Path(__file__).resolve().parents[3]
 STATUS = {"unknown_category": 404, "unknown_subcategory": 404, "product_not_found": 404}
@@ -40,12 +40,12 @@ def create_app(
     if not api_key:
         raise ValueError("an API key is required; refusing to start an open service")
     version, products = read_catalog(catalog_path)
-    catalog = Catalog(products)
+    catalog = Catalog(products, read_vocabulary(catalog_path))
     zone = ZoneInfo(os.environ.get("SHOP_TIMEZONE", "Europe/Rome"))
     clock = today or (lambda: datetime.now(zone).date())
 
     def context() -> Context:
-        return Context(catalog=catalog, catalog_version=version["products_sha256"][:8], today=clock())
+        return Context(catalog=catalog, catalog_version=version["served_sha256"][:8], today=clock())
 
     app = FastAPI(
         title="Gift Shop Catalog", version=__version__, openapi_url=None, docs_url=None, redoc_url=None

@@ -11,6 +11,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from catalog.domain.models import Availability, Product
+from catalog.domain.text import stem, words
 from catalog.ingest.decisions import Category, Decisions
 from catalog.ingest.rules import (
     category_key,
@@ -453,9 +454,20 @@ def _quality_warnings(products: list[Product], decisions: Decisions) -> list[Ano
             f"description of {limit} characters or fewer: says nothing about the product",
         ),
     }
-    return [
+    warnings = [
         Anomaly(code=code, product_ids=ids, detail=detail) for code, (ids, detail) in checks.items() if ids
     ]
+    used = set().union(*(words(p.search_text) for p in products))
+    warnings += [
+        Anomaly(
+            code="unused_synonym",
+            product_ids=[],
+            detail=f"synonym group {group} matches no product; remove it or check the spelling",
+        )
+        for group in decisions.search.synonyms
+        if not used & {stem(w) for w in group}
+    ]
+    return warnings
 
 
 def _rule_detail(rule: str, respellings: Counter[str]) -> str:

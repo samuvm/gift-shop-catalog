@@ -232,11 +232,13 @@ class TestQualityWarnings:
     ) -> None:
         result = ingest([row(description="Great gift.", rating="", reviews_count="")], decisions)
         assert result.status == "ok"
-        # unused_decision also appears here: the real decisions declare pairs this one-row export lacks.
+        # unused_decision and unused_synonym also appear: the real decisions declare pairs and
+        # synonym groups this one-row export does not contain.
         assert {w.code for w in result.quality_warnings} == {
             "thin_description",
             "missing_rating",
             "unused_decision",
+            "unused_synonym",
         }
 
     def test_a_declared_pair_absent_from_the_export_is_noted_not_blocking(self, decisions: Decisions) -> None:
@@ -244,3 +246,10 @@ class TestQualityWarnings:
         unused = [w for w in result.quality_warnings if w.code == "unused_decision"]
         assert result.status == "ok"
         assert [w.product_ids for w in unused] == [["HL-021", "KD-024"], ["HL-024", "KD-023"]]
+
+    def test_a_synonym_group_no_product_uses_is_noted(self, decisions: Decisions) -> None:
+        result = ingest([row()], decisions)
+        unused = {w.detail for w in result.quality_warnings if w.code == "unused_synonym"}
+        assert result.status == "ok"
+        assert any("headphone" in d for d in unused)
+        assert not any("scented" in d for d in unused)  # the candle row is tagged "scented"

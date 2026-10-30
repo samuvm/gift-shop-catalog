@@ -14,16 +14,17 @@ from pathlib import Path
 
 from catalog.domain.catalog import Catalog, Filters
 from catalog.domain.models import Product
-from catalog.storage import read_catalog
+from catalog.domain.text import Vocabulary
+from catalog.storage import read_catalog, read_vocabulary
 
 ROOT = Path(__file__).resolve().parents[1]
 QUERIES = ["chef knife", "candle", "headphones", "gift for her", "board game", "tea", "wallet", "yoga"]
 
 
-def probe(products: list[Product], label: str, reps: int) -> None:
+def probe(products: list[Product], vocabulary: Vocabulary, label: str, reps: int) -> None:
     tracemalloc.start()
     start = time.perf_counter()
-    catalog = Catalog(products)
+    catalog = Catalog(products, vocabulary)
     build_ms = (time.perf_counter() - start) * 1000
     peak_mb = tracemalloc.get_traced_memory()[1] / 1e6
     tracemalloc.stop()
@@ -45,14 +46,16 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--factor", type=int, default=100)
     factor = parser.parse_args().factor
-    _, products = read_catalog(ROOT / "data" / "build" / "catalog.json")
-    probe(products, "served", reps=50)
+    path = ROOT / "data" / "build" / "catalog.json"
+    _, products = read_catalog(path)
+    vocabulary = read_vocabulary(path)
+    probe(products, vocabulary, "served", reps=50)
     big = [
         p.model_copy(update={"product_id": f"{p.product_id[:2]}-{i:04d}{p.product_id[3:]}"})
         for i in range(factor)
         for p in products
     ]
-    probe(big, f"x{factor} synthetic", reps=5)
+    probe(big, vocabulary, f"x{factor} synthetic", reps=5)
 
 
 if __name__ == "__main__":

@@ -12,16 +12,17 @@ import pytest
 
 from catalog.domain.catalog import Catalog, Filters, ListResult
 from catalog.domain.errors import CatalogError
-from catalog.storage import read_catalog
+from catalog.storage import read_catalog, read_vocabulary
 
 ROOT = Path(__file__).resolve().parents[2]
-CASES = [json.loads(line) for line in (ROOT / "evals" / "golden" / "l1" / "v1.jsonl").open(encoding="utf-8")]
+CASES = [json.loads(line) for line in (ROOT / "evals" / "golden" / "l1" / "v2.jsonl").open(encoding="utf-8")]
 FILTER_KEYS = set(Filters.model_fields)
 
 
 @pytest.fixture(scope="module")
 def catalog() -> Catalog:
-    return Catalog(read_catalog(ROOT / "data" / "build" / "catalog.json")[1])
+    path = ROOT / "data" / "build" / "catalog.json"
+    return Catalog(read_catalog(path)[1], read_vocabulary(path))
 
 
 def run(catalog: Catalog, tool: str, args: dict[str, Any]) -> dict[str, Any]:
@@ -44,7 +45,7 @@ def run(catalog: Catalog, tool: str, args: dict[str, Any]) -> dict[str, Any]:
             return summarise(catalog.browse(a["category"], a.get("subcategory"), filters, **paging))
         return summarise(catalog.search(a.get("query"), filters, **paging))
     except CatalogError as err:
-        return {"error_code": err.code}
+        return {"error_code": err.code, "did_you_mean": err.did_you_mean}
 
 
 def summarise(r: ListResult) -> dict[str, Any]:

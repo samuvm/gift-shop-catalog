@@ -237,7 +237,7 @@
                   ],
                   "meta": {
                     "today": "2026-10-30",
-                    "catalog_version": "6b3c871e"
+                    "catalog_version": "3eb1a818"
                   }
                 }
               }
@@ -435,7 +435,7 @@
             "name": "recipient",
             "in": "query",
             "required": false,
-            "description": "Who the gift is for. Products marked 'anyone' are always included. Leave it out when unknown.",
+            "description": "Who the gift is for. Products marked 'anyone' are always included, after the ones for exactly this recipient. Leave it out when unknown. For a partner (an anniversary, for example), also try 'couple'.",
             "schema": {
               "type": "string",
               "enum": [
@@ -806,7 +806,7 @@
                       "max_price": 60.0
                     },
                     "today": "2026-10-30",
-                    "catalog_version": "6b3c871e"
+                    "catalog_version": "3eb1a818"
                   }
                 }
               }
@@ -1007,7 +1007,7 @@
       "get": {
         "operationId": "search_products",
         "summary": "Search the whole catalogue from a description of what the shopper wants.",
-        "description": "Finds products in every category. Use it for requests such as 'a chef's knife under 100', 'something for a coffee lover' or 'a housewarming gift around 50'. Without a query it lists the whole catalogue with the given filters, for 'your best rated' or 'the cheapest thing you have'.\n\nWrite the query in English catalogue words: product types, materials, uses or hobbies ('knife', 'candle', 'coffee', 'noise cancelling headphones', 'yoga'). Do not pass the shopper's literal phrasing or language. Put budget, recipient, occasion and deadline in the filters, not in the query. If the first query finds little, try a broader word or a synonym.\n\nResults are keyword matches ranked by where the words hit (name first, then subcategory and tags, then the rest). They are in stock only by default, and each product appears once. Read the extra fields when present: over_budget_matches (better matches above max_price, with the gap in EUR), out_of_stock_matches, unmatched_terms (words that match nothing: the shop does not carry that brand or item) and suggestions.",
+        "description": "Finds products in every category. Use it for requests such as 'a chef's knife under 100', 'something for a coffee lover' or 'a housewarming gift around 50'. Without a query it lists the whole catalogue with the given filters, for 'your best rated' or 'the cheapest thing you have'.\n\nWrite the query in English catalogue words: product types, materials, uses or hobbies ('knife', 'candle', 'coffee', 'noise cancelling headphones', 'yoga'). Do not pass the shopper's literal phrasing or language. Put budget, recipient, occasion and deadline in the filters, not in the query. If the first query finds little, try a broader word or a synonym.\n\nResults are keyword matches. Products that match more of the words, in their name, subcategory or tags, come first; matches only in the description, colour or material come last. Category names are not searched: use get_products_by_category for a whole category. Results are in stock only by default, and each product appears once. Read the extra fields when present: over_budget_matches (better matches above max_price, with the gap in EUR), out_of_stock_matches, unmatched_terms (words that match nothing: the shop does not carry that brand or item) and suggestions.",
         "parameters": [
           {
             "name": "query",
@@ -1043,7 +1043,7 @@
             "name": "recipient",
             "in": "query",
             "required": false,
-            "description": "Who the gift is for. Products marked 'anyone' are always included. Leave it out when unknown.",
+            "description": "Who the gift is for. Products marked 'anyone' are always included, after the ones for exactly this recipient. Leave it out when unknown. For a partner (an anniversary, for example), also try 'couple'.",
             "schema": {
               "type": "string",
               "enum": [
@@ -1414,7 +1414,7 @@
                       "max_price": 100.0
                     },
                     "today": "2026-10-30",
-                    "catalog_version": "6b3c871e"
+                    "catalog_version": "3eb1a818"
                   },
                   "over_budget_matches": [
                     {
@@ -1562,7 +1562,7 @@
       "get": {
         "operationId": "get_product_details",
         "summary": "Everything about one product, including caveats and available alternatives.",
-        "description": "The full record of one product: brand, colour, material, tags, stock units, gift wrap, shipping days, rating and the shop's description with its caveats (for example 'needs an amplifier' or 'subscription required after the first year'). Use it to answer a specific question about a product, before describing one in detail, or to check stock for several units.\n\nIf the product is out of stock, in_stock_alternatives lists up to 3 similar products that are available (same subcategory first, then closest in price). rating null means no reviews yet. shipping_days is the shop's estimate, not a guaranteed delivery date.\n\nTakes a product_id from an earlier result, such as 'KD-001'. If you only have a name, use search_products first.",
+        "description": "The full record of one product: brand, colour, material, tags, stock units, gift wrap, shipping days, rating and the shop's description with its caveats (for example 'needs an amplifier' or 'subscription required after the first year'). Use it to answer a specific question about a product, before describing one in detail, or to check stock for several units.\n\nIf the product is out of stock, in_stock_alternatives lists up to 3 similar products that are available (same subcategory first, then products sharing its tags, then closest in price). rating null means no reviews yet. shipping_days is the shop's estimate, not a guaranteed delivery date.\n\nTakes a product_id from an earlier result, such as 'KD-001'. If you only have a name, use search_products first.",
         "parameters": [
           {
             "name": "product_id",
@@ -1847,7 +1847,7 @@
                   },
                   "meta": {
                     "today": "2026-10-30",
-                    "catalog_version": "6b3c871e"
+                    "catalog_version": "3eb1a818"
                   },
                   "in_stock_alternatives": [
                     {

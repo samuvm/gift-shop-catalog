@@ -39,3 +39,16 @@ removal_guard:
 
 quality:
   thin_description_max_chars: 19   # "Great gift." and "A card." say nothing; the next shortest is 36 chars
+
+search:   # shopper words the catalogue spells differently (ADR-005). Taken from the 100 development
+          # conversations and the catalogue's own tags, never from the level-1 cases.
+  phrases:                       # rewritten into one catalogue word before the query is split
+    noise cancelling: anc        # TG-001 and TG-002 are tagged "anc"; shoppers spell it out
+    noise canceling: anc
+    record player: turntable     # conversations ask for a "record player"; the shop lists a turntable
+  synonyms:                      # a query word matches any word of its group
+    - [headphone, earbud, earphone, airpod]       # "airpods" in the conversations; headphones and earbuds in the catalogue
+    - [ereader, kindle, ebook]                    # "kindle", "ebook" in the conversations; e-readers in the catalogue
+    - [scented, scent, fragrance, aroma, smell]   # "smell" in the conversations; "scented" and "fragrance" in the catalogue
+    - [planter, plant]                            # "plant" pots in the conversations; planters in the catalogue
+    - [flask, thermos, thermo]                    # "thermo" in the conversations; a flask in the catalogue

@@ -62,7 +62,9 @@ FILTERS = [
         "recipient",
         "query",
         {"type": "string", "enum": RECIPIENTS},
-        "Who the gift is for. Products marked 'anyone' are always included. Leave it out when unknown.",
+        "Who the gift is for. Products marked 'anyone' are always included, after the ones for exactly "
+        "this recipient. Leave it out when unknown. For a partner (an anniversary, for example), also try "
+        "'couple'.",
     ),
     Param(
         "occasion",
@@ -353,8 +355,10 @@ SEARCH_PRODUCTS = Tool(
         "'candle', 'coffee', 'noise cancelling headphones', 'yoga'). Do not pass the shopper's literal "
         "phrasing or language. Put budget, recipient, occasion and deadline in the filters, not in the "
         "query. If the first query finds little, try a broader word or a synonym.\n\n"
-        "Results are keyword matches ranked by where the words hit (name first, then subcategory and tags, "
-        "then the rest). They are in stock only by default, and each product appears once. Read the extra "
+        "Results are keyword matches. Products that match more of the words, in their name, subcategory or "
+        "tags, come first; matches only in the description, colour or material come last. Category names "
+        "are not searched: use get_products_by_category for a whole category. Results are in stock only by "
+        "default, and each product appears once. Read the extra "
         "fields when present: over_budget_matches (better matches above max_price, with the gap in EUR), "
         "out_of_stock_matches, unmatched_terms (words that match nothing: the shop does not carry that "
         "brand or item) and suggestions."
@@ -381,7 +385,8 @@ GET_PRODUCT_DETAILS = Tool(
         "'subscription required after the first year'). Use it to answer a specific question about a "
         "product, before describing one in detail, or to check stock for several units.\n\n"
         "If the product is out of stock, in_stock_alternatives lists up to 3 similar products that are "
-        "available (same subcategory first, then closest in price). rating null means no reviews yet. "
+        "available (same subcategory first, then products sharing its tags, then closest in price). "
+        "rating null means no reviews yet. "
         "shipping_days is the shop's estimate, not a guaranteed delivery date.\n\n"
         "Takes a product_id from an earlier result, such as 'KD-001'. If you only have a name, use "
         "search_products first."

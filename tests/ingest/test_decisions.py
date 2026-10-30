@@ -50,3 +50,21 @@ def test_unknown_keys_are_rejected(raw: dict[str, object]) -> None:
     raw["discounts"] = {"black_friday": 0.2}
     with pytest.raises(ValidationError):
         load_decisions(yaml.safe_dump(raw))
+
+
+@pytest.mark.parametrize(
+    ("search", "message"),
+    [
+        ({"synonyms": [["headphone"]]}, "two or more words"),
+        ({"synonyms": [["headphone", "Ear Buds"]]}, "one lower-case word"),
+        ({"synonyms": [["headphone", "earbud"], ["earbud", "airpod"]]}, "in two groups"),
+        ({"phrases": {"noise": "anc"}}, "two or more lower-case words"),
+        ({"phrases": {"noise cancelling": "a n c"}}, "one lower-case word"),
+    ],
+)
+def test_malformed_search_vocabulary_is_rejected(
+    raw: dict[str, object], search: dict[str, object], message: str
+) -> None:
+    raw["search"] = search
+    with pytest.raises(ValueError, match=message):
+        load_decisions(yaml.safe_dump(raw))
