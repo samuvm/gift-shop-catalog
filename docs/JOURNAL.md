@@ -520,3 +520,37 @@ and the catalogue version.
 does not carry. No product has "pillow" in a strong field, so the query is not narrowed, and
 every travel item says `missing_terms: ["pillow"]`. That is the honest answer, and the agent can
 read it. "coffee grinder" lists both grinders, the manual one marked as missing "coffee".
+
+### Block 10 · The third review: correct information versus taste (≈ 30 min)
+
+**Starting point:** Samuel reviewed the 30 pending v3 cases. 19 were approved; in four of them
+he withdrew an earlier comment, because `missing_terms` now flags the open-ear buds as missing
+"anc", and couple products come out with `recipient: her,couple`. 11 drew a comment.
+
+**Initial approach → conclusion:** With ranking frozen by ADR-006, I sorted each comment by one
+question: *would the agent end up saying something false?*
+- Four did. A Bluetooth speaker was marked as missing "wireless", so the agent could have said
+  it is not wireless. Vermeil earrings were offered over budget for "silver" with no warning. A
+  suggestion proposed dropping a vegan's exclusion. A hint stayed generic although the tool knew
+  the single subcategory where lamps are listed. These were fixed (ADR-007).
+- The other seven ask for a different order or a semantic judgement: a sauna blanket, incense
+  for children, a pepper mill for "coffee grinder", chess as a wooden board game. Under the
+  freeze they become level-2 questions. The review sheet keeps the reviewer's words beside each
+  one, marked *deferred*, not approved. Most of those products now show the missing word, so
+  the agent has what it needs to set them aside.
+
+**Done:** ADR-007; tests first for the three domain changes; `[wireless, bluetooth]` in
+`decisions.yaml`; `missing_terms` on the near-miss blocks; the reference implementation, the
+domain harness and the HTTP harness all updated; level-1 v4.
+
+**Numbers:**
+
+| Goal | Value | Command |
+|---|---|---|
+| G-L1-EXACT | 74/74 over HTTP | `make eval-l1` |
+| G-RESP-TOKENS-DEFAULT / MAX | 622 / 1,046 (≤ 1,150 / 1,800) | `make eval-l1` |
+| G-COVERAGE | 99.58% (716/719) | `make test` |
+| G-SPEC-LINT · G-SECRETS | 0 · 0 new | `make spec-lint` · `make secrets` |
+
+274 tests. 9 cases changed and go back to review: 3 only gain `allowed_values`, and the other 6
+change in exactly the way the comments asked.
