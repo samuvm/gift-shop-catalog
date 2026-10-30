@@ -71,7 +71,11 @@ def test_level_one_case(catalog: Catalog, case: dict[str, Any]) -> None:
         for slug, e in expected["categories"].items():
             c = got["categories"][slug]
             assert (c.products, c.in_stock, c.price_min_eur, c.price_max_eur) == (
-                e["products"], e["in_stock"], e["price_min_eur"], e["price_max_eur"])  # fmt: skip
+                e["products"],
+                e["in_stock"],
+                e["price_min_eur"],
+                e["price_max_eur"],
+            )
             assert {s.name: {"products": s.products, "in_stock": s.in_stock} for s in c.subcategories} == e[
                 "subcategories"
             ]

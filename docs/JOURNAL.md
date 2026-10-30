@@ -310,3 +310,42 @@ agree.
 **Caveat.** The reference and the domain have the same author, so their agreement shows that
 the code matches the written semantics, not that the semantics are right. That second check is
 the human review of the level-1 cases, which is pending.
+
+## Day 2 · Block 6 · REST API, served OpenAPI, contract checks, container (~45 min)
+
+**Approach.** The four tools are defined once (`src/catalog/tools.py`): name, description written
+for the model, parameters and inline response schemas. The OpenAPI document is generated from
+those definitions, with examples taken from real responses. Both REST and the future MCP server
+call a single `execute()` per tool, so parity holds by construction. The API layer is
+contract-tested, not test-driven: auth on every data route, one error shape with a hint, the
+envelope, a snapshot of the served spec, and a lint of the spec against the platform's rules.
+
+**Found while doing it:**
+- "garden" is not a category but a subcategory of Home & Living. The error now says so, and
+  names the exact call to make instead (test written first, in the domain).
+- The secrets scanner flagged the catalogue's sha256 version hashes (false positives, now in
+  the reviewed baseline) and then its own baseline file (now excluded from the scan).
+- **The token measurement behind yesterday's limit change used pretty-printed JSON; the service
+  sends compact JSON.** Re-measured: the synthetic worst case is 831 / 1,351 tokens compact
+  (1,024 / 1,672 with spaces). The real responses across the 61 level-1 cases peak at 622 / 1,046.
+  The revised limits (1,150 / 1,800) hold with room to spare. The original 800 would have
+  failed only on the synthetic worst case. Reported to Samuel; the limits stay unless he decides
+  otherwise.
+
+**Numbers** (all in-process; the deployed run comes with F1):
+
+| Goal | Value | Command |
+|---|---|---|
+| G-L1-EXACT | 61/61 = 1.0 | `make eval-l1` |
+| G-RESP-TOKENS-DEFAULT | 622 (≤ 1,150) | `make eval-l1` |
+| G-RESP-TOKENS-MAX | 1,046 (≤ 1,800) | `make eval-l1` |
+| G-SPEC-LINT | 0 violations | `make spec-lint` |
+| G-AUTH | 12/12 rejected = 1.0 | `make test` |
+| G-ARCH-LAYERS | 0 violations | `make test` |
+| G-COVERAGE | 99.67% (606/608) | `make test` |
+| G-SECRETS | 0 new | `make secrets` |
+| G-INGEST-STOPS | 11/11 | `make eval-ingest` |
+
+221 tests in 0.8 s. The image builds, refuses to start without a key, runs as a non-root user and
+answers health, 401 and search. Still open: the deployment itself (it needs the GitHub repository)
+and whether the platform passes 4xx bodies to the model.

@@ -182,6 +182,12 @@ class TestResolution:
         assert err.value.allowed_values == ["home-living", "kitchen-dining", "pets"]
         assert err.value.did_you_mean == ["kitchen-dining"]
 
+    def test_a_subcategory_name_points_to_its_category(self, catalog: Catalog) -> None:
+        with pytest.raises(UnknownCategory) as err:
+            catalog.browse("knives")
+        assert err.value.did_you_mean == ["kitchen-dining"]
+        assert "subcategory" in err.value.hint and "Knives" in err.value.hint
+
     @pytest.mark.parametrize("value", ["kd-1", "KD1", "kd-001", " KD-001 "])
     def test_product_id_is_tolerant(self, catalog: Catalog, value: str) -> None:
         assert catalog.details(value).product.product_id == "KD-001"

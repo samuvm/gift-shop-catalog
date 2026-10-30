@@ -42,6 +42,8 @@ ignore = []
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101"]
+# Tooling that runs git and detect-secrets with fixed arguments, never user input.
+"scripts/secrets_check.py" = ["S603", "S607"]
 
 [tool.mypy]
 python_version = "3.13"

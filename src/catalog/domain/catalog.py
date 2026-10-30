@@ -179,6 +179,17 @@ class Catalog:
         if len(hits) == 1:
             return hits[0]
         allowed = sorted(self._names)
+        owners = sorted(
+            {(p.category_slug, p.subcategory) for p in self._products if words(p.subcategory) & words(key)}
+        )
+        if len({slug for slug, _ in owners}) == 1:
+            slug, sub = owners[0]
+            raise UnknownCategory(
+                f"{value!r} is not a category; {sub} is a subcategory of {self._names[slug]}.",
+                f"Call get_products_by_category with category {slug!r} and subcategory {sub!r}.",
+                allowed_values=allowed,
+                did_you_mean=[slug],
+            )
         guesses = difflib.get_close_matches(key, allowed + [n.lower() for n in self._names.values()], n=3)
         did_you_mean = sorted({g if g in allowed else self._slug_of(g) for g in guesses})
         raise UnknownCategory(

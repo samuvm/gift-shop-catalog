@@ -1,0 +1,2114 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Gift Shop Catalog",
+    "version": "0.1.0",
+    "description": "Product catalogue of an online gift shop, exposed as four read-only tools for an AI shopping assistant. Prices are in EUR. Every call needs the header X-API-Key."
+  },
+  "paths": {
+    "/categories": {
+      "get": {
+        "operationId": "get_categories",
+        "summary": "List what the shop sells: categories, subcategories, stock and price ranges.",
+        "description": "The gift shop's 11 categories, each with its subcategories, how many products are listed and in stock, and its price range in EUR. Also returns the allowed values of the recipient and occasion filters.\n\nCall it when the shopper has not said what kind of product they want, when you need a category slug for get_products_by_category, or to check whether a budget is realistic before searching. It takes no parameters and rarely changes: one call per conversation is enough.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "categories": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "slug": {
+                            "type": "string",
+                            "enum": [
+                              "beauty-wellness",
+                              "books-stationery",
+                              "experiences",
+                              "games-puzzles",
+                              "home-living",
+                              "jewellery",
+                              "kids",
+                              "kitchen-dining",
+                              "outdoor-travel",
+                              "pets",
+                              "tech-gadgets"
+                            ]
+                          },
+                          "products": {
+                            "type": "integer"
+                          },
+                          "in_stock": {
+                            "type": "integer"
+                          },
+                          "price_min_eur": {
+                            "type": "number"
+                          },
+                          "price_max_eur": {
+                            "type": "number"
+                          },
+                          "subcategories": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                },
+                                "products": {
+                                  "type": "integer"
+                                },
+                                "in_stock": {
+                                  "type": "integer"
+                                }
+                              },
+                              "required": [
+                                "name",
+                                "products",
+                                "in_stock"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "slug",
+                          "products",
+                          "in_stock",
+                          "price_min_eur",
+                          "price_max_eur",
+                          "subcategories"
+                        ]
+                      }
+                    },
+                    "recipients": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "anyone",
+                          "him",
+                          "her",
+                          "couple",
+                          "kids"
+                        ]
+                      }
+                    },
+                    "occasions": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "birthday",
+                          "christmas",
+                          "anniversary",
+                          "housewarming",
+                          "thank-you",
+                          "graduation"
+                        ]
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "today": {
+                          "type": "string",
+                          "format": "date",
+                          "description": "The shop's date, for deadlines."
+                        },
+                        "catalog_version": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "today",
+                        "catalog_version"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "categories",
+                    "recipients",
+                    "occasions",
+                    "meta"
+                  ]
+                },
+                "example": {
+                  "categories": [
+                    {
+                      "name": "Beauty & Wellness",
+                      "slug": "beauty-wellness",
+                      "products": 18,
+                      "in_stock": 17,
+                      "price_min_eur": 36.0,
+                      "price_max_eur": 399.0,
+                      "subcategories": [
+                        {
+                          "name": "Bath",
+                          "products": 2,
+                          "in_stock": 2
+                        },
+                        {
+                          "name": "Fitness",
+                          "products": 2,
+                          "in_stock": 2
+                        },
+                        {
+                          "name": "Fragrance",
+                          "products": 2,
+                          "in_stock": 2
+                        },
+                        {
+                          "name": "Grooming",
+                          "products": 3,
+                          "in_stock": 3
+                        },
+                        {
+                          "name": "Recovery",
+                          "products": 4,
+                          "in_stock": 3
+                        },
+                        {
+                          "name": "Skincare",
+                          "products": 3,
+                          "in_stock": 3
+                        },
+                        {
+                          "name": "Sleep",
+                          "products": 2,
+                          "in_stock": 2
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Books & Stationery",
+                      "slug": "books-stationery",
+                      "products": 16,
+                      "in_stock": 15,
+                      "price_min_eur": 6.5,
+                      "price_max_eur": 129.0,
+                      "subcategories": [
+                        {
+                          "name": "Books",
+                          "products": 4,
+                          "in_stock": 4
+                        },
+                        {
+                          "name": "Craft",
+                          "products": 2,
+                          "in_stock": 2
+                        },
+                        {
+                          "name": "Paper",
+                          "products": 7,
+                          "in_stock": 6
+                        },
+                        {
+                          "name": "Pens",
+                          "products": 3,
+                          "in_stock": 3
+                        }
+                      ]
+                    }
+                  ],
+                  "recipients": [
+                    "anyone",
+                    "him",
+                    "her",
+                    "couple",
+                    "kids"
+                  ],
+                  "occasions": [
+                    "birthday",
+                    "christmas",
+                    "anniversary",
+                    "housewarming",
+                    "thank-you",
+                    "graduation"
+                  ],
+                  "meta": {
+                    "today": "2026-10-30",
+                    "catalog_version": "6b3c871e"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A parameter is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "unauthorized",
+                            "unknown_category",
+                            "unknown_subcategory",
+                            "product_not_found",
+                            "invalid_parameter"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "hint": {
+                          "type": "string",
+                          "description": "What to do next."
+                        },
+                        "allowed_values": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "did_you_mean": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "hint"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                },
+                "example": {
+                  "error": {
+                    "code": "invalid_parameter",
+                    "message": "max_price must be a number.",
+                    "hint": "Fix the parameter and call again."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or wrong X-API-Key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "unauthorized",
+                            "unknown_category",
+                            "unknown_subcategory",
+                            "product_not_found",
+                            "invalid_parameter"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "hint": {
+                          "type": "string",
+                          "description": "What to do next."
+                        },
+                        "allowed_values": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "did_you_mean": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "hint"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                },
+                "example": {
+                  "error": {
+                    "code": "unauthorized",
+                    "message": "Missing or invalid API key.",
+                    "hint": "Send the key in the X-API-Key header."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
+      }
+    },
+    "/categories/{category}/products": {
+      "get": {
+        "operationId": "get_products_by_category",
+        "summary": "Browse one category, with optional filters.",
+        "description": "Lists products in one category. Use it when the shopper names or picks a category ('something for the kitchen', 'show me jewellery') or asks for more of one. To find products from a description across all categories, use search_products instead.\n\nReturns up to `limit` products (default 5), in stock, best rated first unless `sort` says otherwise. Each product has its price, availability, rating, who it suits, occasions, shipping days, gift wrap and the shop's short description. For brand, colour, material and stock units, call get_product_details.\n\nRead the extra fields when present: out_of_stock_matches (matching products that are out of stock), suggestions (a filter change that would return more, and how many) and note (how an input was read).",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "path",
+            "required": true,
+            "description": "Category slug, as listed by get_categories. Names in other spellings ('Kitchen and Dining') or a single word ('kitchen') are also accepted.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "beauty-wellness",
+                "books-stationery",
+                "experiences",
+                "games-puzzles",
+                "home-living",
+                "jewellery",
+                "kids",
+                "kitchen-dining",
+                "outdoor-travel",
+                "pets",
+                "tech-gadgets"
+              ]
+            }
+          },
+          {
+            "name": "subcategory",
+            "in": "query",
+            "required": false,
+            "description": "A subcategory within the category, such as 'Knives' or 'Candles' (any case). get_categories lists them.",
+            "schema": {
+              "type": "string",
+              "maxLength": 50
+            }
+          },
+          {
+            "name": "min_price",
+            "in": "query",
+            "required": false,
+            "description": "Lowest price in EUR, inclusive.",
+            "schema": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "max_price",
+            "in": "query",
+            "required": false,
+            "description": "Highest price in EUR, inclusive. Prices are always in EUR. If the shopper gave an approximate budget ('about 50'), a small margin above it is reasonable.",
+            "schema": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "recipient",
+            "in": "query",
+            "required": false,
+            "description": "Who the gift is for. Products marked 'anyone' are always included. Leave it out when unknown.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "anyone",
+                "him",
+                "her",
+                "couple",
+                "kids"
+              ]
+            }
+          },
+          {
+            "name": "occasion",
+            "in": "query",
+            "required": false,
+            "description": "Occasion tag. The shop's tags are not exhaustive: if a strict occasion filter returns little, try again without it.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "birthday",
+                "christmas",
+                "anniversary",
+                "housewarming",
+                "thank-you",
+                "graduation"
+              ]
+            }
+          },
+          {
+            "name": "max_shipping_days",
+            "in": "query",
+            "required": false,
+            "description": "Only products that ship within this many days. 0 means digital, delivered by email. For a deadline, count days from meta.today and leave a margin: shipping days are an estimate.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 14
+            }
+          },
+          {
+            "name": "exclude",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated words to rule out, matched against product name, subcategory, tags and material. Examples: 'candle,scented' for someone who dislikes scents; 'leather,silk,wool,alpaca' for a vegan.",
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            }
+          },
+          {
+            "name": "include_out_of_stock",
+            "in": "query",
+            "required": false,
+            "description": "Also list out-of-stock products. By default they are left out of the list but still reported in out_of_stock_matches.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "relevance (search default), rating (browse default), popularity (most reviewed), price_asc (cheapest first) or price_desc.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "relevance",
+                "rating",
+                "popularity",
+                "price_asc",
+                "price_desc"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "How many products to return, 1 to 10. Default 5. Larger values are reduced to 10.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10,
+              "default": 5
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "description": "Skip this many results, for 'show me more'. Use meta.next_offset from the previous answer.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "products",
+                    "meta"
+                  ],
+                  "properties": {
+                    "products": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "product_id": {
+                            "type": "string",
+                            "description": "Use it with get_product_details."
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "category": {
+                            "type": "string"
+                          },
+                          "subcategory": {
+                            "type": "string"
+                          },
+                          "price_eur": {
+                            "type": "number"
+                          },
+                          "availability": {
+                            "type": "string",
+                            "enum": [
+                              "in_stock",
+                              "low_stock",
+                              "out_of_stock",
+                              "unlimited"
+                            ],
+                            "description": "low_stock = 5 or fewer left; unlimited = digital gift card."
+                          },
+                          "rating": {
+                            "type": "number",
+                            "nullable": true,
+                            "description": "Out of 5. null means no reviews yet."
+                          },
+                          "reviews_count": {
+                            "type": "integer",
+                            "nullable": true
+                          },
+                          "recipient": {
+                            "type": "string",
+                            "enum": [
+                              "anyone",
+                              "him",
+                              "her",
+                              "couple",
+                              "kids"
+                            ]
+                          },
+                          "occasions": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "shipping_days": {
+                            "type": "integer",
+                            "description": "Estimate in days; 0 = digital delivery."
+                          },
+                          "gift_wrap": {
+                            "type": "boolean"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "The shop's own copy. Caveats live here."
+                          }
+                        },
+                        "required": [
+                          "product_id",
+                          "name",
+                          "category",
+                          "subcategory",
+                          "price_eur",
+                          "availability",
+                          "rating",
+                          "reviews_count",
+                          "recipient",
+                          "occasions",
+                          "shipping_days",
+                          "gift_wrap",
+                          "description"
+                        ]
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total_matches": {
+                          "type": "integer"
+                        },
+                        "returned": {
+                          "type": "integer"
+                        },
+                        "next_offset": {
+                          "type": "integer",
+                          "nullable": true,
+                          "description": "Pass as offset to see more; null when there is no more."
+                        },
+                        "applied": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "The filters as the server understood them."
+                        },
+                        "today": {
+                          "type": "string",
+                          "format": "date",
+                          "description": "The shop's date, for deadlines."
+                        },
+                        "catalog_version": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "total_matches",
+                        "returned",
+                        "next_offset",
+                        "applied",
+                        "today",
+                        "catalog_version"
+                      ]
+                    },
+                    "out_of_stock_matches": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "product_id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "price_eur": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "product_id",
+                          "name",
+                          "price_eur"
+                        ]
+                      },
+                      "description": "Products that match but are out of stock. Present only when relevant. Say they are out of stock; never say the shop does not sell them."
+                    },
+                    "over_budget_matches": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "product_id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "price_eur": {
+                            "type": "number"
+                          },
+                          "over_by_eur": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "product_id",
+                          "name",
+                          "price_eur",
+                          "over_by_eur"
+                        ]
+                      },
+                      "description": "Better matches that max_price left out, with how far over budget they are."
+                    },
+                    "unmatched_terms": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Query words that match nothing in the whole catalogue: the shop does not carry them."
+                    },
+                    "suggestions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "change": {
+                            "type": "string",
+                            "description": "The filter to relax."
+                          },
+                          "to": {
+                            "type": "number",
+                            "nullable": true,
+                            "description": "New value for a price filter; null means remove the filter."
+                          },
+                          "would_match": {
+                            "type": "integer",
+                            "description": "How many products the change would return."
+                          }
+                        },
+                        "required": [
+                          "change",
+                          "to",
+                          "would_match"
+                        ]
+                      },
+                      "description": "When few results came back: filter changes that would return more, and how many."
+                    },
+                    "note": {
+                      "type": "string",
+                      "description": "How the server interpreted an input, when it had to."
+                    }
+                  }
+                },
+                "example": {
+                  "products": [
+                    {
+                      "product_id": "KD-003",
+                      "name": "Knife Sharpening Stone",
+                      "category": "Kitchen & Dining",
+                      "subcategory": "Knives",
+                      "price_eur": 54.0,
+                      "availability": "in_stock",
+                      "rating": 4.5,
+                      "reviews_count": 96,
+                      "recipient": "him",
+                      "occasions": [
+                        "birthday"
+                      ],
+                      "shipping_days": 3,
+                      "gift_wrap": false,
+                      "description": "1000/3000 grit combination stone with a non-slip base. Comes with a card explaining the angle."
+                    },
+                    {
+                      "product_id": "KD-023",
+                      "name": "Amber Glass Tumbler Set",
+                      "category": "Kitchen & Dining",
+                      "subcategory": "Serving",
+                      "price_eur": 56.0,
+                      "availability": "in_stock",
+                      "rating": 4.5,
+                      "reviews_count": 86,
+                      "recipient": "anyone",
+                      "occasions": [
+                        "housewarming",
+                        "anniversary"
+                      ],
+                      "shipping_days": 4,
+                      "gift_wrap": true,
+                      "description": "Six tumblers in smoked amber. Dishwasher safe, which the fancier ones never are."
+                    }
+                  ],
+                  "meta": {
+                    "total_matches": 5,
+                    "returned": 2,
+                    "next_offset": 2,
+                    "applied": {
+                      "category": "kitchen-dining",
+                      "max_price": 60.0
+                    },
+                    "today": "2026-10-30",
+                    "catalog_version": "6b3c871e"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A parameter is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "unauthorized",
+                            "unknown_category",
+                            "unknown_subcategory",
+                            "product_not_found",
+                            "invalid_parameter"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "hint": {
+                          "type": "string",
+                          "description": "What to do next."
+                        },
+                        "allowed_values": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "did_you_mean": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "hint"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                },
+                "example": {
+                  "error": {
+                    "code": "invalid_parameter",
+                    "message": "max_price must be a number.",
+                    "hint": "Fix the parameter and call again."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or wrong X-API-Key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "unauthorized",
+                            "unknown_category",
+                            "unknown_subcategory",
+                            "product_not_found",
+                            "invalid_parameter"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "hint": {
+                          "type": "string",
+                          "description": "What to do next."
+                        },
+                        "allowed_values": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "did_you_mean": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "hint"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                },
+                "example": {
+                  "error": {
+                    "code": "unauthorized",
+                    "message": "Missing or invalid API key.",
+                    "hint": "Send the key in the X-API-Key header."
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The category, subcategory or product does not exist. The body says what to use instead.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "unauthorized",
+                            "unknown_category",
+                            "unknown_subcategory",
+                            "product_not_found",
+                            "invalid_parameter"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "hint": {
+                          "type": "string",
+                          "description": "What to do next."
+                        },
+                        "allowed_values": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "did_you_mean": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "hint"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                },
+                "example": {
+                  "error": {
+                    "code": "unknown_category",
+                    "message": "No category matches 'garden'.",
+                    "hint": "Use one of allowed_values, or call get_categories."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
+      }
+    },
+    "/products/search": {
+      "get": {
+        "operationId": "search_products",
+        "summary": "Search the whole catalogue from a description of what the shopper wants.",
+        "description": "Finds products in every category. Use it for requests such as 'a chef's knife under 100', 'something for a coffee lover' or 'a housewarming gift around 50'. Without a query it lists the whole catalogue with the given filters, for 'your best rated' or 'the cheapest thing you have'.\n\nWrite the query in English catalogue words: product types, materials, uses or hobbies ('knife', 'candle', 'coffee', 'noise cancelling headphones', 'yoga'). Do not pass the shopper's literal phrasing or language. Put budget, recipient, occasion and deadline in the filters, not in the query. If the first query finds little, try a broader word or a synonym.\n\nResults are keyword matches ranked by where the words hit (name first, then subcategory and tags, then the rest). They are in stock only by default, and each product appears once. Read the extra fields when present: over_budget_matches (better matches above max_price, with the gap in EUR), out_of_stock_matches, unmatched_terms (words that match nothing: the shop does not carry that brand or item) and suggestions.",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "description": "What to look for, in English catalogue words, for example 'chef knife' or 'scented candle'. Optional: leave it out to list by filters only.",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "min_price",
+            "in": "query",
+            "required": false,
+            "description": "Lowest price in EUR, inclusive.",
+            "schema": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "max_price",
+            "in": "query",
+            "required": false,
+            "description": "Highest price in EUR, inclusive. Prices are always in EUR. If the shopper gave an approximate budget ('about 50'), a small margin above it is reasonable.",
+            "schema": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "recipient",
+            "in": "query",
+            "required": false,
+            "description": "Who the gift is for. Products marked 'anyone' are always included. Leave it out when unknown.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "anyone",
+                "him",
+                "her",
+                "couple",
+                "kids"
+              ]
+            }
+          },
+          {
+            "name": "occasion",
+            "in": "query",
+            "required": false,
+            "description": "Occasion tag. The shop's tags are not exhaustive: if a strict occasion filter returns little, try again without it.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "birthday",
+                "christmas",
+                "anniversary",
+                "housewarming",
+                "thank-you",
+                "graduation"
+              ]
+            }
+          },
+          {
+            "name": "max_shipping_days",
+            "in": "query",
+            "required": false,
+            "description": "Only products that ship within this many days. 0 means digital, delivered by email. For a deadline, count days from meta.today and leave a margin: shipping days are an estimate.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 14
+            }
+          },
+          {
+            "name": "exclude",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated words to rule out, matched against product name, subcategory, tags and material. Examples: 'candle,scented' for someone who dislikes scents; 'leather,silk,wool,alpaca' for a vegan.",
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            }
+          },
+          {
+            "name": "include_out_of_stock",
+            "in": "query",
+            "required": false,
+            "description": "Also list out-of-stock products. By default they are left out of the list but still reported in out_of_stock_matches.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "relevance (search default), rating (browse default), popularity (most reviewed), price_asc (cheapest first) or price_desc.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "relevance",
+                "rating",
+                "popularity",
+                "price_asc",
+                "price_desc"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "How many products to return, 1 to 10. Default 5. Larger values are reduced to 10.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10,
+              "default": 5
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "description": "Skip this many results, for 'show me more'. Use meta.next_offset from the previous answer.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "products",
+                    "meta"
+                  ],
+                  "properties": {
+                    "products": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "product_id": {
+                            "type": "string",
+                            "description": "Use it with get_product_details."
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "category": {
+                            "type": "string"
+                          },
+                          "subcategory": {
+                            "type": "string"
+                          },
+                          "price_eur": {
+                            "type": "number"
+                          },
+                          "availability": {
+                            "type": "string",
+                            "enum": [
+                              "in_stock",
+                              "low_stock",
+                              "out_of_stock",
+                              "unlimited"
+                            ],
+                            "description": "low_stock = 5 or fewer left; unlimited = digital gift card."
+                          },
+                          "rating": {
+                            "type": "number",
+                            "nullable": true,
+                            "description": "Out of 5. null means no reviews yet."
+                          },
+                          "reviews_count": {
+                            "type": "integer",
+                            "nullable": true
+                          },
+                          "recipient": {
+                            "type": "string",
+                            "enum": [
+                              "anyone",
+                              "him",
+                              "her",
+                              "couple",
+                              "kids"
+                            ]
+                          },
+                          "occasions": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "shipping_days": {
+                            "type": "integer",
+                            "description": "Estimate in days; 0 = digital delivery."
+                          },
+                          "gift_wrap": {
+                            "type": "boolean"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "The shop's own copy. Caveats live here."
+                          }
+                        },
+                        "required": [
+                          "product_id",
+                          "name",
+                          "category",
+                          "subcategory",
+                          "price_eur",
+                          "availability",
+                          "rating",
+                          "reviews_count",
+                          "recipient",
+                          "occasions",
+                          "shipping_days",
+                          "gift_wrap",
+                          "description"
+                        ]
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total_matches": {
+                          "type": "integer"
+                        },
+                        "returned": {
+                          "type": "integer"
+                        },
+                        "next_offset": {
+                          "type": "integer",
+                          "nullable": true,
+                          "description": "Pass as offset to see more; null when there is no more."
+                        },
+                        "applied": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "The filters as the server understood them."
+                        },
+                        "today": {
+                          "type": "string",
+                          "format": "date",
+                          "description": "The shop's date, for deadlines."
+                        },
+                        "catalog_version": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "total_matches",
+                        "returned",
+                        "next_offset",
+                        "applied",
+                        "today",
+                        "catalog_version"
+                      ]
+                    },
+                    "out_of_stock_matches": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "product_id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "price_eur": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "product_id",
+                          "name",
+                          "price_eur"
+                        ]
+                      },
+                      "description": "Products that match but are out of stock. Present only when relevant. Say they are out of stock; never say the shop does not sell them."
+                    },
+                    "over_budget_matches": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "product_id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "price_eur": {
+                            "type": "number"
+                          },
+                          "over_by_eur": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "product_id",
+                          "name",
+                          "price_eur",
+                          "over_by_eur"
+                        ]
+                      },
+                      "description": "Better matches that max_price left out, with how far over budget they are."
+                    },
+                    "unmatched_terms": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Query words that match nothing in the whole catalogue: the shop does not carry them."
+                    },
+                    "suggestions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "change": {
+                            "type": "string",
+                            "description": "The filter to relax."
+                          },
+                          "to": {
+                            "type": "number",
+                            "nullable": true,
+                            "description": "New value for a price filter; null means remove the filter."
+                          },
+                          "would_match": {
+                            "type": "integer",
+                            "description": "How many products the change would return."
+                          }
+                        },
+                        "required": [
+                          "change",
+                          "to",
+                          "would_match"
+                        ]
+                      },
+                      "description": "When few results came back: filter changes that would return more, and how many."
+                    },
+                    "note": {
+                      "type": "string",
+                      "description": "How the server interpreted an input, when it had to."
+                    }
+                  }
+                },
+                "example": {
+                  "products": [
+                    {
+                      "product_id": "KD-002",
+                      "name": "Paring Knife 9cm",
+                      "category": "Kitchen & Dining",
+                      "subcategory": "Knives",
+                      "price_eur": 69.0,
+                      "availability": "in_stock",
+                      "rating": 4.6,
+                      "reviews_count": 148,
+                      "recipient": "anyone",
+                      "occasions": [
+                        "thank-you",
+                        "housewarming"
+                      ],
+                      "shipping_days": 3,
+                      "gift_wrap": true,
+                      "description": "The knife people actually reach for most. Pairs with the gyuto."
+                    },
+                    {
+                      "product_id": "KD-003",
+                      "name": "Knife Sharpening Stone",
+                      "category": "Kitchen & Dining",
+                      "subcategory": "Knives",
+                      "price_eur": 54.0,
+                      "availability": "in_stock",
+                      "rating": 4.5,
+                      "reviews_count": 96,
+                      "recipient": "him",
+                      "occasions": [
+                        "birthday"
+                      ],
+                      "shipping_days": 3,
+                      "gift_wrap": false,
+                      "description": "1000/3000 grit combination stone with a non-slip base. Comes with a card explaining the angle."
+                    }
+                  ],
+                  "meta": {
+                    "total_matches": 3,
+                    "returned": 2,
+                    "next_offset": 2,
+                    "applied": {
+                      "query": "chef knife",
+                      "max_price": 100.0
+                    },
+                    "today": "2026-10-30",
+                    "catalog_version": "6b3c871e"
+                  },
+                  "over_budget_matches": [
+                    {
+                      "product_id": "KD-001",
+                      "name": "Chef's Knife 20cm",
+                      "price_eur": 149.0,
+                      "over_by_eur": 49.0
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A parameter is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "unauthorized",
+                            "unknown_category",
+                            "unknown_subcategory",
+                            "product_not_found",
+                            "invalid_parameter"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "hint": {
+                          "type": "string",
+                          "description": "What to do next."
+                        },
+                        "allowed_values": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "did_you_mean": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "hint"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                },
+                "example": {
+                  "error": {
+                    "code": "invalid_parameter",
+                    "message": "max_price must be a number.",
+                    "hint": "Fix the parameter and call again."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or wrong X-API-Key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "unauthorized",
+                            "unknown_category",
+                            "unknown_subcategory",
+                            "product_not_found",
+                            "invalid_parameter"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "hint": {
+                          "type": "string",
+                          "description": "What to do next."
+                        },
+                        "allowed_values": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "did_you_mean": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "hint"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                },
+                "example": {
+                  "error": {
+                    "code": "unauthorized",
+                    "message": "Missing or invalid API key.",
+                    "hint": "Send the key in the X-API-Key header."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
+      }
+    },
+    "/products/{product_id}": {
+      "get": {
+        "operationId": "get_product_details",
+        "summary": "Everything about one product, including caveats and available alternatives.",
+        "description": "The full record of one product: brand, colour, material, tags, stock units, gift wrap, shipping days, rating and the shop's description with its caveats (for example 'needs an amplifier' or 'subscription required after the first year'). Use it to answer a specific question about a product, before describing one in detail, or to check stock for several units.\n\nIf the product is out of stock, in_stock_alternatives lists up to 3 similar products that are available (same subcategory first, then closest in price). rating null means no reviews yet. shipping_days is the shop's estimate, not a guaranteed delivery date.\n\nTakes a product_id from an earlier result, such as 'KD-001'. If you only have a name, use search_products first.",
+        "parameters": [
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "description": "Product id from an earlier result, such as 'KD-001'. Lower case or no zero padding ('kd-7') is accepted.",
+            "schema": {
+              "type": "string",
+              "maxLength": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "product": {
+                      "type": "object",
+                      "properties": {
+                        "product_id": {
+                          "type": "string",
+                          "description": "Use it with get_product_details."
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "category": {
+                          "type": "string"
+                        },
+                        "subcategory": {
+                          "type": "string"
+                        },
+                        "price_eur": {
+                          "type": "number"
+                        },
+                        "availability": {
+                          "type": "string",
+                          "enum": [
+                            "in_stock",
+                            "low_stock",
+                            "out_of_stock",
+                            "unlimited"
+                          ],
+                          "description": "low_stock = 5 or fewer left; unlimited = digital gift card."
+                        },
+                        "rating": {
+                          "type": "number",
+                          "nullable": true,
+                          "description": "Out of 5. null means no reviews yet."
+                        },
+                        "reviews_count": {
+                          "type": "integer",
+                          "nullable": true
+                        },
+                        "recipient": {
+                          "type": "string",
+                          "enum": [
+                            "anyone",
+                            "him",
+                            "her",
+                            "couple",
+                            "kids"
+                          ]
+                        },
+                        "occasions": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "shipping_days": {
+                          "type": "integer",
+                          "description": "Estimate in days; 0 = digital delivery."
+                        },
+                        "gift_wrap": {
+                          "type": "boolean"
+                        },
+                        "description": {
+                          "type": "string",
+                          "description": "The shop's own copy. Caveats live here."
+                        },
+                        "brand": {
+                          "type": "string"
+                        },
+                        "color": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "material": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "tags": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "stock_units": {
+                          "type": "integer",
+                          "description": "Units available; for gift cards a large placeholder."
+                        },
+                        "is_digital": {
+                          "type": "boolean"
+                        },
+                        "also_listed_as": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "The same product listed under another category's id."
+                        }
+                      },
+                      "required": [
+                        "product_id",
+                        "name",
+                        "category",
+                        "subcategory",
+                        "price_eur",
+                        "availability",
+                        "rating",
+                        "reviews_count",
+                        "recipient",
+                        "occasions",
+                        "shipping_days",
+                        "gift_wrap",
+                        "description",
+                        "brand",
+                        "color",
+                        "material",
+                        "tags",
+                        "stock_units",
+                        "is_digital",
+                        "also_listed_as"
+                      ]
+                    },
+                    "in_stock_alternatives": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "product_id": {
+                            "type": "string",
+                            "description": "Use it with get_product_details."
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "category": {
+                            "type": "string"
+                          },
+                          "subcategory": {
+                            "type": "string"
+                          },
+                          "price_eur": {
+                            "type": "number"
+                          },
+                          "availability": {
+                            "type": "string",
+                            "enum": [
+                              "in_stock",
+                              "low_stock",
+                              "out_of_stock",
+                              "unlimited"
+                            ],
+                            "description": "low_stock = 5 or fewer left; unlimited = digital gift card."
+                          },
+                          "rating": {
+                            "type": "number",
+                            "nullable": true,
+                            "description": "Out of 5. null means no reviews yet."
+                          },
+                          "reviews_count": {
+                            "type": "integer",
+                            "nullable": true
+                          },
+                          "recipient": {
+                            "type": "string",
+                            "enum": [
+                              "anyone",
+                              "him",
+                              "her",
+                              "couple",
+                              "kids"
+                            ]
+                          },
+                          "occasions": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "shipping_days": {
+                            "type": "integer",
+                            "description": "Estimate in days; 0 = digital delivery."
+                          },
+                          "gift_wrap": {
+                            "type": "boolean"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "The shop's own copy. Caveats live here."
+                          }
+                        },
+                        "required": [
+                          "product_id",
+                          "name",
+                          "category",
+                          "subcategory",
+                          "price_eur",
+                          "availability",
+                          "rating",
+                          "reviews_count",
+                          "recipient",
+                          "occasions",
+                          "shipping_days",
+                          "gift_wrap",
+                          "description"
+                        ]
+                      },
+                      "description": "Present when the product is out of stock: similar products that are available."
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "today": {
+                          "type": "string",
+                          "format": "date",
+                          "description": "The shop's date, for deadlines."
+                        },
+                        "catalog_version": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "today",
+                        "catalog_version"
+                      ]
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "product",
+                    "meta"
+                  ]
+                },
+                "example": {
+                  "product": {
+                    "product_id": "KD-007",
+                    "name": "Cold Brew Carafe",
+                    "category": "Kitchen & Dining",
+                    "subcategory": "Coffee",
+                    "price_eur": 52.0,
+                    "availability": "out_of_stock",
+                    "rating": 4.1,
+                    "reviews_count": 74,
+                    "recipient": "anyone",
+                    "occasions": [
+                      "birthday"
+                    ],
+                    "shipping_days": 3,
+                    "gift_wrap": true,
+                    "description": "One litre overnight in the fridge. Fine mesh, no grit.",
+                    "brand": "Fumo",
+                    "color": "Clear",
+                    "material": "Glass, steel mesh",
+                    "tags": [
+                      "coffee",
+                      "coldbrew",
+                      "summer",
+                      "glass"
+                    ],
+                    "is_digital": false,
+                    "also_listed_as": [],
+                    "stock_units": 0
+                  },
+                  "meta": {
+                    "today": "2026-10-30",
+                    "catalog_version": "6b3c871e"
+                  },
+                  "in_stock_alternatives": [
+                    {
+                      "product_id": "KD-004",
+                      "name": "Espresso Moka Pot 3-cup",
+                      "category": "Kitchen & Dining",
+                      "subcategory": "Coffee",
+                      "price_eur": 46.0,
+                      "availability": "in_stock",
+                      "rating": 4.4,
+                      "reviews_count": 276,
+                      "recipient": "anyone",
+                      "occasions": [
+                        "housewarming",
+                        "thank-you"
+                      ],
+                      "shipping_days": 2,
+                      "gift_wrap": true,
+                      "description": "The Italian classic in the size that fits two mugs. Induction-compatible base."
+                    },
+                    {
+                      "product_id": "KD-005",
+                      "name": "Pour-Over Set",
+                      "category": "Kitchen & Dining",
+                      "subcategory": "Coffee",
+                      "price_eur": 78.0,
+                      "availability": "in_stock",
+                      "rating": 4.6,
+                      "reviews_count": 183,
+                      "recipient": "him",
+                      "occasions": [
+                        "birthday",
+                        "christmas"
+                      ],
+                      "shipping_days": 3,
+                      "gift_wrap": true,
+                      "description": "Carafe, dripper, wooden collar and fifty filters. For the person who has opinions about water temperature."
+                    },
+                    {
+                      "product_id": "KD-006",
+                      "name": "Burr Coffee Grinder, Manual",
+                      "category": "Kitchen & Dining",
+                      "subcategory": "Coffee",
+                      "price_eur": 115.0,
+                      "availability": "in_stock",
+                      "rating": 4.7,
+                      "reviews_count": 241,
+                      "recipient": "anyone",
+                      "occasions": [
+                        "christmas",
+                        "birthday"
+                      ],
+                      "shipping_days": 3,
+                      "gift_wrap": true,
+                      "description": "Stepped adjustment from espresso to French press. Quiet, which the electric ones are not."
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A parameter is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "unauthorized",
+                            "unknown_category",
+                            "unknown_subcategory",
+                            "product_not_found",
+                            "invalid_parameter"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "hint": {
+                          "type": "string",
+                          "description": "What to do next."
+                        },
+                        "allowed_values": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "did_you_mean": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "hint"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                },
+                "example": {
+                  "error": {
+                    "code": "invalid_parameter",
+                    "message": "max_price must be a number.",
+                    "hint": "Fix the parameter and call again."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or wrong X-API-Key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "unauthorized",
+                            "unknown_category",
+                            "unknown_subcategory",
+                            "product_not_found",
+                            "invalid_parameter"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "hint": {
+                          "type": "string",
+                          "description": "What to do next."
+                        },
+                        "allowed_values": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "did_you_mean": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "hint"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                },
+                "example": {
+                  "error": {
+                    "code": "unauthorized",
+                    "message": "Missing or invalid API key.",
+                    "hint": "Send the key in the X-API-Key header."
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The category, subcategory or product does not exist. The body says what to use instead.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "unauthorized",
+                            "unknown_category",
+                            "unknown_subcategory",
+                            "product_not_found",
+                            "invalid_parameter"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "hint": {
+                          "type": "string",
+                          "description": "What to do next."
+                        },
+                        "allowed_values": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "did_you_mean": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "hint"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                },
+                "example": {
+                  "error": {
+                    "code": "unknown_category",
+                    "message": "No category matches 'garden'.",
+                    "hint": "Use one of allowed_values, or call get_categories."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKey": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "Documentation only: the platform sends the key from a secret."
+      }
+    }
+  }
+}

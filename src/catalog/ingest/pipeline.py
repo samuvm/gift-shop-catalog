@@ -22,10 +22,24 @@ from catalog.ingest.rules import (
 )
 
 EXPECTED_COLUMNS = (
-    "product_id", "name", "category", "subcategory", "brand", "price_eur", "stock", "rating",
-    "reviews_count", "recipient", "occasion", "tags", "color", "material", "gift_wrap",
-    "shipping_days", "description",
-)  # fmt: skip
+    "product_id",
+    "name",
+    "category",
+    "subcategory",
+    "brand",
+    "price_eur",
+    "stock",
+    "rating",
+    "reviews_count",
+    "recipient",
+    "occasion",
+    "tags",
+    "color",
+    "material",
+    "gift_wrap",
+    "shipping_days",
+    "description",
+)
 REQUIRED = (
     "product_id",
     "name",
@@ -183,9 +197,14 @@ def run_ingest(
 
 def _stopped(anomalies: list[Anomaly]) -> IngestResult:
     return IngestResult(
-        status="stopped", products=[], anomalies=anomalies, quality_warnings=[],
-        rules_applied=[], decisions_applied=[], diff=Diff(),
-    )  # fmt: skip
+        status="stopped",
+        products=[],
+        anomalies=anomalies,
+        quality_warnings=[],
+        rules_applied=[],
+        decisions_applied=[],
+        diff=Diff(),
+    )
 
 
 def _parse_row(
@@ -256,9 +275,16 @@ def _parse_row(
         return None, anomalies, respelled
     values["category"] = category.name
     row = _Row(
-        values=values, category=category, price_eur=price, stock=stock, rating=rating,
-        reviews_count=reviews, occasions=occasions, gift_wrap=gift_wrap, shipping_days=shipping,
-    )  # fmt: skip
+        values=values,
+        category=category,
+        price_eur=price,
+        stock=stock,
+        rating=rating,
+        reviews_count=reviews,
+        occasions=occasions,
+        gift_wrap=gift_wrap,
+        shipping_days=shipping,
+    )
     return row, [], respelled
 
 

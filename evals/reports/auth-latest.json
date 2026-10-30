@@ -1,0 +1,18 @@
+{
+  "rejected_rate": 1.0,
+  "n": 12,
+  "checks": {
+    "/categories [missing]": true,
+    "/categories [wrong]": true,
+    "/categories [empty]": true,
+    "/categories/kitchen-dining/products [missing]": true,
+    "/categories/kitchen-dining/products [wrong]": true,
+    "/categories/kitchen-dining/products [empty]": true,
+    "/products/search?query=candle [missing]": true,
+    "/products/search?query=candle [wrong]": true,
+    "/products/search?query=candle [empty]": true,
+    "/products/KD-001 [missing]": true,
+    "/products/KD-001 [wrong]": true,
+    "/products/KD-001 [empty]": true
+  }
+}

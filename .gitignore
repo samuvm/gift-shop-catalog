@@ -20,3 +20,6 @@ htmlcov/
 .DS_Store
 .idea/
 .vscode/
+
+# Raw coverage output (the summary in evals/reports/coverage-latest.json is kept)
+evals/reports/coverage-raw.json

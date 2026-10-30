@@ -1,0 +1,17 @@
+{
+  "line_percent": 99.67,
+  "statements": 608,
+  "covered": 606,
+  "files": [
+    "src/catalog/domain/__init__.py",
+    "src/catalog/domain/catalog.py",
+    "src/catalog/domain/errors.py",
+    "src/catalog/domain/models.py",
+    "src/catalog/domain/text.py",
+    "src/catalog/ingest/__init__.py",
+    "src/catalog/ingest/__main__.py",
+    "src/catalog/ingest/decisions.py",
+    "src/catalog/ingest/pipeline.py",
+    "src/catalog/ingest/rules.py"
+  ]
+}

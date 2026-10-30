@@ -11,8 +11,21 @@ lint: ## Ruff lint + format check
 typecheck: ## mypy strict over src/catalog
 	$(UV) mypy
 
-test: ## Full test suite with coverage
-	$(UV) pytest --cov --cov-report=term
+test: ## Full suite; writes coverage, auth and architecture reports (G-COVERAGE, G-AUTH, G-ARCH-LAYERS)
+	$(UV) pytest --cov --cov-report=term --cov-report=json:evals/reports/coverage-raw.json
+	$(UV) python scripts/coverage_report.py
+
+spec-lint: ## Lint the served OpenAPI against the platform's rules (G-SPEC-LINT)
+	$(UV) python scripts/spec_lint.py
+
+eval-l1: ## Level-1 cases over HTTP, exact match and response tokens (G-L1-EXACT, G-RESP-TOKENS-*)
+	$(UV) python evals/golden/l1/run.py
+
+secrets: ## Secrets in tracked files that are not in the reviewed baseline (G-SECRETS)
+	$(UV) python scripts/secrets_check.py
+
+run: ## Serve locally on :8000 (needs CATALOG_API_KEY in the environment or .env)
+	set -a; [ -f .env ] && . ./.env; set +a; $(UV) uvicorn catalog.api.app:app_from_env --factory --port 8000
 
 gate-fast: lint typecheck test ## Everything that must stay green after each change
 
@@ -28,4 +41,4 @@ golden-l1: ## Rebuild level-1 cases from the reference semantics (evals/golden/l
 audit-csv: ## Independent audit of the raw export (stdlib only)
 	python3 -I scripts/audit_csv.py data/gift-shop-catalog.csv
 
-.PHONY: help lint typecheck test gate-fast ingest eval-ingest golden-l1 audit-csv
+.PHONY: help lint typecheck test spec-lint eval-l1 secrets run gate-fast ingest eval-ingest golden-l1 audit-csv
