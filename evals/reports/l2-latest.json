@@ -3,11 +3,11 @@
   "recording": "evals/l2/recordings/gemma4-26b-mlx__prompt-cbdcb55e__tools-09b2db5c.jsonl",
   "n": 150,
   "n_negative": 36,
-  "tool_accuracy": 0.8933,
-  "args_accuracy": 0.8556,
+  "tool_accuracy": 0.9,
+  "args_accuracy": 0.9231,
   "negative_false_call_rate": 0.0,
   "replay_mismatches": 0,
-  "seconds_calling_model": 148.7,
+  "seconds_calling_model": 0,
   "failures": [
     {
       "id": "l2-003",
@@ -64,18 +64,6 @@
       "wrong_args": [
         "exclude"
       ],
-      "text": ""
-    },
-    {
-      "id": "l2-027",
-      "kind": "positive",
-      "tool": "search_products",
-      "args": {
-        "query": "walnut speakers"
-      },
-      "tool_ok": false,
-      "args_ok": false,
-      "wrong_args": [],
       "text": ""
     },
     {
@@ -136,48 +124,6 @@
       "args_ok": false,
       "wrong_args": [],
       "text": "El Trio Votive Set (HL-005) tarda 3 días en enviarse. Como hoy es sábado, lo más probable es que llegue a partir del martes o miércoles, pero no puedo garantizar la entrega exacta.\n\n¿Quieres que lo añ"
-    },
-    {
-      "id": "l2-041",
-      "kind": "positive",
-      "tool": "search_products",
-      "args": {
-        "query": "cat"
-      },
-      "tool_ok": false,
-      "args_ok": false,
-      "wrong_args": [],
-      "text": ""
-    },
-    {
-      "id": "l2-052",
-      "kind": "positive",
-      "tool": "search_products",
-      "args": {
-        "max_price": 100,
-        "recipient": "her,couple"
-      },
-      "tool_ok": true,
-      "args_ok": false,
-      "wrong_args": [
-        "occasion"
-      ],
-      "text": ""
-    },
-    {
-      "id": "l2-053",
-      "kind": "positive",
-      "tool": "search_products",
-      "args": {
-        "max_price": 200,
-        "query": "notebook"
-      },
-      "tool_ok": true,
-      "args_ok": false,
-      "wrong_args": [
-        "sort"
-      ],
-      "text": ""
     },
     {
       "id": "l2-060",
@@ -255,23 +201,6 @@
       "text": "Ciao! Posso aiutarti solo con i regali presenti nel nostro catalogo.\n\nPer trovare l'idea migliore per il tuo fratello, potresti dirmi un budget indicativo per il regalo?"
     },
     {
-      "id": "l2-111",
-      "kind": "positive",
-      "tool": "search_products",
-      "args": {
-        "max_price": 120,
-        "min_price": 80,
-        "occasion": "housewarming",
-        "query": "classy gift"
-      },
-      "tool_ok": true,
-      "args_ok": false,
-      "wrong_args": [
-        "max_price"
-      ],
-      "text": ""
-    },
-    {
       "id": "l2-119",
       "kind": "positive",
       "tool": null,
@@ -280,20 +209,6 @@
       "args_ok": false,
       "wrong_args": [],
       "text": "Tienes razón, ¡casi lo mismo! Si quieres evitar cualquier cosa que se queme o huela, aquí tienes otras opciones:\n\n**Leather Notebook, Forest Green** · 25 € · envíos en 3 días\nUn clásico elegante para "
-    },
-    {
-      "id": "l2-124",
-      "kind": "positive",
-      "tool": "search_products",
-      "args": {
-        "query": "airpods"
-      },
-      "tool_ok": true,
-      "args_ok": false,
-      "wrong_args": [
-        "query"
-      ],
-      "text": ""
     },
     {
       "id": "l2-131",
@@ -313,11 +228,9 @@
         "query": "dinner spa experience",
         "recipient": "her,couple"
       },
-      "tool_ok": true,
+      "tool_ok": false,
       "args_ok": false,
-      "wrong_args": [
-        "category"
-      ],
+      "wrong_args": [],
       "text": ""
     },
     {
@@ -359,20 +272,6 @@
       "args_ok": false,
       "wrong_args": [],
       "text": "Capito, un budget di circa 60 € per il gruppo. Ecco due opzioni che potrebbero aiutarlo con la schiena:\n\n**Laptop Stand, Folding** · €64 · spedisce in 3 giorni\nAiuta a mantenere una postura corretta d"
-    },
-    {
-      "id": "l2-142",
-      "kind": "positive",
-      "tool": "search_products",
-      "args": {
-        "query": "kindle"
-      },
-      "tool_ok": true,
-      "args_ok": false,
-      "wrong_args": [
-        "query"
-      ],
-      "text": ""
     }
   ]
 }

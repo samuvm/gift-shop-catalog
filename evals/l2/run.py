@@ -16,6 +16,7 @@ Case schema (one JSON object per line):
     message, expect {tool | null, accept_tools [..], args {name: matcher}}, why
 Matchers: {"eq": v} · {"between": [lo, hi]} · {"any_of": [..]} · {"words": [[..], [..]]}
 (at least one word of each group, case-insensitive substring) · {"absent": true}.
+Only the matchers for parameters of the tool actually called are checked.
 """
 
 import argparse
@@ -30,11 +31,13 @@ from typing import Any
 from fastapi.testclient import TestClient
 
 from catalog.api.app import create_app
+from catalog.tools import TOOLS
 
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 PROMPT = ROOT / "agent" / "system-prompt.md"
 REPORT = ROOT / "evals" / "reports" / "l2-latest.json"
+PARAMS = {t.name: {p.name for p in t.params} for t in TOOLS}
 MODEL = "gemma4:26b-mlx"
 OLLAMA = "http://localhost:11434/api/chat"
 TODAY = "Saturday 2026-10-31"
@@ -125,7 +128,10 @@ def score(case: dict[str, Any], message: dict[str, Any]) -> dict[str, Any]:
     expect = case["expect"]
     accepted = [expect["tool"], *expect.get("accept_tools", [])]
     tool_ok = tool in accepted
-    wrong = [k for k, rule in expect.get("args", {}).items() if not matches(args.get(k), rule)]
+    # Only the arguments the called tool has: a case that accepts two tools lists the arguments of
+    # either, and the other tool cannot be failed for lacking them.
+    rules = {k: r for k, r in expect.get("args", {}).items() if k in PARAMS.get(tool or "", set())}
+    wrong = [k for k, rule in rules.items() if not matches(args.get(k), rule)]
     return {
         "id": case["id"],
         "kind": case["kind"],

@@ -8,6 +8,7 @@ that does not exist is an error here, not a silent miss in the evaluation.
 """
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -49,6 +50,17 @@ def check(case: dict[str, Any], ids: set[str]) -> list[str]:
     return problems
 
 
+def reviewed() -> dict[str, str]:
+    """The reviewer's comment per source turn, from the current sheet, so a rebuild keeps it."""
+    path = HERE / "REVIEW.md"
+    if not path.exists():
+        return {}
+    found = re.findall(
+        r"^## l2-\d+ · \w+ · (\S+) .*?^Review: ?(.*?)$", path.read_text(encoding="utf-8"), re.M | re.S
+    )
+    return {source: comment.strip() for source, comment in found if comment.strip()}
+
+
 def main() -> None:
     catalog = json.loads((ROOT / "data" / "build" / "catalog.json").read_text(encoding="utf-8"))
     ids = {p["product_id"] for p in catalog["products"]}
@@ -64,6 +76,7 @@ def main() -> None:
             cases.append(case)
     if errors:
         raise SystemExit("invalid cases:\n  " + "\n  ".join(errors))
+    previous = reviewed()
     report_path = ROOT / "evals" / "reports" / "l2-latest.json"
     failures = {}
     if report_path.exists():
@@ -84,7 +97,8 @@ def main() -> None:
             "",
         ]
     # Failing cases first: a wrong label must be fixed before the prompt is tuned against it.
-    for case in sorted(numbered, key=lambda c: c["id"] not in failures):
+    # Reviewed cases go last, so what is still pending stays at the top.
+    for case in sorted(numbered, key=lambda c: (c["source"] in previous, c["id"] not in failures)):
         expect = case["expect"]
         accepted = " or ".join(str(t) for t in [expect["tool"], *expect.get("accept_tools", [])])
         review += [f"## {case['id']} · {case['kind']} · {case['source']} ({case['language']})", ""]
@@ -101,11 +115,14 @@ def main() -> None:
             review.append(f"- **model did ({what}):** {did}")
             if not f["tool"] and f["text"]:
                 review.append(f"  - *its reply began:* {f['text'][:160]}")
-        review += ["", "Review: ", ""]
+        review += ["", f"Review: {previous.get(case['source'], '')}", ""]
     (HERE / "cases.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
     (HERE / "REVIEW.md").write_text("\n".join(review), encoding="utf-8")
     kinds = {k: sum(c["kind"] == k for c in cases) for k in sorted(KINDS)}
-    print(f"{len(cases)} cases from {len(drafts)} drafts -> cases.jsonl, REVIEW.md · {kinds}")
+    print(
+        f"{len(cases)} cases from {len(drafts)} drafts -> cases.jsonl, REVIEW.md · {kinds} · "
+        f"{len(previous)} reviewed"
+    )
 
 
 if __name__ == "__main__":
