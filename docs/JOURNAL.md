@@ -554,3 +554,38 @@ domain harness and the HTTP harness all updated; level-1 v4.
 
 274 tests. 9 cases changed and go back to review: 3 only gain `allowed_values`, and the other 6
 change in exactly the way the comments asked.
+
+### Block 11 · Deployment on Coolify, measured from outside (≈ 1 h, mostly Samuel's hands)
+
+**Starting point:** the image had been built and run locally, but never deployed. Samuel created
+the resource in Coolify (v4.5.3) through a new GitHub App with access to this repository only.
+The app another project uses was left as it was.
+
+**Initial approach → conclusion:** I wrote the deployment guide assuming Coolify's own
+healthcheck was harmless. It was not. The first deployment built and started (`Uvicorn running
+on 0.0.0.0:8000`) and was then rolled back. Coolify's healthcheck runs `curl` or `wget` inside
+the container, and the slim image ships neither: `curl: not found`, then *New container is not
+healthy, rolling back*. It also probed `/`, not `/health`. The image already declares its own
+`HEALTHCHECK` in Python, so the fix was to switch Coolify's off, not to add curl to the image
+for it. The same log showed the domain saved as `http://`, so no certificate was requested.
+With both corrected, the second deployment went live with a Let's Encrypt certificate on
+`https://catalog.178.18.243.118.sslip.io`. The URL exposes the server's IP. That was a known,
+accepted trade-off of using sslip.io instead of a domain; it will be noted in the README.
+
+**Numbers** (from the client machine, over the public URL):
+
+| Goal | Value | Command |
+|---|---|---|
+| G-LATENCY-P95 | 264.8 ms, worst p95 of 3 runs × 20 calls (≤ 300) | `make latency URL=…` |
+| G-PUBLIC-CHECK | 6/6: HTTPS, spec without key, 401 without and with a wrong key, 200 with the key, test page up | `make check-public URL=…` |
+| G-L1-EXACT | 74/74 against the deployment | `CATALOG_URL=… make eval-l1` |
+
+The latency margin is narrow, but the measurement is deliberately pessimistic: every call opens
+a new TCP and TLS connection. One call to `/health` breaks down as 50 ms to connect, 73 ms of
+TLS handshake, and about 107 ms to the first byte. The search itself takes 0.36 ms in process.
+A client that keeps the connection open, as the platform's HTTP client normally does, saves
+the handshake on every call after the first.
+
+All phase-1 goals now pass: ingest clean (0 pending) and 11/11 seeded anomalies stopped; 74/74
+level-1 cases; 622 / 1,046 tokens; spec lint 0; auth 12/12; secrets 0; coverage 99.58%;
+layer violations 0; latency 264.8 ms.

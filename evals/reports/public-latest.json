@@ -1,0 +1,12 @@
+{
+  "base_url": "https://catalog.178.18.243.118.sslip.io",
+  "checks": {
+    "https": true,
+    "spec_reachable_without_key": true,
+    "401_without_key": true,
+    "401_with_wrong_key": true,
+    "200_with_key": true,
+    "test_page_up": true
+  },
+  "pass_rate": 1.0
+}

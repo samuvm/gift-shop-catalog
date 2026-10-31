@@ -3,7 +3,7 @@
   "n_cases": 74,
   "max_tokens_default_page": 622,
   "max_tokens_max_page": 1046,
-  "target": "in-process",
+  "target": "https://catalog.178.18.243.118.sslip.io",
   "failures": [],
   "tokens_by_case": {
     "l1-001": 1235,
