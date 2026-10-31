@@ -325,9 +325,11 @@ GET_PRODUCTS_BY_CATEGORY = Tool(
     path="/categories/{category}/products",
     summary="Browse one category, with optional filters.",
     description=(
-        "Lists products in one category. Use it when the shopper names or picks a category ('something for "
-        "the kitchen', 'show me jewellery') or asks for more of one. To find products from a description "
-        "across all categories, use search_products instead.\n\n"
+        "Lists products in one of the shop's 11 categories (the values of `category`). Use it when the "
+        "shopper names or picks one of them ('something for the kitchen', 'show me jewellery') or asks for "
+        "more of one. If the shopper's word is not one of those categories ('garden', 'candles', 'gadgets'), "
+        "do not pick the nearest category: use search_products with that word. To find products from a "
+        "description across all categories, use search_products too.\n\n"
         "Returns up to `limit` products (default 5), in stock, best rated first unless `sort` says "
         "otherwise. "
         "Each product has its price, availability, rating, who it suits, occasions, shipping days, gift wrap "
@@ -342,9 +344,9 @@ GET_PRODUCTS_BY_CATEGORY = Tool(
             "category",
             "path",
             {"type": "string", "enum": SLUGS},
-            "Category slug, as listed by get_categories. Names in other spellings "
-            "('Kitchen and Dining') or a "
-            "single word ('kitchen') are also accepted.",
+            "Category slug, as listed by get_categories. Names in other spellings ('Kitchen and Dining') "
+            "or a single word ('kitchen') are also accepted. If the shopper's word is none of these "
+            "categories, call search_products with it instead of choosing the nearest one.",
             required=True,
         ),
         Param(

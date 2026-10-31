@@ -60,7 +60,9 @@ def _operation(tool: Tool, ctx: Context) -> dict[str, Any]:
         )
     return {
         "operationId": tool.name,
-        "summary": tool.summary,
+        # The platform imports `summary` as the tool description the model reads, and drops
+        # `description`; both carry the full text so no client loses the guidance.
+        "summary": tool.description,
         "description": tool.description,
         "parameters": [
             {

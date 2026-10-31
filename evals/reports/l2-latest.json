@@ -1,13 +1,13 @@
 {
   "model": "gemma4:26b",
-  "recording": "evals/l2/recordings/gemma4-26b__prompt-051d2feb__tools-09b2db5c.jsonl",
+  "recording": "evals/l2/recordings/gemma4-26b__prompt-051d2feb__tools-75e51725.jsonl",
   "n": 150,
   "n_negative": 36,
-  "tool_accuracy": 0.8667,
-  "args_accuracy": 0.9412,
+  "tool_accuracy": 0.8733,
+  "args_accuracy": 0.9535,
   "negative_false_call_rate": 0.0,
   "replay_mismatches": 0,
-  "seconds_calling_model": 0,
+  "seconds_calling_model": 184.3,
   "failures": [
     {
       "id": "l2-003",
@@ -41,8 +41,8 @@
       "tool": "search_products",
       "args": {
         "max_price": 100,
-        "recipient": "her",
-        "query": "gift"
+        "occasion": "graduation",
+        "recipient": "her"
       },
       "tool_ok": true,
       "args_ok": false,
@@ -59,7 +59,7 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "No tengo ninguna agenda para 2027 en el catálogo. ¿Te gustaría que buscara algún otro tipo de regalo para tu tío, como algo de tecnología o juegos?"
+      "text": "No tenemos agendas para el año 2027 en la tienda. ¿Te gustaría que buscara algún otro tipo de regalo para tu tío, como algo de tecnología o juegos?"
     },
     {
       "id": "l2-028",
@@ -77,16 +77,18 @@
       "text": ""
     },
     {
-      "id": "l2-029",
+      "id": "l2-030",
       "kind": "positive",
       "tool": "search_products",
       "args": {
-        "query": "bath candle relaxation tea"
+        "max_price": 50,
+        "query": "pen",
+        "recipient": "him"
       },
       "tool_ok": true,
       "args_ok": false,
       "wrong_args": [
-        "recipient"
+        "max_price"
       ],
       "text": ""
     },
@@ -98,7 +100,7 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "Como lleva barba, he quitado la maquinilla de afeitar. Aquí tienes otras opciones:\n\n**Burr Coffee Grinder, Manual** · 115 € · 3 días\nIdeal si le gusta el buen café por la mañana.\n\n**Chess Set, Weighte"
+      "text": "Como lleva barba, el Safety Razor Set (BW-007, 89 €) es ideal para su cuidado. También tienes el Burr Coffee Grinder, Manual (KD-006, 115 €) o el Chess Set, Weighted (GP-009, 145 €).\n\n¿Te gustaría ver"
     },
     {
       "id": "l2-039",
@@ -108,7 +110,7 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "Entiendo. Como la vela de higo está agotada, tengo estas opciones de velas por menos de 40 € que podrían gustarle:\n\n**Ember Ceramic Candle** · €42 · 3 días\nSe pasa solo por 2 €, es una vela muy bien v"
+      "text": "Entiendo. Como la de higo está agotada, tengo estas opciones de velas por menos de 40 € que podrían gustarle:\n\n**Ember Ceramic Candle** · €42 · envía en 3 días\nSe pasa solo por 2 €, es una vela muy va"
     },
     {
       "id": "l2-040",
@@ -118,7 +120,7 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "El Trio Votive Set (HL-005) tarda 4 días en enviarse. Si lo pides hoy, no llegaría para este miércoles. ¿Quieres que busque otras opciones que lleguen antes?"
+      "text": "El Trio Votive Set (HL-005) tarda 4 días en enviarse. Si lo pides hoy, llegaría el viernes. ¿Quieres que te ayude con algo más?"
     },
     {
       "id": "l2-043",
@@ -150,7 +152,7 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "Per chi è il regalo? E hai qualche idea su cosa gli potrebbe piacere?"
+      "text": "Per chi è il regalo e che tipo di cose gli piacciono?"
     },
     {
       "id": "l2-085",
@@ -160,7 +162,7 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "No tengo información sobre los horarios de apertura o festivos de la tienda. Le sugiero que contacte con el servicio de atención al cliente de la tienda para esa consulta.\n\nEn cuanto a la agenda para "
+      "text": "No tengo información sobre los horarios de apertura o festivos de la tienda. Le sugiero contactar con el servicio de atención al cliente de la tienda para esa consulta.\n\nEn cuanto a la agenda para su "
     },
     {
       "id": "l2-102",
@@ -170,14 +172,14 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "Ciao. Posso aiutarti solo con i regali presenti nel nostro catalogo.\n\nPer trovare il regalo perfetto per la laurea di tuo fratello, mi servirebbe sapere quanto vorresti spendere indicativamente."
+      "text": "Ciao. Posso aiutarti solo con i regali presenti nel nostro catalogo.\n\nPer trovare il regalo perfetto per la laurea di tuo fratello, mi servirebbe sapere un budget indicativo. Hai già in mente un tipo "
     },
     {
       "id": "l2-118",
       "kind": "positive",
       "tool": "search_products",
       "args": {
-        "query": "slate cheese board"
+        "query": "slate cheese board set"
       },
       "tool_ok": false,
       "args_ok": false,
@@ -192,7 +194,7 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "Tienes razón, el ambiente es parecido. Si quieres evitar cualquier cosa que se queme, ¿qué te parece algo más práctico o decorativo?\n\nPara saber qué buscar, ¿tienes un presupuesto máximo en mente?"
+      "text": "Tienes razón, es un ambiente parecido. Si quieres evitar aromas y fuego por completo, ¿qué te parece algo más práctico o de otro estilo?\n\nPara ayudarte mejor, ¿tienes un presupuesto máximo para el reg"
     },
     {
       "id": "l2-120",
@@ -202,7 +204,7 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "Capito, niente tè allora. Ecco tre opzioni a tema caffè o comunque molto eleganti, tra i 35 e i 55 EUR, perfette per Natale:\n\n**Coffee Lover's Set** · €48 · spedisce in 3 giorni\nUn set perfetto per ch"
+      "text": "Capito, niente tè allora. Ecco tre opzioni a tema caffè o comunque molto eleganti, restando nel tuo budget per Natale:\n\n**Coffee Lover's Set** · €48 · spedisce in 3 giorni\nPerfetto per chi non può far"
     },
     {
       "id": "l2-131",
@@ -212,7 +214,7 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "Ecco le opzioni disponibili tra i 60 e i 70 EUR:\n\n**Laptop Stand, Folding** · €64 · spedisce in 3 giorni\nPratico e pieghevole, perfetto per studiare in biblioteca o in camera.\n\n**Power Bank 20000mAh**"
+      "text": "Ecco le opzioni disponibili tra i 60 e i 70 EUR:\n\n**Laptop Stand, Folding** · €64 · spedisce in 3 giorni\nPratico per studiare comodamente in biblioteca o in camera.\n\n**Power Bank 20000mAh** · €69 · sp"
     },
     {
       "id": "l2-132",
@@ -222,7 +224,7 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "Perfecto, aquí tienes unas opciones que unen vuestros gustos:\n\n**Enamel Casserole 24cm** · 189 € · envía en 3 días\nIdeal para que ella cocine platos espectaculares y tú los disfrutes.\n\n**Cast Iron Ski"
+      "text": "Perfecto, aquí tienes unas opciones que unen vuestras pasiones:\n\n**Enamel Casserole 24cm** · 189 € · envía en 3 días\nIdeal para que ella cocine platos espectaculares y tú los disfrutes.\n\n**Cast Iron S"
     },
     {
       "id": "l2-133",
@@ -252,7 +254,7 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "**Brass Picture Frame 13x18** · €39 · ships in 3 days\nEs un marco elegante de latón, ideal para una foto familiar de los nietos.\n\n¿Quieres que busque otros modelos de marcos o prefieres ver detalles d"
+      "text": "**Brass Picture Frame 13x18** · 39 € · se envía en 3 días\nEs un detalle clásico y elegante para que luzca la foto de todos sus nietos.\n\n¿Quieres que busque otros modelos de marcos o prefieres ver algo"
     },
     {
       "id": "l2-139",
@@ -262,32 +264,7 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "I hear you. Since they'll likely be exhausted, how about something to help them relax or stay caffeinated?\n\n**Lavender Scented Candle** · €18.50 · ships in 3 days\nPerfect for a little moment of calm.\n"
-    },
-    {
-      "id": "l2-140",
-      "kind": "positive",
-      "tool": "search_products",
-      "args": {
-        "max_price": 65,
-        "query": "back massage neck relief"
-      },
-      "tool_ok": true,
-      "args_ok": false,
-      "wrong_args": [
-        "max_price"
-      ],
-      "text": ""
-    },
-    {
-      "id": "l2-150",
-      "kind": "positive",
-      "tool": null,
-      "args": {},
-      "tool_ok": false,
-      "args_ok": false,
-      "wrong_args": [],
-      "text": "**Magnetic Wallet Stand** · €45 · ships in 3 days\nA sleek, practical accessory for a busy professional on the move.\n\nShall I check the details for you?"
+      "text": "I hear you. Since they'll likely be exhausted, here are a few things to help them relax or stay fueled:\n\n**Lavender Scented Candle** · €18.50 · ships in 3 days\nPerfect for creating a calm atmosphere w"
     }
   ]
 }
