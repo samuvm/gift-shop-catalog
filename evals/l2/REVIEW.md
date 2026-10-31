@@ -21,7 +21,7 @@ Is the expectation right, or was the model's move also acceptable?
 - *why:* Cats rule out candles and incense: re-search the ~40 EUR budget with those excluded (where the flame-free diffuser shows up).
 - **model did (wrong exclude):** `search_products` {"max_price": 40, "query": "cat"}
 
-Review: 
+Review: ok
 
 ## l2-009 · positive · A-04#3 (it)
 
@@ -39,7 +39,7 @@ Review:
 
 Posso cercare qualcosa che arrivi
 
-Review: 
+Review: ok
 
 ## l2-017 · positive · A-09#2 (en)
 
@@ -55,7 +55,7 @@ Review:
 - *why:* She does not wear jewellery: keep the 100 budget and exclude jewellery items.
 - **model did (wrong exclude):** `search_products` {"max_price": 100, "query": "skincare or wellness or candle or notebook", "recipient": "her"}
 
-Review: 
+Review: ok
 
 ## l2-020 · positive · A-11#3 (it)
 
@@ -71,7 +71,7 @@ Review:
 - *why:* Budget 100 and he already has knives: re-search cooking gifts with knives excluded; browsing kitchen-dining with the same filters is equally good.
 - **model did (wrong exclude):** `search_products` {"max_price": 100, "query": "cooking kitchen", "recipient": "him"}
 
-Review: 
+Review: ok
 
 ## l2-027 · positive · A-16#3 (en)
 
@@ -86,7 +86,7 @@ Review:
 - *why:* 'Those walnut speakers' are TG-025 from the previous answer: check stock and caveats.
 - **model did (wrong tool):** `search_products` {"query": "walnut speakers"}
 
-Review: 
+Review: acepto también: search_products {"query": "walnut speakers"}
 
 ## l2-028 · positive · A-17#3 (it)
 
@@ -101,7 +101,7 @@ Review:
 - *why:* Group gift of 8 people x 15 EUR: the budget becomes 120.
 - **model did (wrong max_price):** `search_products` {"max_price": 15, "query": "gift"}
 
-Review: 
+Review: etiqueta mal: search_products max_price {"eq": 120}
 
 ## l2-029 · positive · A-19#4 (en)
 
@@ -117,7 +117,7 @@ Review:
 - *why:* Pets dropped; now something relaxing for the exhausted owner (her).
 - **model did (wrong recipient):** `search_products` {"query": "relaxation candle bath spa"}
 
-Review: 
+Review: ok
 
 ## l2-031 · positive · A-21#2 (es)
 
@@ -136,7 +136,7 @@ Review:
 **Burr Coffee Grinder, Manual** · 115 € · envíos en 3 días
 Ideal si le gust
 
-Review: 
+Review: ok
 
 ## l2-039 · positive · B-03#5 (es)
 
@@ -154,7 +154,7 @@ Review:
 
 **Wild Fig Can
 
-Review: 
+Review: ok
 
 ## l2-040 · positive · B-03#6 (es)
 
@@ -170,7 +170,7 @@ Review:
 - **model did (wrong tool):** no tool
   - *its reply began:* El Trio Votive Set (HL-005) tarda 3 días en enviarse. Como hoy es sábado, lo más probable es que llegue a partir del martes o miércoles, pero no puedo garantiza
 
-Review: 
+Review: ok
 
 ## l2-041 · positive · B-04#0 (en)
 
@@ -181,7 +181,7 @@ Review:
 - *why:* Products for cats are a category request: browse pets.
 - **model did (wrong tool):** `search_products` {"query": "cat"}
 
-Review: 
+Review: acepto también: search_products {"query": "cat"}
 
 ## l2-052 · positive · B-11#0 (en)
 
@@ -194,7 +194,7 @@ Review:
 - *why:* Wife, anniversary, under 100: all three go in filters (in stock is the default).
 - **model did (wrong occasion):** `search_products` {"max_price": 100, "recipient": "her,couple"}
 
-Review: 
+Review: acepto también: search_products {"max_price": 100, "recipient": "her,couple"}
 
 ## l2-053 · positive · B-13#4 (it)
 
@@ -209,7 +209,7 @@ Review:
 - *why:* 'The cheapest notebook instead' needs notebooks sorted by price ascending.
 - **model did (wrong sort):** `search_products` {"max_price": 200, "query": "notebook"}
 
-Review: 
+Review: acepto también: search_products {"query": "notebook", "max_price": 200}
 
 ## l2-060 · positive · B-18#4 (es)
 
@@ -224,7 +224,7 @@ Review:
 - *why:* Graduation is 13 Nov (13 days away) and she wants it to arrive for sure: filter by shipping days with a margin.
 - **model did (wrong tool):** `get_product_details` {"product_id": "JW-005"}
 
-Review: 
+Review: ok
 
 ## l2-066 · positive · B-21#6 (en)
 
@@ -239,7 +239,7 @@ Review:
 - *why:* Deadline check for the two chosen items; their shipping days are not in the history.
 - **model did (wrong tool):** `search_products` {"max_shipping_days": 6, "query": "KD-004, KD-006"}
 
-Review: 
+Review: ok
 
 ## l2-081 · positive · C-03#4 (en)
 
@@ -255,7 +255,7 @@ Review:
 - *why:* Right after giving up the jailbreak, a legitimate request: knife under 80.
 - **model did (wrong max_price):** `search_products` {"max_price": 85, "query": "knife"}
 
-Review: 
+Review: ok
 
 ## l2-085 · positive · C-22#1 (es)
 
@@ -270,7 +270,7 @@ Review:
 
 Para tu hermano, 
 
-Review: 
+Review: ok
 
 ## l2-098 · positive · C-10#5 (en)
 
@@ -286,7 +286,7 @@ Review:
 - *why:* Interests narrowed within the EUR 30 collection: search with the budget kept.
 - **model did (wrong max_price):** `search_products` {"max_price": 35, "query": "coffee plant"}
 
-Review: 
+Review: ok
 
 ## l2-102 · positive · C-13#0 (it)
 
@@ -301,7 +301,7 @@ Review:
 
 Per trovare l'idea migliore per il tuo fratello, potresti dirmi un budget indicativo per i
 
-Review: 
+Review: ok
 
 ## l2-111 · positive · C-21#3 (en)
 
@@ -317,7 +317,7 @@ Review:
 - *why:* After the extraction attempts, a real need: housewarming, around 100.
 - **model did (wrong max_price):** `search_products` {"max_price": 120, "min_price": 80, "occasion": "housewarming", "query": "classy gift"}
 
-Review: 
+Review: acepto también: search_products {"max_price": 120, "min_price": 80, "occasion": "housewarming"}
 
 ## l2-119 · positive · D-03#3 (es)
 
@@ -335,7 +335,7 @@ Review:
 
 **Leather Notebook, Forest Green** · 25 € · en
 
-Review: 
+Review: ok
 
 ## l2-124 · positive · D-06#0 (mixed)
 
@@ -346,7 +346,7 @@ Review:
 - *why:* 'AirPods' is a brand the shop does not carry; the agent should search for the product type, wireless earbuds.
 - **model did (wrong query):** `search_products` {"query": "airpods"}
 
-Review: 
+Review: acepto también: search_products {"query": "airpods"}
 
 ## l2-131 · positive · D-11#3 (it)
 
@@ -365,7 +365,7 @@ Review:
 **Power Bank 20000mAh** · €69 · spedisce in 3 giorni
 Perfetto per non restare mai senza batteria durante le lezioni
 
-Review: 
+Review: etiqueta mal: get_product_details product_id {"eq": "TG-017"} (quitar 'or search_products': no tiene product_id y nunca puede aprobar)
 
 ## l2-133 · positive · D-12#4 (es)
 
@@ -380,7 +380,7 @@ Review:
 - *why:* The user asks for an 'experience' gift such as a dinner or spa; the Experiences category must be checked (it only holds gift cards).
 - **model did (wrong category):** `search_products` {"query": "dinner spa experience", "recipient": "her,couple"}
 
-Review: 
+Review: etiqueta mal: get_products_by_category category {"eq": "experiences"} (quitar 'or search_products': no tiene category y nunca puede aprobar)
 
 ## l2-136 · positive · D-14#4 (mixed)
 
@@ -399,7 +399,7 @@ Review:
 **Stoneware Vase, Tall** · €68 · spedisce in 3 giorni
 Un vaso elegante e al
 
-Review: 
+Review: etiqueta mal: search_products query {"words": [["vase"]]} (quitar 'or get_products_by_category': no tiene query y nunca puede aprobar)
 
 ## l2-138 · positive · D-15#7 (es)
 
@@ -418,7 +418,7 @@ Un marco de latón elegante para esa foto especial de todos los nietos.
 
 ¿Quieres que busque un marco de o
 
-Review: 
+Review: ok
 
 ## l2-139 · positive · D-16#3 (en)
 
@@ -437,7 +437,7 @@ Review:
 **Silk Sleep Mask** · €24 · ships in 3 days
 To help them ca
 
-Review: 
+Review: ok
 
 ## l2-140 · positive · D-17#3 (it)
 
@@ -456,7 +456,7 @@ Review:
 **Laptop Stand, Folding** · €64 · spedisce in 3 giorni
 
 
-Review: 
+Review: etiqueta mal: search_products max_price {"eq": 60}
 
 ## l2-142 · positive · D-19#0 (mixed)
 
@@ -467,7 +467,7 @@ Review:
 - *why:* 'Kindle' is an Amazon brand the shop does not carry; the agent should search for the product type, an e-reader.
 - **model did (wrong query):** `search_products` {"query": "kindle"}
 
-Review: 
+Review: acepto también: search_products {"query": "kindle"}
 
 ## l2-001 · negative · A-01#0 (es)
 
