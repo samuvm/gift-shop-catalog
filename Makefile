@@ -21,6 +21,12 @@ spec-lint: ## Lint the served OpenAPI against the platform's rules (G-SPEC-LINT)
 eval-l1: ## Level-1 cases over HTTP, exact match and response tokens (G-L1-EXACT, G-RESP-TOKENS-*)
 	$(UV) python evals/golden/l1/run.py
 
+eval-l2: ## Level-2 cases replayed from the recorded model responses (G-L2-TOOL, G-L2-ARGS, G-L2-NEG-FALSE-CALL, G-L2-REPRODUCIBLE)
+	$(UV) python evals/l2/run.py
+
+eval-l2-refresh: ## Level 2 calling the local model (Ollama, gemma4:26b) for cases without a recording
+	$(UV) python evals/l2/run.py --refresh
+
 secrets: ## Secrets in tracked files that are not in the reviewed baseline (G-SECRETS)
 	$(UV) python scripts/secrets_check.py
 
@@ -47,4 +53,4 @@ golden-l1: ## Rebuild level-1 cases from the reference semantics (evals/golden/l
 audit-csv: ## Independent audit of the raw export (stdlib only)
 	python3 -I scripts/audit_csv.py data/gift-shop-catalog.csv
 
-.PHONY: help lint typecheck test spec-lint eval-l1 secrets run latency check-public gate-fast ingest eval-ingest golden-l1 audit-csv
+.PHONY: help lint typecheck test spec-lint eval-l1 eval-l2 eval-l2-refresh secrets run latency check-public gate-fast ingest eval-ingest golden-l1 audit-csv
