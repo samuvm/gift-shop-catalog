@@ -637,3 +637,41 @@ The run also showed why a platform guardrail matters here. The tools only read, 
 can only read the public catalogue. The real risk is the model inventing a product or a policy.
 The platform's *Hallucination* guardrail targets exactly that, and it goes into the platform
 configuration.
+
+### Block 13 · Reviewing the failures, and deciding what "good enough" means (≈ 30 min)
+
+**Starting point:** Samuel reviewed the 29 cases the model failed with prompt v2. He found 17
+real model failures, 7 cases where the model's move was also acceptable, and 5 wrong labels.
+Three of the wrong labels exposed a **bug in the evaluator**, not in the labels. When a case
+accepted two tools, the expected arguments of one were also required of the other, so the
+alternative could never pass. For example, `product_id` was required of a `search_products`
+call. The scorer now checks only the parameters of the tool actually called.
+
+**Numbers** (prompt v2 re-scored from its recording; the model was not called again):
+
+| Goal | Before review | After review | Threshold |
+|---|---|---|---|
+| G-L2-TOOL | 89.3% | **90.0%** (135/150, 95% CI 84.7–94.7%) | ≥ 90% |
+| G-L2-ARGS | 85.6% | **92.3%** | ≥ 85% |
+| G-L2-NEG-FALSE-CALL | 0% | 0% | ≤ 5% |
+| G-L2-REPRODUCIBLE | 0 | 0 | 0 |
+
+The goal now passes because labels and the scorer were corrected, not because the model got
+better. That distinction is recorded here on purpose. 12 of the 15 remaining failures are the
+same pattern: answering from memory without a tool.
+
+**Decision: no prompt v3 for now.** Three reasons:
+- The brief asks for no accuracy figure. It asks that the agent holds up in six scenarios,
+  explains its recommendations, presents them well on a phone and leaves off-topic
+  conversations cleanly. The level-2 goal is our own quality gate.
+- More prompt rules tuned on the same 150 cases would start fitting the test.
+- The remaining pattern is what the platform's *Hallucination* guardrail and the Simulations
+  will exercise with the production model.
+
+A v3 is reopened only if the Playground or the Simulations show the agent answering from
+memory. The 121 cases that passed are still unreviewed; that does not block anything.
+
+**Working rule from here, agreed with Samuel:** follow the process, test what matters, state
+plainly what each step achieves, and do not spend disproportionate time on marginal gains.
+Every platform step is written down before and after it is done, with the reason for each
+choice.
