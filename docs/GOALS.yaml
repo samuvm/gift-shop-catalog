@@ -141,7 +141,7 @@ goals:
     artifact: "evals/reports/l2-latest.json :: tool_accuracy"
     blocking_from_phase: 2
     kind: core
-    requires: [OPENAI_API_KEY]
+    requires: [ollama gemma4:26b]
     paired_with: G-L2-NEG-FALSE-CALL
 
   - id: G-L2-ARGS
@@ -151,7 +151,7 @@ goals:
     artifact: "evals/reports/l2-latest.json :: args_accuracy"
     blocking_from_phase: 2
     kind: core
-    requires: [OPENAI_API_KEY]
+    requires: [ollama gemma4:26b]
 
   - id: G-L2-NEG-FALSE-CALL
     name: Off-topic level-2 cases where the model calls a catalogue tool anyway
@@ -160,7 +160,7 @@ goals:
     artifact: "evals/reports/l2-latest.json :: negative_false_call_rate"
     blocking_from_phase: 2
     kind: core
-    requires: [OPENAI_API_KEY]
+    requires: [ollama gemma4:26b]
     paired_with: G-L2-TOOL
 
   - id: G-L2-REPRODUCIBLE
