@@ -713,3 +713,43 @@ Arguments stay at 90–95% and no negative case calls a tool, in all four runs.
 - No more prompt iterations on these 150 cases. The remaining failures are the same pattern,
   answering from memory, and the platform's Hallucination guardrail and the production model
   are the levers for it.
+
+### Block 15 · First connection to the platform, configured step by step (≈ 2 h 15 min, with Samuel)
+
+**Starting point:** prompt v3, a guide written from the official documentation, and a deployed
+service. Samuel did every platform step by hand from a chat guide, one step at a time, and sent
+screenshots after each. The full configuration and its reasons are in `docs/PLATFORM.md`.
+
+**What the platform taught us**, each found on screen and acted on:
+
+- **It reads `summary`, not `description`.** The first import gave the model one-line
+  summaries. Samuel pasted the long descriptions by hand, and the JSON editor then showed them
+  stored as `summary`. The served spec now puts the full text in both fields, so a fresh import
+  needs no hand edits. An evaluator importing our spec would have hit the same trap.
+- **An enum can stop the model from searching.** In Preview, "show me the garden category" made
+  the model pick `outdoor-travel`, the nearest value of the category enum, and never send
+  "garden". Our 404 for "garden" would have named home-living / Garden. The browse tool and its
+  parameter now tell the model to search when the shopper's word is not a category. Level 2
+  re-measured on gemma4:26b: 87.3% tool choice, 95.3% arguments, 0% negatives calling a tool. In
+  a fresh conversation the same request returned the two planters and the herb garden kit.
+- **Error bodies do reach the model**, an open question since F1. The debug view redacts
+  response bodies, so it was checked by behaviour. With "lamps in home and living", the agent
+  got the 404 for `Lamps` and called again with `Lighting`, the subcategory the error names.
+- **Evaluators and guardrails are not in this workspace.** The Hallucination guardrail planned
+  for the "answers from memory" risk is therefore not available. The prompt rule that every
+  product fact must come from a tool call covers it. The Security layer is on, in Shadow mode.
+- **Coolify did not redeploy on push.** Samuel redeployed by hand. Auto-deploy is worth
+  switching on.
+
+**First Simulations run** (gpt-4.1-mini, on the draft): core **5/6**, extra **1/3**. core-1 (the
+vague shopper) failed: more than two questions, the budget asked twice, a single product. The
+two extra failures concern a deadline not presented as an estimate, and "show me more" repeating
+products. The judge also flagged a material that is in the product record, which needs checking
+in the transcript. G-SIM-CORE needs 6/6, so this is the first item for tomorrow.
+
+**Published** on 1 Nov. On the test page, the chef's-knife request and the returns question
+behave as designed. A Spanish request was answered in English: the second item for tomorrow.
+
+Deliberately left for the next session, with Samuel: the transcripts of the three failures, a
+prompt v4 aimed only at what they show, re-running the core suite, the widget's home texts, and
+the regenerated perimeter.

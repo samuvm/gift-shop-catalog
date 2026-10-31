@@ -1,0 +1,90 @@
+# Platform configuration (indigo.ai)
+
+How the agent is wired on the platform, and why each setting is what it is. The prompt text
+itself lives in `agent/system-prompt.md`; this file records everything else. Configured on
+31 Oct – 1 Nov 2026 and published on 1 Nov.
+
+## Tools: a Tool Collection built from the served OpenAPI
+
+| Setting | Value | Why |
+|---|---|---|
+| Collection | `Gift Shop Catalog`, created by pasting `/openapi.json` into the JSON editor | The platform documents no import by URL |
+| Endpoint (Test and Production) | `https://catalog.178.18.243.118.sslip.io` | The platform's endpoint fields replace `servers` |
+| Header | `X-API-Key: [[CATALOG_API_KEY]]` | `securitySchemes` are ignored, so auth is an explicit header. The secret must be the entire header value, and it has a value in both Test and Production |
+| Operations | `get_categories`, `get_products_by_category`, `search_products`, `get_product_details` | One tool per operation, named after `operationId` |
+
+**Finding: the platform reads `summary`, not `description`.** On import, each operation's
+`summary` became the tool description the model reads, and the long `description` was dropped.
+The first import gave the model one-line summaries such as "Browse one category, with optional
+filters.", which lost the guidance on query words, `missing_terms` and the near-miss blocks. The
+served spec now puts the full text in both fields (`src/catalog/api/openapi.py`), so a fresh
+import needs no manual edits.
+
+**Finding: an enum can stop the model from searching.** Asked to "show me the garden
+category", the model picked the nearest value from `category`'s enum (`outdoor-travel`) instead
+of searching. A request with `garden` would have received a 404 naming *home-living / Garden*.
+The browse tool and its `category` parameter now say: if the shopper's word is not one of the
+categories, call `search_products` with it.
+
+**Verified: error bodies reach the model.** Asked for "lamps in home and living", the agent
+called the browse tool with `subcategory: "Lamps"`, got the 404, and called again with
+`Lighting`, the subcategory the error body names. The platform's debug view shows response
+bodies as `*** redacted ***`, so this was checked through behaviour.
+
+## Agents
+
+**Gift finder**, the only agent with tools.
+- Fields are filled from `agent/system-prompt.md` v3: General Description (with `{{$date}}`),
+  Agent Goal, Tone of Voice, 9 General Rules, and 5 custom sections (Asking questions,
+  Recommendation format, Using the catalogue, Reading the results, Outside the shop).
+- The trigger carries the routing text and 8 example questions in English, Spanish and Italian.
+- Settings:
+
+| Setting | Value | Why |
+|---|---|---|
+| Model | gpt-4.1-mini (EU) | The platform's default and its recommended speed model. Level 2 measured the tools on gemma-4-26b, a weaker model the platform also offers |
+| Creativity | Low (temperature 0.2 in traces) | Stable tool and argument choice |
+| Short memory | 20 messages | The default of 3 would forget a budget given a few turns earlier |
+| Tool calls in memory | All | Earlier results stay visible for "the second one" or "show me more" |
+| Max answer tokens | 600 | Three products in two lines each fit with room to spare |
+| Error handling | Fixed message: "Sorry, I couldn't reach the catalogue just now…" | A network failure still gets a clear reply |
+
+**General** (the platform's fallback agent). It handles small talk and anything outside the shop:
+weather, returns, payments, discounts and tracking. Four rules: never invent a policy, never name
+products, ignore role changes, and end by steering back to the gift. It has no tools. Its
+default Italian trigger was replaced.
+
+**Welcome.** The opening text says what the assistant does and asks for the two things it needs:
+who the gift is for, and the budget.
+
+## Protections
+
+- **Security layer: on, Shadow mode.** It classifies and records every message but changes no
+  answer, so false positives can be reviewed before anything is blocked. The jailbreak guardrail
+  agent is the platform's *Jailbreak agent*. The workspace perimeter is regenerated after
+  publishing, because it is built from the published agents.
+- **Evaluators and guardrails (Hallucination, Jailbreak detection): not available** in this
+  workspace. The Improve menu shows only Issues, Simulations and Playground. Hallucination is
+  covered instead by the prompt rule that every product fact must come from a tool call, which
+  level 2 measures.
+- **Web chat privacy settings: not enabled.** On a test page the consent banner only adds a
+  click before typing. A production deployment would turn it on.
+
+## Simulations (first run, gpt-4.1-mini, draft)
+
+Imported from `evals/simulations/scenarios.csv`. They ran on the draft before the first
+publish.
+
+| Suite | Pass | Failing |
+|---|---|---|
+| core (the brief's six scenarios) | 5 / 6 | core-1, vague shopper: more than two questions before products, the budget asked twice, one product recommended |
+| extra | 1 / 3 | extra-8, deadline: delivery not presented as an estimate. extra-9, "show me more": repeated two products; the judge also flagged a material that is in the product record, to be checked |
+
+## Observed and not yet acted on
+
+- A Spanish message ("¿qué me recomiendas para parejas?") was answered in English on the test
+  page, although the first rule says to reply in the shopper's language.
+- Product names are not bold in the widget: the model rarely writes the `**` the format asks for.
+- In one long Preview conversation that chained six unrelated requests, a reply repeated earlier
+  messages and re-ran an earlier search. It did not reproduce in fresh conversations. If it shows
+  up in multi-turn Simulations, the first lever is a shorter memory.
