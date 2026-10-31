@@ -675,3 +675,41 @@ memory. The 121 cases that passed are still unreviewed; that does not block anyt
 plainly what each step achieves, and do not spend disproportionate time on marginal gains.
 Every platform step is written down before and after it is done, with the reason for each
 choice.
+
+### Block 14 · The prompt in the platform's shape, and two model sizes (≈ 1 h)
+
+**Starting point:** the official guide (read through a research sub-agent, every fact cited to
+its page) showed the platform has **no single prompt field**. An agent is a block of fields:
+General Description, Agent Goal, Tone of Voice, up to 10 General Rules, custom sections. The
+platform compiles them into its own prompt. It also showed two traps: Short Memory defaults to
+3 messages, and guardrails do nothing until a Control Room rule uses them.
+
+**Initial approach → conclusion:** v3 split v2's rules into those fields, so that level 2
+measures the text that will actually be pasted. On the MLX build of Gemma 26B, v3 first dropped
+from 90.0% to 85.3%. The cause was visible case by case. With "only help with gifts from this
+shop" among the general rules, the model treated "do you have AirPods?" as off-topic and
+answered without searching. That rule went back to the off-topic section, as in v2, and a line
+now says that asking whether the shop has an item is a shop question.
+
+Samuel then asked for the standard (GGUF) builds instead of MLX: `gemma4:26b`, the gate model,
+and `gemma4:12b` for comparison. A first 12B run hung on a generation that never ended. Output
+is now capped at 512 tokens, which does not affect scoring because only the first move is
+scored.
+
+| Model | Prompt v2 | Prompt v3 | v3 − v2, paired (95% CI) |
+|---|---|---|---|
+| gemma4:26b | 88.0% | 86.7% | −1.3 pts (−5.3 to +2.0): no real difference |
+| gemma4:12b | 81.3% | 88.0% | +6.7 pts (+2.7 to +11.3): clearly better |
+
+Arguments stay at 90–95% and no negative case calls a tool, in all four runs.
+
+**Decisions:**
+- **Ship v3.** It is the platform's format, it is no worse on the gate model and it helps the
+  weaker one.
+- **G-L2-TOOL is not met** with the gate model: 86.7% against 90%, after two measured attempts.
+  It stays at 90% for now. Samuel decides at the end of F2, with the production model's
+  Simulations in front of him, whether it holds or changes. The earlier 90.0% was the MLX build
+  with v2; it is not the number that counts.
+- No more prompt iterations on these 150 cases. The remaining failures are the same pattern,
+  answering from memory, and the platform's Hallucination guardrail and the production model
+  are the levers for it.
