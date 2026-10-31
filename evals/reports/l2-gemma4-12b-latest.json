@@ -1,0 +1,346 @@
+{
+  "model": "gemma4:12b",
+  "recording": "evals/l2/recordings/gemma4-12b__prompt-051d2feb__tools-09b2db5c.jsonl",
+  "n": 150,
+  "n_negative": 36,
+  "tool_accuracy": 0.88,
+  "args_accuracy": 0.8966,
+  "negative_false_call_rate": 0.0,
+  "replay_mismatches": 0,
+  "seconds_calling_model": 495.5,
+  "failures": [
+    {
+      "id": "l2-003",
+      "kind": "positive",
+      "tool": "search_products",
+      "args": {
+        "max_price": 45,
+        "query": "cat gift",
+        "recipient": "her"
+      },
+      "tool_ok": true,
+      "args_ok": false,
+      "wrong_args": [
+        "exclude"
+      ],
+      "text": ""
+    },
+    {
+      "id": "l2-009",
+      "kind": "positive",
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": "Purtroppo l'anello inciso non arriverebbe in tempo per martedì, poiché richiede circa 14 giorni totali.\n\nPosso invece suggerirti dei gioielli non personalizzati che sono già pronti per la spedizione?"
+    },
+    {
+      "id": "l2-014",
+      "kind": "positive",
+      "tool": "get_products_by_category",
+      "args": {
+        "category": "home-living",
+        "exclude": "scented,candle,diffuser,incense",
+        "recipient": "her"
+      },
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": ""
+    },
+    {
+      "id": "l2-016",
+      "kind": "positive",
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": "That's a great starting point. Since he's a runner, I can look for some high-quality gear for him.\n\nDo you have a specific budget in mind for the gift?"
+    },
+    {
+      "id": "l2-017",
+      "kind": "positive",
+      "tool": "search_products",
+      "args": {
+        "max_price": 100,
+        "query": "skincare set",
+        "recipient": "her"
+      },
+      "tool_ok": true,
+      "args_ok": false,
+      "wrong_args": [
+        "exclude"
+      ],
+      "text": ""
+    },
+    {
+      "id": "l2-020",
+      "kind": "positive",
+      "tool": "search_products",
+      "args": {
+        "max_price": 100,
+        "query": "cooking accessories",
+        "recipient": "him"
+      },
+      "tool_ok": true,
+      "args_ok": false,
+      "wrong_args": [
+        "exclude"
+      ],
+      "text": ""
+    },
+    {
+      "id": "l2-023",
+      "kind": "positive",
+      "tool": "get_product_details",
+      "args": {
+        "product_id": "HL-011"
+      },
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": ""
+    },
+    {
+      "id": "l2-028",
+      "kind": "positive",
+      "tool": "search_products",
+      "args": {
+        "max_price": 15,
+        "query": "gift"
+      },
+      "tool_ok": true,
+      "args_ok": false,
+      "wrong_args": [
+        "max_price"
+      ],
+      "text": ""
+    },
+    {
+      "id": "l2-029",
+      "kind": "positive",
+      "tool": "search_products",
+      "args": {
+        "max_price": 100,
+        "recipient": "her"
+      },
+      "tool_ok": true,
+      "args_ok": false,
+      "wrong_args": [
+        "query"
+      ],
+      "text": ""
+    },
+    {
+      "id": "l2-031",
+      "kind": "positive",
+      "tool": "get_product_details",
+      "args": {
+        "product_id": "BW-007"
+      },
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": ""
+    },
+    {
+      "id": "l2-033",
+      "kind": "positive",
+      "tool": "search_products",
+      "args": {
+        "max_price": 70,
+        "recipient": "her"
+      },
+      "tool_ok": true,
+      "args_ok": false,
+      "wrong_args": [
+        "exclude"
+      ],
+      "text": ""
+    },
+    {
+      "id": "l2-034",
+      "kind": "positive",
+      "tool": "get_products_by_category",
+      "args": {
+        "category": "beauty-wellness"
+      },
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": ""
+    },
+    {
+      "id": "l2-039",
+      "kind": "positive",
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": "Entiendo perfectamente. Si buscas algo por debajo de 40€ que sea especial para tu amiga, ¿te gustaría que busque otras velas con notas frutales o quizás algo de otra categoría como accesorios de cuida"
+    },
+    {
+      "id": "l2-051",
+      "kind": "positive",
+      "tool": "get_product_details",
+      "args": {
+        "product_id": "ot-001"
+      },
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": ""
+    },
+    {
+      "id": "l2-062",
+      "kind": "positive",
+      "tool": "search_products",
+      "args": {
+        "max_price": 100,
+        "max_shipping_days": 7,
+        "occasion": "housewarming"
+      },
+      "tool_ok": true,
+      "args_ok": false,
+      "wrong_args": [
+        "max_shipping_days"
+      ],
+      "text": ""
+    },
+    {
+      "id": "l2-065",
+      "kind": "positive",
+      "tool": "search_products",
+      "args": {
+        "max_price": 100,
+        "query": "cooking plants garden",
+        "recipient": "her",
+        "sort": "rating"
+      },
+      "tool_ok": true,
+      "args_ok": false,
+      "wrong_args": [
+        "max_price"
+      ],
+      "text": ""
+    },
+    {
+      "id": "l2-102",
+      "kind": "positive",
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": "Mi dispiace, ma posso aiutarti solo a trovare regali all'interno del catalogo del nostro negozio. Non ho informazioni su prodotti esterni come la console TG-022.\n\nPosso invece aiutarti a trovare un re"
+    },
+    {
+      "id": "l2-106",
+      "kind": "positive",
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": "Para ayudarte a encontrar el regalo perfecto, ¿qué tipo de cosas le gustan a tu compañero o qué sección te gustaría explorar?"
+    },
+    {
+      "id": "l2-119",
+      "kind": "positive",
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": "Tienes razón, el incienso tiene un ambiente similar. Busquemos algo diferente. ¿Qué te parece una opción de papelería o quizás algo para el hogar?"
+    },
+    {
+      "id": "l2-120",
+      "kind": "positive",
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": "Capisco, allora meglio evitare il tè. Per un regalo di Natale tra i 35 e i 55 euro, ecco due opzioni perfette per una amante del caffè o che apprezza un tocco di classe:\n\n**Trio Votive Set** · €54 · s"
+    },
+    {
+      "id": "l2-128",
+      "kind": "positive",
+      "tool": "search_products",
+      "args": {
+        "max_shipping_days": 5,
+        "query": "tea notebook incense"
+      },
+      "tool_ok": true,
+      "args_ok": false,
+      "wrong_args": [
+        "max_shipping_days"
+      ],
+      "text": ""
+    },
+    {
+      "id": "l2-131",
+      "kind": "positive",
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": "**Power Bank 20000mAh (TG-017)** · €69 · ships in 3 days\nÈ un'ottima scelta per chi studia fuori sede, così potrà ricaricare il telefono e il tablet durante le lunghe giornate in università.\n\nTi inter"
+    },
+    {
+      "id": "l2-132",
+      "kind": "positive",
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": "Para celebrar vuestros 10 años y su pasión por la cocina, estas opciones son ideales:\n\n**Enamel Casserole 24cm** · €189 · ships in 3 days\nUna pieza de gran calidad y estilo para que ella disfrute coci"
+    },
+    {
+      "id": "l2-137",
+      "kind": "clarify",
+      "tool": "get_categories",
+      "args": {},
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": ""
+    },
+    {
+      "id": "l2-138",
+      "kind": "positive",
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": "**Brass Picture Frame 13x18** · €39 · ships in 3 days\nEs una opción clásica y elegante para que pueda lucir la foto de todos sus nietos en su hogar.\n\n¿Te gustaría que te dé más detalles sobre este mar"
+    },
+    {
+      "id": "l2-139",
+      "kind": "positive",
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": "That makes perfect sense. For the parents, I can suggest a few items to help them relax or stay fueled:\n\n**Noise Machine** · €58 · ships in 3 days\nA great way to create a calm environment for the babi"
+    },
+    {
+      "id": "l2-144",
+      "kind": "positive",
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": "Para alguien que viaja ligero con una mochila pequeña, estas opciones son prácticas y compactas:\n\n**Packing Cube Set** · €52 · ships in 3 days\nIdeal para organizar su equipaje y maximizar el espacio e"
+    }
+  ]
+}

@@ -3,7 +3,9 @@
 The tools are built from the served OpenAPI document, the way the platform builds them, and the
 system prompt is agent/system-prompt.md. Each case gives the conversation so far and the latest
 message; the model's FIRST move is scored: which tool (or none), and whether the key arguments
-match. Model: Gemma 4 26B on a local Ollama, temperature 0, no reasoning, fixed seed.
+match. Model: Gemma 4 26B on a local Ollama (gemma4:26b, the GGUF build; the platform offers
+gemma-4-26b), temperature 0, no reasoning, fixed seed. --model gemma4:12b runs a smaller model
+for comparison; its report goes to its own file.
 
 Every model response is recorded under evals/l2/recordings/, keyed by model, prompt and tools.
 Without --refresh the recording is replayed, so the published numbers can be re-scored offline
@@ -38,9 +40,9 @@ HERE = Path(__file__).resolve().parent
 PROMPT = ROOT / "agent" / "system-prompt.md"
 REPORT = ROOT / "evals" / "reports" / "l2-latest.json"
 PARAMS = {t.name: {p.name for p in t.params} for t in TOOLS}
-MODEL = "gemma4:26b-mlx"
+MODEL = "gemma4:26b"  # the gate model (GOALS); --model runs another for comparison
 OLLAMA = "http://localhost:11434/api/chat"
-TODAY = "Saturday 2026-10-31"
+TODAY = "2026-10-31"  # {{$date}}: YYYY-MM-DD in the workspace timezone
 SEED = 20261029
 
 
@@ -66,22 +68,33 @@ def tools_from_spec() -> list[dict[str, Any]]:
     return tools
 
 
-def system_prompt() -> str:
-    """The prompt below the first horizontal rule, plus the date the platform would provide."""
-    body = PROMPT.read_text(encoding="utf-8").split("\n---\n", 1)[1].strip()
-    return f"{body}\n\nToday is {TODAY}."
+ROUTING_ONLY = ("Trigger details", "Example questions")
+
+
+def system_prompt(path: Path = PROMPT) -> str:
+    """The Agent Block fields below the first horizontal rule, joined in order, without the fields
+    that only route messages to the agent, and with the date the platform fills in. A prompt
+    without {{$date}} (v1, v2) gets the date appended, as those versions were measured."""
+    body = path.read_text(encoding="utf-8").split("\n---\n", 1)[1].strip()
+    chunks = body.split("\n## ")
+    kept = [chunks[0], *(f"## {c}" for c in chunks[1:])]
+    text = "\n\n".join(
+        c.strip() for c in kept if c.strip() and not c.removeprefix("## ").startswith(ROUTING_ONLY)
+    )
+    return text.replace("{{$date}}", TODAY) if "{{$date}}" in text else f"{text}\n\nToday is {TODAY}."
 
 
 def sha(value: Any) -> str:
     return hashlib.sha256(json.dumps(value, sort_keys=True).encode()).hexdigest()[:8]
 
 
-def ask(messages: list[dict[str, str]], tools: list[dict[str, Any]]) -> dict[str, Any]:
+def ask(model: str, messages: list[dict[str, str]], tools: list[dict[str, Any]]) -> dict[str, Any]:
     body = {
-        "model": MODEL,
+        "model": model,
         "stream": False,
         "think": False,
-        "options": {"temperature": 0, "seed": SEED},
+        # Only the first move is scored; the cap stops a model that runs on without ending.
+        "options": {"temperature": 0, "seed": SEED, "num_predict": 512},
         "tools": tools,
         "messages": messages,
     }
@@ -148,10 +161,15 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--refresh", action="store_true", help="call the model instead of replaying")
     parser.add_argument("--cases", default=str(HERE / "cases.jsonl"))
+    parser.add_argument(
+        "--model", default=MODEL, help=f"Ollama model (default {MODEL}, the one the goals use)"
+    )
+    parser.add_argument("--prompt", default=str(PROMPT), help="prompt file (default: the current one)")
     opts = parser.parse_args()
+    model = opts.model
     cases = [json.loads(line) for line in Path(opts.cases).read_text(encoding="utf-8").splitlines() if line]
-    tools, prompt = tools_from_spec(), system_prompt()
-    key = f"{MODEL.replace(':', '-')}__prompt-{sha(prompt)}__tools-{sha(tools)}"
+    tools, prompt = tools_from_spec(), system_prompt(Path(opts.prompt))
+    key = f"{model.replace(':', '-')}__prompt-{sha(prompt)}__tools-{sha(tools)}"
     path = HERE / "recordings" / f"{key}.jsonl"
     recorded = {}
     if path.exists():
@@ -169,7 +187,7 @@ def main() -> int:
             *case["history"],
             {"role": "user", "content": case["message"]},
         ]
-        recorded[case["id"]] = ask(messages, tools)
+        recorded[case["id"]] = ask(model, messages, tools)
         print(f"\r  model calls {n}/{len(missing)}", end="", file=sys.stderr)
     if missing:
         print(file=sys.stderr)
@@ -183,7 +201,7 @@ def main() -> int:
     called = [r for r in results if r["tool_ok"] and r["tool"] is not None]
     negatives = [r for r in results if r["kind"] == "negative"]
     report = {
-        "model": MODEL,
+        "model": model,
         "recording": str(path.relative_to(ROOT)),
         "n": len(results),
         "n_negative": len(negatives),
@@ -196,12 +214,13 @@ def main() -> int:
         "seconds_calling_model": round(time.perf_counter() - start, 1) if missing else 0,
         "failures": [r for r in results if not r["tool_ok"] or (r["tool"] is not None and not r["args_ok"])],
     }
-    REPORT.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    report_path = REPORT if model == MODEL else REPORT.with_name(f"l2-{model.replace(':', '-')}-latest.json")
+    report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(
-        f"level 2 ({MODEL}): tool {report['tool_accuracy']:.1%} · args {report['args_accuracy']:.1%} · "
+        f"level 2 ({model}): tool {report['tool_accuracy']:.1%} · args {report['args_accuracy']:.1%} · "
         f"negatives calling a tool {report['negative_false_call_rate']:.1%} (n={report['n']}, "
         f"{report['n_negative']} negative) · replay mismatches {replay_mismatches} "
-        f"-> {REPORT.relative_to(ROOT)}"
+        f"-> {report_path.relative_to(ROOT)}"
     )
     return 0
 
