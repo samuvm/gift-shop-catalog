@@ -589,3 +589,51 @@ the handshake on every call after the first.
 All phase-1 goals now pass: ingest clean (0 pending) and 11/11 seeded anomalies stopped; 74/74
 level-1 cases; 622 / 1,046 tokens; spec lint 0; auth 12/12; secrets 0; coverage 99.58%;
 layer violations 0; latency 264.8 ms.
+
+### Block 12 · Level 2 on a local model: the agent answers from memory (≈ 1 h 30 min)
+
+**Starting point:** F1 approved. The level-2 goals assumed an OpenAI key. Samuel proposed a
+local model instead. The platform's own model list includes **gemma-4-26b (EU)**, and the same
+open-weight model runs in Ollama on this machine with tool calling. So level 2 now measures the
+tools against a model the platform actually offers, at no cost. The three goals' `requires`
+field changed; thresholds did not, and Samuel resealed the lock.
+
+**Rejected:** exposing the local model with ngrok. Level 2 runs entirely on this machine, and
+the platform can only use the models in its own list, so a public tunnel would add risk for
+nothing. Also rejected as the measured model: a Claude sub-agent of this session. It would read
+the spec as text rather than through function calling, it cannot be recorded and replayed, and
+the same family wrote the descriptions it would be judging.
+
+**Done:**
+- `agent/system-prompt.md`: versioned prompt (id, version, model, changes).
+- `evals/l2/run.py`: builds the tools from the served OpenAPI the way the platform does, calls
+  Gemma 4 26B (temperature 0, no reasoning, fixed seed), records every response and replays it
+  (`make eval-l2`, `make eval-l2-refresh`).
+- 150 cases drafted in parallel by four agents, one per direction of the 100 development
+  conversations. Each case keeps the history and the latest message. `evals/l2/build.py`
+  validates every tool, argument, category and product id, then writes the review sheet with
+  failing cases first. 36 cases are negative (24%).
+
+**Initial approach → conclusion:** v1 of the prompt reached 74.0% on tool choice. The dominant
+failure was not a wrong tool but **no tool**: in 28 of 39 failures the model answered from
+memory, and invented a "Pocket Notebook at €15" and "we don't sell Kindles" (the shop has
+e-readers). It happened mostly when the shopper changed a condition mid-conversation and the
+model reused what had already been said. v2 added three general rules: every product fact
+comes from a tool call, search again when a condition changes, and call `get_categories` only
+on request.
+
+| Prompt | Tool choice | Arguments | Negatives calling a tool | Replay mismatches |
+|---|---|---|---|---|
+| v1 | 74.0% | 89.4% | 0% | 0 |
+| v2 | **89.3%** (134/150, 95% CI 84–94%) | 85.6% | 0% | 0 |
+
+Paired over the same 150 cases (bootstrap, seed 20261029): +15.3 points, 95% CI +9.3 to +21.3.
+23 cases fixed, none broken. G-L2-TOOL (≥ 90%) is **one case short after two attempts**, so
+work stopped and the question went to Samuel. The bank had not been reviewed by a person yet,
+and tuning the prompt against unreviewed labels risks fitting it to the labels' mistakes. He
+chose to review the 29 failing cases first, then allow one more prompt attempt.
+
+The run also showed why a platform guardrail matters here. The tools only read, so injection
+can only read the public catalogue. The real risk is the model inventing a product or a policy.
+The platform's *Hallucination* guardrail targets exactly that, and it goes into the platform
+configuration.
