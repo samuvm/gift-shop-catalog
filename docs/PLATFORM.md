@@ -60,8 +60,9 @@ who the gift is for, and the budget.
 ## Protections
 
 - **Security layer: on, Shadow mode.** It classifies and records every message but changes no
-  answer, so false positives can be reviewed before anything is blocked. The jailbreak guardrail
-  agent is the platform's *Jailbreak agent*. The workspace perimeter is regenerated after
+  answer, so false positives can be reviewed before anything is blocked. Guardrail agents:
+  jailbreak attempts → the platform's *Jailbreak agent*; out-of-scope requests → *General*
+  (blocking switched on, inactive while in Shadow mode). The workspace perimeter is regenerated after
   publishing, because it is built from the published agents.
 - **Evaluators and guardrails (Hallucination, Jailbreak detection): not available** in this
   workspace. The Improve menu shows only Issues, Simulations and Playground. Hallucination is
