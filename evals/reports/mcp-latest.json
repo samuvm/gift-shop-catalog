@@ -1,0 +1,39 @@
+{
+  "parity_rate": 1.0,
+  "conformance_rate": 1.0,
+  "n": {
+    "parity_cases": 74,
+    "conformance_checks": 16
+  },
+  "target": "in-process, today pinned to 2026-10-30",
+  "failures": [],
+  "checks": {
+    "initialize_2025_11_25": true,
+    "initialize_unsupported_version_gets_a_supported_one": true,
+    "initialized_notification_is_202_without_body": true,
+    "tools_list_equals_the_tool_definitions_read_only": true,
+    "tools_call_success_equals_rest": true,
+    "unknown_tool_is_a_jsonrpc_error": true,
+    "domain_error_is_iserror_with_the_rest_body": true,
+    "invalid_argument_is_iserror_invalid_parameter": true,
+    "loose_closed_set_values_read_like_rest": true,
+    "malformed_json_is_parse_error": true,
+    "non_request_envelope_is_rejected": true,
+    "missing_empty_or_wrong_key_is_401_without_executing": true,
+    "get_is_405_and_accept_without_json_is_406": true,
+    "stateless_call_without_initialize_or_session": true,
+    "server_discover_2026_07_28": true,
+    "tools_call_2026_07_28_equals_rest": true
+  },
+  "parity_error_cases": [
+    "l1-005",
+    "l1-007",
+    "l1-060",
+    "l1-061"
+  ],
+  "by_design_differences": [
+    "A tool error is HTTP 200 with result.isError true over MCP, and HTTP 4xx over REST; the body is the same.",
+    "A parameter the framework rejects (type, bound, length) is answered with the same code, hint and allowed_values over both; the message wording comes from each validator (pydantic vs JSON Schema).",
+    "A JSON-RPC envelope that is not a request is answered with code -32602 by the SDK's handshake-era path (JSON-RPC names -32600); the per-request era answers -32600."
+  ]
+}
