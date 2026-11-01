@@ -960,3 +960,38 @@ byte-identical; `make eval-l1` 74/74; `make spec-lint` 0.
 Left out, and listed in ADR-009: a per-export acceptance for the removal guard (today only
 the ratio can be raised), header names in other cases (`PRICE_EUR` stops), and look-alike
 letters from other alphabets inside injection phrases.
+
+### Block 23 · The same four tools over MCP (merge of `mcp-server`, ≈ 20 min to review)
+
+The platform documents an MCP client (full endpoint URL, static headers, no OAuth) but not
+its protocol revision. So the server speaks both eras: the `initialize` handshake and the
+2026-07-28 revision without it (ADR-008). It runs on the official SDK (`mcp==2.3.0`, with
+`jsonschema` declared), uses its low-level server, and is mounted at `/mcp` in the same
+service behind the same key.
+
+**Why REST and MCP cannot drift:** the MCP tool list is built from `tools.TOOLS`, and every
+call goes through `service.execute`. A result carries the REST body as `structuredContent`
+plus a text block with exactly the bytes REST sends, so a model reads the same text over both.
+Arguments are read as REST reads them: jsonschema checks types, bounds and lengths, while
+closed-set values go through the shared normalisation (`HER` works on both). A domain error
+comes back as `isError` with the REST error body, so the model can still follow
+`did_you_mean`.
+
+**Measured** (`make eval-mcp`, in-process): parity 74/74 level-1 cases byte-identical with REST,
+and conformance 16/16 protocol checks:
+- initialize and version negotiation;
+- tools/list against `tools.TOOLS`;
+- tools/call success, domain error and invalid argument;
+- malformed JSON and an invalid request;
+- 401 without the key;
+- 405 on GET;
+- no session required.
+
+The same eval run over real HTTP against a local server gave the same numbers. The check was
+also tested against planted defects: changing the text bytes dropped parity to 0/74, so it
+does catch drift. On main after the merge: `make gate-fast` 449 passed, `make eval-l1` 74/74,
+`make eval-ingest` 17/17, `make spec-lint` 0, `make secrets` 0 (the new catalogue version
+hashes were reviewed into the baseline).
+
+One deliberate addition: `GET /mcp` returns 405. Without it the SDK holds the GET open
+indefinitely, which a stateless JSON server has no use for.
