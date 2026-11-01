@@ -1,8 +1,12 @@
-"""Raw export rows + decisions -> cleaned products, or a list of what a person must decide.
+"""Raw export + decisions -> cleaned products, or a list of what a person must decide.
 
 Pure: no file or network access. `catalog.ingest.__main__` does the I/O.
 """
 
+import codecs
+import csv
+import hashlib
+import io
 import math
 import re
 from collections import Counter, defaultdict
@@ -95,6 +99,15 @@ class IngestResult(_Record):
     diff: Diff
 
 
+class Export(_Record):
+    """The export as read: its header, its rows, and whatever stops it being read safely."""
+
+    columns: list[str]
+    rows: list[dict[str, str]]
+    anomalies: list[Anomaly]
+    source_sha256: str
+
+
 class _Row(_Record):
     """One export row after the general rules, before cross-listing is resolved."""
 
@@ -116,17 +129,78 @@ class _Row(_Record):
         return tuple(v for k, v in self.values.items() if k not in LISTING_COLUMNS)
 
 
+def read_export(raw: bytes) -> Export:
+    """Decode and split the export exactly as received. The encoding is never guessed."""
+    source_sha256 = hashlib.sha256(raw).hexdigest()
+
+    def unreadable(code: str, detail: str) -> Export:
+        anomaly = Anomaly(code=code, product_ids=[], detail=detail)
+        return Export(columns=[], rows=[], anomalies=[anomaly], source_sha256=source_sha256)
+
+    try:
+        text = raw.decode("utf-8-sig")
+    except UnicodeDecodeError as exc:
+        found = (
+            "a UTF-16 byte-order mark"
+            if raw.startswith((codecs.BOM_UTF16_LE, codecs.BOM_UTF16_BE))
+            else f"byte 0x{raw[exc.start]:02x} at offset {exc.start}, likely Windows-1252 or Latin-1"
+        )
+        return unreadable("unreadable_export", f"not UTF-8 ({found}); export it again as UTF-8")
+    if "\x00" in text:
+        return unreadable(
+            "unreadable_export", "not UTF-8 (NUL characters, likely UTF-16); export it again as UTF-8"
+        )
+
+    reader = csv.reader(io.StringIO(text, newline=""))
+    records = [(reader.line_num, record) for record in reader if record]
+    if not records:
+        return unreadable("empty_export", "the file holds no header and no rows")
+    (_, columns), *body = records
+    rows: list[dict[str, str]] = []
+    anomalies: list[Anomaly] = []
+    for line, record in body:
+        if len(record) == len(columns):
+            rows.append(dict(zip(columns, record, strict=True)))
+            continue
+        pid = dict(zip(columns, record, strict=False)).get("product_id", "")
+        detail = (
+            f"line {line} has {len(record)} fields, the header has {len(columns)}; "
+            "an unquoted comma or a missing value shifts every column after it"
+        )
+        anomalies.append(Anomaly(code="malformed_row", product_ids=[clean(pid) or "(no id)"], detail=detail))
+    return Export(
+        columns=columns, rows=[] if anomalies else rows, anomalies=anomalies, source_sha256=source_sha256
+    )
+
+
+def ingest_export(
+    raw: bytes, decisions: Decisions, previous: list[Product] | None = None
+) -> tuple[Export, IngestResult]:
+    """Read the export as received, then ingest it. A problem reading it stops before any row."""
+    export = read_export(raw)
+    if export.anomalies:
+        return export, _stopped(export.anomalies)
+    return export, run_ingest(export.rows, export.columns, decisions, previous, export.source_sha256)
+
+
 def run_ingest(
     rows: list[dict[str, str]],
     columns: list[str],
     decisions: Decisions,
     previous: list[Product] | None = None,
+    source_sha256: str | None = None,
 ) -> IngestResult:
     missing = [c for c in EXPECTED_COLUMNS if c not in columns]
     unexpected = [c for c in columns if c not in EXPECTED_COLUMNS]
-    if missing or unexpected:
+    duplicated = sorted(c for c, n in Counter(columns).items() if n > 1)
+    if missing or unexpected or duplicated:
         detail = f"missing columns: {missing or 'none'}; unexpected columns: {unexpected or 'none'}"
+        if duplicated:  # a second column of the same name would silently win for every row
+            detail += f"; duplicated columns: {duplicated}"
         return _stopped([Anomaly(code="schema_mismatch", product_ids=[], detail=detail)])
+    if not rows:
+        detail = "the export has a header but no product rows; an empty catalogue is never served"
+        return _stopped([Anomaly(code="empty_export", product_ids=[], detail=detail)])
 
     anomalies: list[Anomaly] = []
     rules: dict[str, list[str]] = defaultdict(list)
@@ -177,6 +251,10 @@ def run_ingest(
                 f"above the allowed {decisions.removal_guard.max_removed_ratio:.0%}",
             )
         )
+    if previous:
+        changed_too_much, accepted = _mass_change(diff, len(previous), decisions, source_sha256)
+        anomalies.extend(changed_too_much)
+        applied.extend(accepted)
 
     findings = [
         Finding(rule=k, product_ids=sorted(set(v)), detail=_rule_detail(k, respellings))
@@ -429,6 +507,29 @@ def _diff(previous: list[Product] | None, current: list[Product]) -> Diff:
         removed=sorted(before.keys() - after.keys()),
         changed=changed,
     )
+
+
+def _mass_change(
+    diff: Diff, previous: int, decisions: Decisions, source_sha256: str | None
+) -> tuple[list[Anomaly], list[Finding]]:
+    """Too many prices or stock counts changed at once: stop, unless a person accepted this export."""
+    guard = decisions.change_guard
+    moved = [pid for pid, fields in diff.changed.items() if {"price_eur", "stock"} & set(fields)]
+    share = len(moved) / previous
+    if share <= guard.max_changed_ratio:
+        return [], []
+    summary = f"{len(moved)} of {previous} products changed price or stock ({share:.0%})"
+    accepted = next((a for a in guard.accepted_exports if a.source_sha256 == source_sha256), None)
+    if accepted is not None:
+        return [], [
+            Finding(rule="mass_change_accepted", product_ids=moved, detail=f"{summary}: {accepted.reason}")
+        ]
+    line = f'- {{source_sha256: "{source_sha256 or "<sha256 of the export>"}", reason: "<why>"}}'
+    detail = (
+        f"{summary}, above the allowed {guard.max_changed_ratio:.0%}. If the export is right "
+        f"(a sale, a stocktake), accept it under change_guard.accepted_exports: {line}"
+    )
+    return [Anomaly(code="mass_change", product_ids=moved, detail=detail)], []
 
 
 def _sentinel_findings(products: list[Product], decisions: Decisions) -> list[Finding]:

@@ -47,3 +47,20 @@ def test_second_run_reports_no_changes(root: Path, tmp_path: Path, capsys: objec
     assert '"added": []' in report
     assert '"removed": []' in report
     assert '"changed": {}' in report
+
+
+def test_an_export_that_is_not_utf8_stops_cleanly_and_keeps_the_previous_catalogue(
+    root: Path, tmp_path: Path
+) -> None:
+    assert run(root, root / "data" / "gift-shop-catalog.csv", tmp_path) == 0
+    served = (tmp_path / "catalog.json").read_bytes()
+
+    text = (root / "data" / "gift-shop-catalog.csv").read_text(encoding="utf-8-sig")
+    windows = tmp_path / "windows.csv"
+    windows.write_bytes(text.replace("Aurora Table Lamp", "Auróra Table Lamp", 1).encode("cp1252"))
+
+    assert run(root, windows, tmp_path) == 1
+    assert (tmp_path / "catalog.json").read_bytes() == served
+    report = (tmp_path / "ingest-report.json").read_text(encoding="utf-8")
+    assert '"status": "stopped"' in report
+    assert "unreadable_export" in report

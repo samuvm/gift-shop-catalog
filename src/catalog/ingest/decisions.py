@@ -3,7 +3,7 @@
 import re
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class _Strict(BaseModel):
@@ -35,6 +35,23 @@ class RemovalGuard(_Strict):
     max_removed_ratio: float
 
 
+class AcceptedExport(_Strict):
+    """One export a person checked and accepted despite the change guard, e.g. a seasonal sale."""
+
+    source_sha256: str
+    reason: str
+
+
+class ChangeGuard(_Strict):
+    max_changed_ratio: float
+    accepted_exports: list[AcceptedExport] = Field(default_factory=list)
+
+    @field_validator("accepted_exports", mode="before")
+    @classmethod
+    def _none_is_empty(cls, value: object) -> object:
+        return [] if value is None else value  # `accepted_exports:` with no line under it yet
+
+
 class QualityRules(_Strict):
     thin_description_max_chars: int
 
@@ -56,11 +73,24 @@ class Decisions(_Strict):
     stock: StockRules
     shipping: ShippingRules
     removal_guard: RemovalGuard
+    change_guard: ChangeGuard
     quality: QualityRules
     search: SearchVocabulary = Field(default_factory=SearchVocabulary)
 
 
 _WORD = re.compile(r"[a-z0-9]+")
+_SHA256 = re.compile(r"[0-9a-f]{64}")
+
+
+def _check_change_guard(guard: ChangeGuard) -> None:
+    hashes = [a.source_sha256 for a in guard.accepted_exports]
+    for accepted in guard.accepted_exports:
+        if not _SHA256.fullmatch(accepted.source_sha256):
+            raise ValueError(f"change_guard {accepted.source_sha256!r}: not a lower-case hex sha256")
+        if not accepted.reason.strip():
+            raise ValueError(f"change_guard {accepted.source_sha256}: an accepted export needs a reason")
+        if hashes.count(accepted.source_sha256) > 1:
+            raise ValueError(f"change_guard {accepted.source_sha256}: accepted twice")
 
 
 def _check_search(search: SearchVocabulary) -> None:
@@ -98,5 +128,6 @@ def load_decisions(text: str) -> Decisions:
     prefixes = [c.id_prefix for c in decisions.categories]
     if len(prefixes) != len(set(prefixes)):
         raise ValueError("categories: two categories share an ID prefix")
+    _check_change_guard(decisions.change_guard)
     _check_search(decisions.search)
     return decisions

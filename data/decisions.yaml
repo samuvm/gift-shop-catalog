@@ -37,6 +37,12 @@ shipping:
 removal_guard:
   max_removed_ratio: 0.20   # a bigger drop is likelier a truncated export than a closing-down sale
 
+change_guard:               # ADR-009
+  max_changed_ratio: 0.50   # more than half the catalogue repriced or restocked at once is likelier a
+                            # shifted column than an ordinary week
+  accepted_exports:         # one line per export a person checked (a sale, a stocktake); the stop report
+                            # prints the line, keyed by the sha256 of the file as received
+
 quality:
   thin_description_max_chars: 19   # "Great gift." and "A card." say nothing; the next shortest is 36 chars
 

@@ -5,14 +5,12 @@ to decide something. On 1 the previous catalogue is left untouched and only the 
 """
 
 import argparse
-import csv
-import io
 import sys
 from pathlib import Path
 
 from catalog.domain.models import Product
 from catalog.ingest.decisions import load_decisions
-from catalog.ingest.pipeline import run_ingest
+from catalog.ingest.pipeline import ingest_export
 from catalog.storage import dumps, encode_catalog, read_catalog, sha256
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -22,15 +20,15 @@ def build(
     csv_path: Path, decisions_path: Path, previous: list[Product] | None
 ) -> tuple[bytes, dict[str, object]]:
     """Run the ingest. Returns the catalogue bytes (empty when stopped) and the report."""
-    raw = csv_path.read_bytes()
     decisions_raw = decisions_path.read_bytes()
-    reader = csv.DictReader(io.StringIO(raw.decode("utf-8-sig"), newline=""))
-    rows = list(reader)
     decisions = load_decisions(decisions_raw.decode("utf-8"))
-    result = run_ingest(rows, list(reader.fieldnames or []), decisions, previous)
+    export, result = ingest_export(csv_path.read_bytes(), decisions, previous)
 
     catalog = b""
-    version: dict[str, str] = {"source_sha256": sha256(raw), "decisions_sha256": sha256(decisions_raw)}
+    version: dict[str, str] = {
+        "source_sha256": export.source_sha256,
+        "decisions_sha256": sha256(decisions_raw),
+    }
     if result.status == "ok":
         catalog, version = encode_catalog(
             result.products,
@@ -42,7 +40,7 @@ def build(
         "status": result.status,
         "pending_decisions": len(result.anomalies),
         "counts": {
-            "rows": len(rows),
+            "rows": len(export.rows),
             "products": len(result.products),
             "distinct_products": sum(p.search_primary for p in result.products),
             "categories": len({p.category for p in result.products}),

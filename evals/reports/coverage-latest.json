@@ -1,7 +1,7 @@
 {
-  "line_percent": 99.72,
-  "statements": 724,
-  "covered": 722,
+  "line_percent": 99.75,
+  "statements": 807,
+  "covered": 805,
   "files": [
     "src/catalog/domain/__init__.py",
     "src/catalog/domain/catalog.py",

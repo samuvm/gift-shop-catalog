@@ -1,6 +1,7 @@
 """General cleaning rules. They hold for any export of this catalogue, so they live in code."""
 
 import re
+import unicodedata
 
 _WHITESPACE = re.compile(r"\s+")
 _AND_WORD = re.compile(r"\band\b")
@@ -56,5 +57,11 @@ _INSTRUCTION_PATTERNS = re.compile(
 
 
 def looks_like_instruction(text: str) -> bool:
-    """True when the text contains phrasing aimed at a language model rather than a shopper."""
-    return bool(_INSTRUCTION_PATTERNS.search(text))
+    """True when the text contains phrasing aimed at a language model rather than a shopper.
+
+    Matched on a folded copy: full-width and other compatibility forms become plain letters, and
+    invisible format characters (zero-width spaces, soft hyphens, bidi controls) are dropped, so
+    they cannot split a phrase the reader of the text would still see whole.
+    """
+    folded = "".join(c for c in unicodedata.normalize("NFKC", text) if unicodedata.category(c) != "Cf")
+    return bool(_INSTRUCTION_PATTERNS.search(folded))
