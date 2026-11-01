@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ribbon &amp; Co. · Gift finder</title>
+<meta name="description" content="Ribbon &amp; Co. is a small online gift shop. Tell the gift assistant who it's for and your budget, and get up to three ideas with a reason for each.">
+<meta name="theme-color" content="#9E1F45">
+<link rel="icon" href="/ribbon.svg" type="image/svg+xml">
+<style>
+  :root {
+    --ribbon: #9e1f45;
+    --ribbon-dark: #7a1734;
+    --ink: #2b1d2a;
+    --muted: #6b5560;
+    --paper: #fff8f1;
+    --blush: #fbede6;
+    --gold: #c9a227;
+    --line: #ecd9cf;
+    --radius: 1rem;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 1rem/1.6 var(--sans);
+  }
+  .wrap { max-width: 40rem; margin: 0 auto; padding: 0 1rem; }
+  a { color: var(--ribbon); text-underline-offset: 0.15em; }
+  a:hover { color: var(--ribbon-dark); }
+  :focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; border-radius: 0.25rem; }
+  .skip {
+    position: absolute; left: 1rem; top: -4rem; z-index: 10;
+    background: var(--ink); color: var(--paper); padding: 0.5rem 1rem; border-radius: 0.5rem;
+  }
+  .skip:focus { top: 1rem; }
+
+  header { border-bottom: 1px solid var(--line); }
+  .brand { display: flex; align-items: center; gap: 0.75rem; padding: 1rem 0; }
+  .brand img { width: 2.5rem; height: 2.5rem; }
+  .brand strong { display: block; font: 600 1.35rem/1.1 var(--serif); letter-spacing: 0.01em; }
+  .brand span { display: block; font-size: 0.875rem; color: var(--muted); }
+
+  .hero {
+    position: relative; overflow: hidden;
+    margin: 1.5rem 0 0; padding: 1.75rem 3rem 1.5rem 1.25rem;
+    background: var(--blush); border-radius: var(--radius);
+  }
+  /* A ribbon running down the card: decoration only. */
+  .hero::before, .hero::after { content: ""; position: absolute; top: 0; bottom: 0; pointer-events: none; }
+  .hero::before { right: 1rem; width: 0.75rem; background: var(--ribbon); opacity: 0.12; }
+  .hero::after { right: 1.3rem; width: 0.15rem; background: var(--gold); opacity: 0.5; }
+  .hero > * { position: relative; }
+  h1 { margin: 0 0 0.75rem; font: 600 clamp(1.9rem, 7vw, 2.6rem)/1.15 var(--serif); max-width: 16ch; }
+  .lede { margin: 0 0 1.25rem; max-width: 34rem; }
+  .cta {
+    display: inline-flex; align-items: center; gap: 0.5rem; min-height: 3rem;
+    padding: 0.75rem 1.25rem; border: 0; border-radius: 999px;
+    background: var(--ribbon); color: #fff; font: 600 1rem/1.2 var(--sans); cursor: pointer;
+  }
+  .cta:hover { background: var(--ribbon-dark); }
+  .status { min-height: 1.5rem; margin: 0.75rem 0 0; font-size: 0.875rem; color: var(--muted); }
+
+  section { margin: 2.25rem 0; }
+  h2 { margin: 0 0 0.75rem; font: 600 1.35rem/1.25 var(--serif); }
+  .chips { display: grid; gap: 0.625rem; margin: 0; padding: 0; list-style: none; }
+  .chip {
+    width: 100%; min-height: 3rem; padding: 0.75rem 1rem; text-align: left;
+    background: #fff; color: var(--ink); border: 1px solid var(--line); border-radius: 0.75rem;
+    font: 1rem/1.4 var(--sans); cursor: pointer;
+  }
+  .chip::before { content: "\201C"; color: var(--ribbon); font: 700 1.25rem/1 var(--serif); margin-right: 0.35rem; }
+  .chip:hover { border-color: var(--ribbon); background: var(--paper); }
+
+  .steps { counter-reset: step; margin: 0; padding: 0; list-style: none; display: grid; gap: 1rem; }
+  .steps li { counter-increment: step; display: grid; grid-template-columns: 2.25rem 1fr; gap: 0.75rem; }
+  .steps li::before {
+    content: counter(step); display: grid; place-items: center; width: 2.25rem; height: 2.25rem;
+    border-radius: 50%; background: var(--ribbon); color: #fff; font-weight: 700;
+  }
+  .steps strong { display: block; }
+  .steps p { margin: 0; color: var(--muted); }
+
+  footer { margin-top: 3rem; padding: 1.5rem 0 7rem; border-top: 1px solid var(--line); font-size: 0.875rem; color: var(--muted); }
+  footer p { margin: 0 0 0.5rem; }
+  code { font-size: 0.9em; background: var(--blush); color: var(--ink); padding: 0.1em 0.35em; border-radius: 0.3rem; }
+
+  @media (min-width: 40em) {
+    .hero { padding: 2.5rem 5rem 2rem 2rem; }
+    .hero::before { right: 2.25rem; }
+    .hero::after { right: 2.55rem; }
+    .chips { grid-template-columns: 1fr 1fr; }
+  }
+  /* On desktop the chat opens as a panel in the bottom-right corner: keep the page clear of it. */
+  @media (min-width: 64em) {
+    .wrap { margin-left: max(1rem, calc((100vw - min(28rem, 36vw) - 40rem) / 2)); }
+    footer { padding-bottom: 2rem; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .cta, .chip { transition: background-color 0.15s ease, border-color 0.15s ease; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header>
+  <div class="wrap brand">
+    <img src="/ribbon.svg" alt="" width="40" height="40">
+    <div><strong>Ribbon &amp; Co.</strong><span>Thoughtful gifts, wrapped with care</span></div>
+  </div>
+</header>
+
+<main id="main" class="wrap">
+  <div class="hero">
+    <h1>Find the right gift in a minute</h1>
+    <p class="lede">Tell our gift assistant who it's for and what you'd like to spend. It looks through the
+      shop's catalogue, with live prices, stock and delivery times, and suggests up to three gifts with
+      a reason for each.</p>
+    <button type="button" class="cta" data-ask>Ask the gift assistant</button>
+    <p class="status" id="chat-status" role="status" aria-live="polite"></p>
+  </div>
+
+  <section aria-labelledby="try">
+    <h2 id="try">Try asking</h2>
+    <ul class="chips">
+      <li><button type="button" class="chip" data-ask="A birthday gift for my sister who loves cooking, under €50">A birthday gift for my sister who loves cooking, under €50</button></li>
+      <li><button type="button" class="chip" data-ask="A thank-you present for a colleague, around €30">A thank-you present for a colleague, around €30</button></li>
+      <li><button type="button" class="chip" data-ask="Something for a coffee lover that arrives within 3 days">Something for a coffee lover that arrives within 3 days</button></li>
+      <li><button type="button" class="chip" data-ask="A housewarming gift for a couple">A housewarming gift for a couple</button></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="how">
+    <h2 id="how">How it works</h2>
+    <ol class="steps">
+      <li><div><strong>Tell it who and how much</strong><p>Who the gift is for, the occasion and your budget, in your own words.</p></div></li>
+      <li><div><strong>It asks at most one question</strong><p>Only if something important is missing, such as the budget.</p></div></li>
+      <li><div><strong>Up to three picks, each with a reason</strong><p>Real products from the catalogue, with price, stock and delivery time.</p></div></li>
+    </ol>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Ribbon &amp; Co. is a demo shop built for a technical assignment. The products come from a sample
+      catalogue and nothing here is for sale.</p>
+    <p>For developers: the catalogue API is described at <a href="/openapi.json">/openapi.json</a>, and the
+      same tools are served over MCP (Streamable HTTP) at <code>/mcp</code>. Both need an API key.</p>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var status = document.getElementById("chat-status");
+    var embedded = !!document.querySelector('script[src^="https://platform.indigo.ai/widget.js"]');
+    // Desktop only: there the chat is a corner panel next to the page; on a phone it fills the screen.
+    var desktop = window.matchMedia("(min-width: 64em)");
+
+    function ask(text) {
+      var chat = window.IndigoAIChat;
+      if (!chat) {
+        status.textContent = embedded
+          ? "The gift assistant is still loading. Try again in a moment."
+          : "The gift assistant is not available on this page right now.";
+        return;
+      }
+      status.textContent = "";
+      chat.setOpen(true);
+      if (text && typeof chat.sendMessage === "function") chat.sendMessage({ type: "text", text: text });
+    }
+
+    document.querySelectorAll("[data-ask]").forEach(function (button) {
+      button.addEventListener("click", function () { ask(button.getAttribute("data-ask")); });
+    });
+
+    document.addEventListener("indigo-ai-widget-loaded", function (event) {
+      status.textContent = "";
+      // Open once per visit: a visitor who closes it is not asked again on every reload.
+      var seen = false;
+      try {
+        seen = sessionStorage.getItem("ribbon-chat-opened") === "1";
+        sessionStorage.setItem("ribbon-chat-opened", "1");
+      } catch (e) { /* storage blocked: open as on a first visit */ }
+      if (desktop.matches && !seen) event.detail.widget.setOpen(true);
+    });
+  })();
+</script>
+<!-- widget -->
+</body>
+</html>

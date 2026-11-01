@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Ribbon &amp; Co.">
+  <rect width="64" height="64" rx="16" fill="#9E1F45"/>
+  <g fill="none" stroke="#FFF8F1" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M32 29C27 18 13 16 13 25s13 7 19 4z"/>
+    <path d="M32 29c5-11 19-13 19-4s-13 7-19 4z"/>
+    <path d="M29 33l-7 17M35 33l7 17"/>
+  </g>
+  <circle cx="32" cy="30" r="5" fill="#FFF8F1"/>
+</svg>
