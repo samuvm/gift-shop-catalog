@@ -1,6 +1,7 @@
 """REST transport: FastAPI routes over `catalog.service.execute`, plus auth and error mapping.
 
-The MCP transport (`catalog.api.mcp`) is served by the same app at /mcp.
+The MCP transport (`catalog.api.mcp`) is served by the same app at /mcp, and the shop's public
+landing page with the web chat (`catalog.api.landing`) at /.
 """
 
 import os
@@ -18,7 +19,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from catalog import __version__
-from catalog.api import mcp, openapi
+from catalog.api import landing, mcp, openapi
 from catalog.domain.catalog import Catalog
 from catalog.domain.errors import CatalogError
 from catalog.service import Context, InvalidParameter, error_body, execute
@@ -48,6 +49,7 @@ def create_app(
     api_key: str,
     catalog_path: Path = ROOT / "data" / "build" / "catalog.json",
     today: Callable[[], date] | None = None,
+    widget_token: str | None = None,
 ) -> FastAPI:
     if not api_key:
         raise ValueError("an API key is required; refusing to start an open service")
@@ -77,6 +79,7 @@ def create_app(
         lifespan=lifespan,
     )
     app.router.routes.append(mcp_endpoint.route)
+    app.router.routes.extend(landing.routes(widget_token))
 
     def require_key(request: Request) -> None:
         sent = request.headers.get("x-api-key", "")
@@ -158,5 +161,6 @@ def create_app(
 
 
 def app_from_env() -> FastAPI:
-    """Entry point for uvicorn (`--factory`): the key comes from the environment, never from the repo."""
-    return create_app(os.environ.get("CATALOG_API_KEY", ""))
+    """Entry point for uvicorn (`--factory`): the key and the web chat token come from the environment,
+    never from the repo."""
+    return create_app(os.environ.get("CATALOG_API_KEY", ""), widget_token=os.environ.get("WIDGET_TOKEN"))
