@@ -5,7 +5,7 @@ import secrets
 from collections.abc import Callable
 from datetime import date, datetime
 from pathlib import Path
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any
 from zoneinfo import ZoneInfo
 
 from fastapi import Depends, FastAPI, Query, Request
@@ -17,15 +17,16 @@ from catalog import __version__
 from catalog.api import openapi
 from catalog.domain.catalog import Catalog
 from catalog.domain.errors import CatalogError
-from catalog.service import Context, error_body, execute
+from catalog.service import Context, InvalidParameter, error_body, execute
 from catalog.storage import read_catalog, read_vocabulary
-from catalog.tools import RECIPIENT_PATTERN
 
 ROOT = Path(__file__).resolve().parents[3]
 STATUS = {"unknown_category": 404, "unknown_subcategory": 404, "product_not_found": 404}
 
-Occasion = Literal["birthday", "christmas", "anniversary", "housewarming", "thank-you", "graduation"]
-SortParam = Literal["relevance", "rating", "popularity", "price_asc", "price_desc"]
+# occasion, sort and recipient are taken as plain strings: `service.normalise` matches them in any
+# case and answers a wrong one with its allowed values, for REST and MCP alike.
+Price = Annotated[float | None, Query(ge=0, allow_inf_nan=False)]  # nan and inf can match nothing
+BOOLEAN_VALUES = ["true", "false"]
 
 
 class Unauthorized(Exception):
@@ -74,15 +75,14 @@ def create_app(
     @app.exception_handler(RequestValidationError)
     async def invalid(_: Request, err: RequestValidationError) -> JSONResponse:
         problems = [f"{'.'.join(str(x) for x in e['loc'][1:])}: {e['msg']}" for e in err.errors()]
-        body = {
-            "error": {
-                "code": "invalid_parameter",
-                "message": "; ".join(problems),
-                "hint": "Fix the parameter as described and call again. Allowed values are in the tool "
-                "description.",
-            }
-        }
-        return JSONResponse(body, status_code=400)
+        if any(e["type"] == "bool_parsing" for e in err.errors()):
+            hint, allowed = "Use one of allowed_values.", BOOLEAN_VALUES
+        else:
+            hint = (
+                "Fix the parameter as described and call again. Allowed values are in the tool description."
+            )
+            allowed = None
+        return JSONResponse(error_body(InvalidParameter("; ".join(problems), hint, allowed)), status_code=400)
 
     @app.get("/health", include_in_schema=False)
     def health() -> dict[str, str]:
@@ -102,14 +102,14 @@ def create_app(
     def get_products_by_category(
         category: Annotated[str, PathParam(max_length=50)],
         subcategory: Annotated[str | None, Query(max_length=50)] = None,
-        min_price: Annotated[float | None, Query(ge=0)] = None,
-        max_price: Annotated[float | None, Query(ge=0)] = None,
-        recipient: Annotated[str | None, Query(max_length=40, pattern=RECIPIENT_PATTERN)] = None,
-        occasion: Occasion | None = None,
+        min_price: Price = None,
+        max_price: Price = None,
+        recipient: Annotated[str | None, Query(max_length=40)] = None,
+        occasion: str | None = None,
         max_shipping_days: Annotated[int | None, Query(ge=0, le=14)] = None,
         exclude: Annotated[str | None, Query(max_length=200)] = None,
         include_out_of_stock: bool = False,
-        sort: SortParam | None = None,
+        sort: str | None = None,
         limit: Annotated[int, Query(ge=1)] = 5,
         offset: Annotated[int, Query(ge=0)] = 0,
     ) -> dict[str, Any]:
@@ -118,14 +118,14 @@ def create_app(
     @app.get("/products/search", dependencies=auth)
     def search_products(
         query: Annotated[str | None, Query(max_length=100)] = None,
-        min_price: Annotated[float | None, Query(ge=0)] = None,
-        max_price: Annotated[float | None, Query(ge=0)] = None,
-        recipient: Annotated[str | None, Query(max_length=40, pattern=RECIPIENT_PATTERN)] = None,
-        occasion: Occasion | None = None,
+        min_price: Price = None,
+        max_price: Price = None,
+        recipient: Annotated[str | None, Query(max_length=40)] = None,
+        occasion: str | None = None,
         max_shipping_days: Annotated[int | None, Query(ge=0, le=14)] = None,
         exclude: Annotated[str | None, Query(max_length=200)] = None,
         include_out_of_stock: bool = False,
-        sort: SortParam | None = None,
+        sort: str | None = None,
         limit: Annotated[int, Query(ge=1)] = 5,
         offset: Annotated[int, Query(ge=0)] = 0,
     ) -> dict[str, Any]:
