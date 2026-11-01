@@ -398,7 +398,8 @@
                 "outdoor-travel",
                 "pets",
                 "tech-gadgets"
-              ]
+              ],
+              "maxLength": 50
             }
           },
           {
