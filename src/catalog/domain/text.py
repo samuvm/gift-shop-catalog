@@ -58,7 +58,9 @@ class Vocabulary:
     `phrases` rewrites a multi-word phrase into one catalogue word before the query is split
     ("noise cancelling" -> "anc"). `synonyms` groups words that mean the same thing to a shopper;
     a query word matches any word of its group. `generic` words ("set", "kit") say how a product is
-    packaged, not what it is: they are dropped when the query has another word.
+    packaged, not what it is: they are dropped when the query has another word. `category_words`
+    names, per category slug, the words of the category's name a shopper uses for the whole aisle
+    ("kitchen", "gadget"); they are searched as a weak field (ADR-010).
     """
 
     def __init__(
@@ -66,6 +68,7 @@ class Vocabulary:
         phrases: Mapping[str, str] | None = None,
         synonyms: Iterable[Iterable[str]] = (),
         generic: Iterable[str] = (),
+        category_words: Mapping[str, Iterable[str]] | None = None,
     ) -> None:
         normalised = ((" ".join(tokens(k)), v.lower()) for k, v in (phrases or {}).items())
         self._phrases = sorted(normalised, key=lambda kv: (-len(kv[0]), kv[0]))
@@ -75,6 +78,10 @@ class Vocabulary:
             for s in stems:
                 self._groups[s] = stems
         self._generic = frozenset(stem(w.lower()) for w in generic)
+        self._category_words = {
+            slug: frozenset(stem(w.lower()) for w in chosen)
+            for slug, chosen in (category_words or {}).items()
+        }
 
     def _words(self, query: str | None) -> list[str]:
         text = " ".join(tokens(query))
@@ -95,3 +102,6 @@ class Vocabulary:
 
     def group(self, term: str) -> frozenset[str]:
         return self._groups.get(term, frozenset({term}))
+
+    def category_words(self, slug: str) -> frozenset[str]:
+        return self._category_words.get(slug, frozenset())

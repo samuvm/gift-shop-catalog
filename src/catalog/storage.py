@@ -1,6 +1,6 @@
 """The served catalogue on disk: `data/build/catalog.json`, written by the ingest, read by the service.
 
-It holds the products and the search vocabulary (ADR-005). `served_sha256` covers both, so a change
+It holds the products and the search vocabulary (ADR-005, ADR-010). `served_sha256` covers both, so a change
 of synonyms is as traceable in a response's `catalog_version` as a change of data.
 """
 
@@ -43,4 +43,9 @@ def read_catalog(path: Path) -> tuple[dict[str, str], list[Product]]:
 
 def read_vocabulary(path: Path) -> Vocabulary:
     search = json.loads(path.read_text(encoding="utf-8")).get("search") or {}
-    return Vocabulary(search.get("phrases"), search.get("synonyms") or [], search.get("generic") or [])
+    return Vocabulary(
+        search.get("phrases"),
+        search.get("synonyms") or [],
+        search.get("generic") or [],
+        search.get("category_words"),
+    )

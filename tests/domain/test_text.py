@@ -57,6 +57,17 @@ class TestApostrophes:
         assert result.unmatched_terms == []
 
 
+class TestCategoryWords:
+    """ADR-010: the words of a category's name a person chose to make searchable."""
+
+    def test_the_chosen_words_are_stemmed_by_category(self) -> None:
+        vocabulary = Vocabulary(category_words={"tech-gadgets": ["tech", "Gadgets"]})
+        assert vocabulary.category_words("tech-gadgets") == {"tech", "gadget"}
+
+    def test_a_category_without_chosen_words_has_none(self) -> None:
+        assert Vocabulary().category_words("games-puzzles") == frozenset()
+
+
 class TestSingleCharacters:
     """Decided: single letters and digits are kept. In this catalogue they carry meaning: "Vitamin C
     Serum", "E-Reader", "Moka Pot 3-cup", "2-4players". Only the "s" an apostrophe used to split off

@@ -537,3 +537,55 @@ class TestSmallerRules:
     def test_alternatives_from_the_category_prefer_shared_tags(self, relevance: Catalog) -> None:
         alternatives = relevance.details("HL-040").in_stock_alternatives
         assert [p.product_id for p in alternatives] == ["HL-030", "HL-031", "HL-042"]
+
+
+@pytest.fixture
+def aisles() -> Catalog:
+    """A catalogue whose category names hold words no product field uses (ADR-010)."""
+    return Catalog(
+        [
+            product("HL-021", name="Herb Garden Kit", subcategory="Garden", tags=["herbs", "kitchen"]),
+            product("KD-004", name="Moka Pot", subcategory="Coffee", rating=4.5, tags=["coffee"]),
+            product("KD-022", name="Tea Flight", subcategory="Tea", rating=4.4, tags=["tea"]),
+            product("PT-001", name="Dog Bed", subcategory="Dogs", recipient="pet", rating=4.6),
+            product("PT-002", name="Rope Toy", subcategory="Dogs", recipient="pet", price_eur=28),
+            product("HL-027", name="Incense Set", subcategory="Fragrance", price_eur=28),
+            product("HL-001", name="Night Light", subcategory="Lighting", recipient="kids", price_eur=42),
+        ],
+        vocabulary=Vocabulary(
+            synonyms=[["cooking", "kitchen"]],
+            category_words={"kitchen-dining": ["kitchen"], "pets": ["pet"]},
+        ),
+    )
+
+
+class TestVocabularyAndPets:
+    """ADR-010: category words a shopper uses, and pet products that are not for a person."""
+
+    def test_a_category_word_matches_the_whole_category_after_strong_matches(self, aisles: Catalog) -> None:
+        result = aisles.search("kitchen")
+        assert ids(result) == ["HL-021", "KD-004", "KD-022"]  # its own tag first, then the aisle
+        assert (result.unmatched_terms, result.missing_terms) == ([], {})
+
+    def test_other_words_of_the_category_name_stay_unsearched(self, aisles: Catalog) -> None:
+        result = aisles.search("dining")
+        assert (ids(result), result.unmatched_terms) == ([], ["dining"])
+
+    def test_a_category_word_does_not_name_the_product(self, aisles: Catalog) -> None:
+        assert ids(aisles.search("kitchen tea")) == ["KD-022"]  # "tea" narrows, the aisle does not
+
+    def test_a_synonym_reaches_the_category_word(self, aisles: Catalog) -> None:
+        assert ids(aisles.search("cooking")) == ["HL-021", "KD-004", "KD-022"]
+
+    def test_a_pet_product_does_not_match_a_person(self, aisles: Catalog) -> None:
+        result = aisles.search("toy", filters=Filters(recipient="kids", max_price=30))
+        assert (ids(result), result.over_budget_matches) == ([], [])
+
+    def test_a_pet_gets_pet_products_only(self, aisles: Catalog) -> None:
+        result = aisles.search(None, filters=Filters(recipient="pet"))
+        assert ids(result) == ["PT-001", "PT-002"]  # not the incense, which is for any person
+
+    def test_a_person_and_a_pet_together_keep_products_for_anyone(self, aisles: Catalog) -> None:
+        result = aisles.search(None, filters=Filters(recipient="kids,pet"), limit=10)
+        assert ids(result)[:3] == ["PT-001", "HL-001", "PT-002"]  # the recipients asked for first
+        assert result.total_matches == 7
