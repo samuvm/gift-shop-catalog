@@ -925,3 +925,10 @@ product's name and its reason instead of between products, so the products ran t
 The format section now spells out the layout with placeholders (not real products, which
 the model could copy as recommendations). Level 2 is being re-measured to confirm a layout
 change leaves tool choice alone.
+
+**Level 2 with prompt v5** (`make eval-l2-refresh`, gemma4:26b, n=150, 36 negatives): tool 88.0%,
+args 95.3%, negatives calling a tool 0.0%, replay mismatches 0. With v4 it was 81.3% / 97.3%.
+The prompt change was layout only, and the tool schemas changed in one place (`category`
+maxLength). A swing of 6.7 points from a layout edit says more about this model's sensitivity
+to wording than about a real improvement; it is recorded, not claimed. G-L2-TOOL (≥ 90%) stays
+not reached, as decided.
