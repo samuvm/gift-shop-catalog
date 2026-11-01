@@ -1,13 +1,13 @@
 {
   "model": "gemma4:26b",
-  "recording": "evals/l2/recordings/gemma4-26b__prompt-056a3e07__tools-4d142067.jsonl",
+  "recording": "evals/l2/recordings/gemma4-26b__prompt-306b0f1c__tools-4d142067.jsonl",
   "n": 150,
   "n_negative": 36,
-  "tool_accuracy": 0.8867,
-  "args_accuracy": 0.9535,
+  "tool_accuracy": 0.8733,
+  "args_accuracy": 0.9524,
   "negative_false_call_rate": 0.0,
   "replay_mismatches": 0,
-  "seconds_calling_model": 0,
+  "seconds_calling_model": 112.9,
   "failures": [
     {
       "id": "l2-003",
@@ -43,7 +43,7 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "Mi dispiace, ma l'anello non arriverebbe in tempo per martedì, poiché tra spedizione e incisione servono circa due settimane.\n\nPosso cercare altri regali che arrivano più velocemente o preferisci vede"
+      "text": "Mi dispiace, ma l'anello non arriverebbe in tempo per martedì. Se desideri, posso cercare altri regali che arrivano prima o controllare se ci sono opzioni digitali.\n\nVuoi che cerchi qualcosa con una s"
     },
     {
       "id": "l2-017",
@@ -59,16 +59,6 @@
         "exclude"
       ],
       "text": ""
-    },
-    {
-      "id": "l2-021",
-      "kind": "positive",
-      "tool": null,
-      "args": {},
-      "tool_ok": false,
-      "args_ok": false,
-      "wrong_args": [],
-      "text": "Il Pasta Making Kit di solito viene spedito in 3 giorni.\n\nPer essere sicuro che arrivi entro domenica, posso controllare se ci sono altre opzioni con una spedizione più veloce?"
     },
     {
       "id": "l2-028",
@@ -88,13 +78,17 @@
     {
       "id": "l2-030",
       "kind": "positive",
-      "tool": "get_product_details",
+      "tool": "search_products",
       "args": {
-        "product_id": "BS-002"
+        "max_price": 50,
+        "query": "pen",
+        "recipient": "him"
       },
-      "tool_ok": false,
+      "tool_ok": true,
       "args_ok": false,
-      "wrong_args": [],
+      "wrong_args": [
+        "max_price"
+      ],
       "text": ""
     },
     {
@@ -105,7 +99,17 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "Entendido, quito el kit de afeitado. Aquí tienes otras opciones para su cumpleaños:\n\n1. **Burr Coffee Grinder, Manual** · 115 € · suele enviarse en 3 días — ideal si le gusta el buen café.\n2. **Chess "
+      "text": "Como lleva barba, he quitado la maquinilla de afeitar. Aquí tienes otras opciones:\n\n1. **Burr Coffee Grinder, Manual** · 115 € · suele enviarse en 3 días — ideal si le gusta el buen café.\n2. **Chess S"
+    },
+    {
+      "id": "l2-039",
+      "kind": "positive",
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": "Entiendo. Como el set de higo se pasa de tu presupuesto, ¿te gustaría que busque otras velas con aromas frescos o prefieres ver otros tipos de regalos para tu amiga por menos de 40 €?"
     },
     {
       "id": "l2-040",
@@ -115,7 +119,7 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "El Trio Votive Set (HL-005) suele enviarse en 3 días. Como hoy es 31 de octubre, no puedo garantizar que llegue antes del miércoles.\n\n¿Quieres que te ayude con algo más?"
+      "text": "El Trio Votive Set (HL-005) suele enviarse en 3 días. Como hoy es 31 de octubre, no llegaría para este miércoles.\n\n¿Quieres que busque alguna otra opción que llegue antes?"
     },
     {
       "id": "l2-059",
@@ -125,7 +129,17 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "Per aiutarti a trovare qualcosa di perfetto, per che occasione è il regalo o ha qualche interesse particolare?"
+      "text": "Per chi è il regalo, e hai qualche preferenza su cosa potrebbe piacergli?"
+    },
+    {
+      "id": "l2-061",
+      "kind": "positive",
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": "La funda de cuero BS-006 suele enviarse en 3 días, pero el grabado de las iniciales añade una semana adicional al proceso.\n\n¿Te gustaría que compruebe si hay algún otro detalle sobre la funda?"
     },
     {
       "id": "l2-066",
@@ -133,7 +147,7 @@
       "tool": "search_products",
       "args": {
         "max_shipping_days": 6,
-        "query": "Burr Coffee Grinder, Manual"
+        "query": "coffee grinder moka pot"
       },
       "tool_ok": false,
       "args_ok": false,
@@ -148,7 +162,7 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "Solo puedo ayudarte con regalos de nuestra tienda. No tengo información sobre horarios de apertura o festivos.\n\nPara la agenda de tu hermano, ¿tienes algún presupuesto en mente?"
+      "text": "No tengo información sobre los horarios de apertura o festivos de la tienda. Le sugiero que contacte con el servicio de atención al cliente de la tienda para consultarlo.\n\nEn cuanto al regalo, ¿tiene "
     },
     {
       "id": "l2-102",
@@ -180,7 +194,17 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "Tienes razón, si busca evitar el ambiente de las velas, mejor pasamos de la fragancia.\n\n¿Qué te parece algo de estas opciones?\n\n1. **Poetry Anthology, Pocket** · 22 € · suele enviarse en 3 días — un d"
+      "text": "Tienes razón, si busca algo totalmente distinto, podemos evitar el aroma y el fuego. ¿Qué te parece algo de papelería o algo para decorar?\n\n¿Tienes algún presupuesto máximo en mente para buscar algo q"
+    },
+    {
+      "id": "l2-124",
+      "kind": "positive",
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": "No, no tenemos AirPods. ¿Te gustaría que buscara algún otro tipo de auriculares o algún regalo tecnológico diferente?"
     },
     {
       "id": "l2-131",
@@ -190,13 +214,25 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "Ecco le opzioni disponibili tra i 60 e i 70 EUR:\n\n1. **Laptop Stand, Folding** · €64 · spedisce solitamente in 3 giorni — molto pratico per studiare comodamente in biblioteca o in camera.\n2. **Power B"
+      "text": "1. **Power Bank 20000mAh** · €69 · spedisce solitamente in 3 giorni — ideale per non restare mai senza batteria durante le lezioni.\n2. **Laptop Stand, Folding** · €64 · spedisce solitamente in 2 giorn"
+    },
+    {
+      "id": "l2-132",
+      "kind": "positive",
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": "Perfecto, con ese toque de cocina y comida aquí tienes tres opciones especiales para vuestro décimo aniversario:\n\n1. **Enamel Casserole 24cm** · 189 € · suele enviarse en 3 días — Ideal para que ella "
     },
     {
       "id": "l2-133",
       "kind": "positive",
       "tool": "get_categories",
-      "args": {},
+      "args": {
+        "category": "experiences"
+      },
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
@@ -210,7 +246,7 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "1. **Stoneware Vase, Squat** · €49 · spedisce solitamente in 3 giorni — perfetto per i fiori freschi che compra ogni settimana.\n2. **Bud Vase Cluster** · €36 · ideale per decorare piccoli spazi con un"
+      "text": "Perfetto, allora un vaso è un'ottima idea. Ecco tre opzioni che non occupano troppo spazio:\n\n1. **Stoneware Vase, Squat** · €49 · di solito spedisce in 3 giorni — un vaso compatto e decorativo per i s"
     },
     {
       "id": "l2-138",
@@ -220,7 +256,7 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "1. **Brass Picture Frame 13x18** · €39 · suele enviarse en 3 días — es un detalle elegante para una foto de todos los nietos.\n\n¿Quieres que busque algún otro modelo de marco o te interesa este?"
+      "text": "1. **Brass Picture Frame 13x18** · €39 · suele enviarse en 3 días — es un detalle elegante para una foto de todos los nietos.\n\n¿Quieres que compruebe si queda stock o prefieres ver otros modelos de ma"
     },
     {
       "id": "l2-139",
@@ -230,22 +266,7 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "I hear you. Since they'll likely be exhausted, here are a few things to help them relax or stay fueled:\n\n1. **Lavender Scented Candle** · €18.50 · usually ships in 3 days — perfect for a moment of cal"
-    },
-    {
-      "id": "l2-140",
-      "kind": "positive",
-      "tool": "search_products",
-      "args": {
-        "max_price": 65,
-        "query": "back massage massager"
-      },
-      "tool_ok": true,
-      "args_ok": false,
-      "wrong_args": [
-        "max_price"
-      ],
-      "text": ""
+      "text": "I hear you. Since they'll likely be quite tired, here are a few things that might help them relax or make life a little easier:\n\n1. **Lavender Scented Candle** · €18.50 · usually ships in 3 days — per"
     }
   ]
 }
