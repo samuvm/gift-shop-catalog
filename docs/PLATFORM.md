@@ -42,7 +42,7 @@ bodies as `*** redacted ***`, so this was checked through behaviour.
 
 | Setting | Value | Why |
 |---|---|---|
-| Model | gpt-4.1-mini (EU) | The platform's default and its recommended speed model. Level 2 measured the tools on gemma-4-26b, a weaker model the platform also offers |
+| Model | gpt-5.6-luna (EU), reasoning Low | Chosen by the comparison below: best behaviour of the five models tried, at half gpt-4.1-mini's price. Level 2 measured the tools on gemma-4-26b |
 | Creativity | Low (temperature 0.2 in traces) | Stable tool and argument choice |
 | Short memory | 20 messages | The default of 3 would forget a budget given a few turns earlier |
 | Tool calls in memory | All | Earlier results stay visible for "the second one" or "show me more" |
@@ -69,6 +69,33 @@ who the gift is for, and the budget.
   level 2 measures.
 - **Web chat privacy settings: not enabled.** On a test page the consent banner only adds a
   click before typing. A production deployment would turn it on.
+
+## Choosing the model: a controlled comparison
+
+The first Simulations runs on gpt-4.1-mini failed in ways no prompt rule fixed: padding a coffee
+request with unrelated products, misreading results ("nothing under 80" with a 78-euro match),
+four products in one message, merged and duplicated messages. To separate the model from the
+prompt and from the test, everything else was held fixed: prompt v4, the same nine scenarios,
+memory 20, creativity Low, 600 answer tokens, reasoning Low where offered.
+
+Candidates came from τ²-Bench Airline (OpenRouter, 1 Nov 2026), the closest public benchmark to
+this task (multi-turn customer service with tools and rules): models cheaper than gpt-4.1 that
+score well above gpt-4.1-mini there.
+
+| Model | Price in/out per M tokens | τ²-Bench Airline | Core (judge / after reading) | Extra (judge / after reading) | Run time | Verdict |
+|---|---|---|---|---|---|---|
+| gpt-4.1-mini | 0.40 / 1.60 | 44.3% | 4/6 / 5/6 | 1/3 / 1/3 | ~50 s | pads, misreads results, duplicates messages |
+| gpt-4.1 | 2.0 / 8.0 | 47.7% | 5/6 / 6/6 | 2/3 / 2/3 | ~50 s | good; does not always flag over-budget items |
+| **gpt-5.6-luna** | **0.20 / 1.20** | **69.7%** | **5/6 / 6/6** | **1/3 / ~2.5/3** | **~45 s** | **flags over-budget items with the gap, one question at a time, right language** |
+| gemini-3.5-flash-lite | 0.30 / 2.50 | 78.3% | 5/6 / 5/6 | 1/3 / 1/3 | ~50 s | replies in Italian (the workspace language) to English and Spanish shoppers |
+| deepseek-v4-flash | 0.19 / 0.51 | 74.0% | 5/6 / 4/6 | 1/3 / 0/3 | 3 min 26 s | leaks raw tool-call tokens into the chat, loops, triggers error recovery |
+
+"After reading" means each Fail was checked against its transcript: the judge sees the
+conversation but not the catalogue, so it flags real products and prices as unverifiable (the
+Notebook Trio A6, the 50 filters of the Pour-Over Set) and treats the platform's fixed welcome
+text as the agent's. A public benchmark ranked gemini-3.5-flash-lite and deepseek-v4-flash
+above gpt-5.6-luna; on this task they failed in ways the benchmark does not measure (language,
+tool-call formatting). The benchmark chose what to try; the suite decided.
 
 ## Simulations (first run, gpt-4.1-mini, draft)
 

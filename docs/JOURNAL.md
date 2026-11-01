@@ -753,3 +753,42 @@ behave as designed. A Spanish request was answered in English: the second item f
 Deliberately left for the next session, with Samuel: the transcripts of the three failures, a
 prompt v4 aimed only at what they show, re-running the core suite, the widget's home texts, and
 the regenerated perimeter.
+
+### Block 16 · Prompt v4, sharper simulations, and choosing the model by experiment (≈ 2 h, with Samuel)
+
+**Starting point:** core 5/6, extra 1/3 on gpt-4.1-mini. The transcripts of the three failures
+showed real faults (three questions before products, "delivery is guaranteed", "show me more"
+raising the budget and repeating products) and one judge error (a material that is in the
+catalogue).
+
+**Prompt v4** targets only those faults: search as soon as the person or budget is known and
+never repeat a question; never guarantee delivery; page with offset and the same filters; reply
+in the language of the last message. On level 2 (gemma4:26b) v4 measured 80.0%, then 81.3%
+with the tool-call rule moved first, against 87.3% for v3. Samuel chose to test v4 on the
+platform anyway: the gate model is not the production model.
+
+**The simulations needed work too.** The judge sees the conversation, not the catalogue. It
+marked real products as invented, and extra-9 asked for "more coffee gifts around 50" when the
+catalogue has only two. Each criterion now states the catalogue facts it depends on. Two were
+loosened after reading transcripts, with the reason in the commit: core-2 demanded the literal
+"49 euros", and extra-7 counted three products across the conversation instead of per message.
+Changing a criterion after seeing results risks moving the goalposts, so every change is tied
+to a transcript that shows the criterion, not the agent, was wrong.
+
+**Model or prompt?** Samuel proposed a 2×2: model (mini, gpt-4.1) × criteria (old, sharpened),
+prompt fixed. gpt-4.1 removed the padding, the misreads and the duplicated messages that no
+prompt rule had fixed: the model weighed more than the prompt. Then, at Samuel's request, the
+candidates were widened using a public benchmark close to the task (τ²-Bench Airline) to find
+models cheaper than gpt-4.1 and better than mini. Three were run under identical settings.
+Results and reasons are in `docs/PLATFORM.md`.
+
+**Decision: gpt-5.6-luna, reasoning Low.** Core 6/6 after reading every Fail, the best extra
+result, at half gpt-4.1-mini's price. It flags over-budget items with the gap ("se pasa 23 €"),
+which was the one remaining fault of gpt-4.1. gemini-3.5-flash-lite ranked higher on the
+benchmark but answered English and Spanish shoppers in Italian. deepseek-v4-flash ranked higher
+too but leaked raw tool-call tokens, looped, and took four times longer. A benchmark is good for
+choosing what to try, not for deciding.
+
+Still open, noted not fixed: `over_budget_matches` ranks the 115-euro grinder above the
+78-euro pour-over set for "coffee" (name match beats tag match), and the judge treats the fixed
+welcome text as the agent's.

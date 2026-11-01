@@ -4,7 +4,7 @@
 |---|---|
 | id | gift-discovery |
 | version | 4 |
-| model (platform) | gpt-4.1-mini (platform default); level 2 measured on gemma-4-26b |
+| model (platform) | gpt-5.6-luna, reasoning Low (chosen by a controlled comparison of five models, see docs/PLATFORM.md); level 2 measured on gemma-4-26b |
 | changes | v1: first version · v2: always look products up before naming them, re-search when a condition changes, get_categories only on request (level 2: 28 answers from memory, 8 needless category calls) · v3: same rules, split into the platform's Agent Block fields (the platform has no single prompt field), plus one rule: follow an error body's did_you_mean. The off-topic rule stays in the last section, as in v2: in General Rules it made the model decline brand questions (level 2: 85.3%, 8 cases broken) · v4, from the first Simulations run: search as soon as the person or the budget is known and never repeat a question (core-1 asked three); never guarantee delivery (extra-8); 'show me more' keeps the filters and pages with offset (extra-9 raised the budget and repeated products); reply in the language of the shopper's last message (a Spanish message got an English reply). The rule that every product fact comes from a tool call goes first: with the new rules below it, level 2 dropped to 80.0% |
 
 The platform builds the agent's prompt from fields. Each `##` section below is pasted into the
