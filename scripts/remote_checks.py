@@ -23,7 +23,7 @@ LATENCY_CALLS = {
     "browse": "/categories/kitchen-dining/products?max_price=100",
     "search": "/products/search?query=chef%20knife&max_price=100",
 }
-RUNS, CALLS_PER_RUN = 3, 20
+RUNS, WARMUP, CALLS_PER_RUN = 3, 20, 200  # the latency protocol in docs/GOALS.yaml
 
 
 def get(url: str, key: str | None = None) -> tuple[int, bytes]:
@@ -39,7 +39,8 @@ def get(url: str, key: str | None = None) -> tuple[int, bytes]:
 
 
 def latency(base: str, key: str) -> dict[str, Any]:
-    get(base + "/health")  # wake the connection pool and the container
+    for _ in range(WARMUP):  # discarded: wake the connection pool and the container
+        get(base + LATENCY_CALLS["search"], key)
     runs = []
     for _ in range(RUNS):
         run: dict[str, float] = {}
@@ -56,7 +57,7 @@ def latency(base: str, key: str) -> dict[str, Any]:
             run[f"{name}_p95_ms"] = round(times[int(len(times) * 0.95) - 1], 1)
         runs.append(run)
     worst = max(v for run in runs for k, v in run.items() if k.endswith("p95_ms"))
-    return {"base_url": base, "runs": runs, "calls_per_run": CALLS_PER_RUN, "p95_ms_max_of_runs": worst}
+    return {"base_url": base, "runs": runs, "warmup_calls": WARMUP, "calls_per_run": CALLS_PER_RUN, "p95_ms_max_of_runs": worst}
 
 
 def public(base: str, key: str, test_page: str | None) -> dict[str, Any]:
