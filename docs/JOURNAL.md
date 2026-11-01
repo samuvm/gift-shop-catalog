@@ -837,3 +837,29 @@ prompt v3 and 81.3% with v4, against a production model (gpt-5.6-luna) that pass
 scenarios in two runs. Lowering it now would move the goalpost, and tuning the prompt for a
 model that is not in production would optimise the wrong thing. It is reported as not reached,
 with these numbers.
+
+### Block 19 · The judge cannot check facts it cannot see (≈ 20 min)
+
+**Run after re-import:** core 5/6, extra 1/3. Every named product and detail in the three Fails
+was checked against `data/build/catalog.json`:
+
+- core-1: the judge rejected the Ember Ceramic Candle, Atlas of Remote Islands and Incense Set
+  (all real, shown after a search by recipient and budget, before cooking came up) and "ninety
+  recipes, six hours" (the book's own description). Judge error.
+- extra-7: "se abre con una mano" for the Travel Mug is the catalogue's "One-handed open". Judge
+  error; the reference had paraphrased the description and left that part out.
+- extra-9: the same mug detail (judge error), and one real fault: after "show me more", the
+  Pour-Over Set at 78 was offered without saying it is over budget, while the grinder was
+  flagged. Minor, noted.
+
+**Conclusion:** this is the third round in which most Fails come from the judge comparing the
+agent with a partial list. Adding facts one Fail at a time cannot converge: any product or
+detail left out of a reference becomes a false Fail. The judge is now told what it can and
+cannot know: judge the behaviour, and treat a fact as wrong only if it contradicts the
+reference. Product existence is verified where the catalogue is visible: level 1 checks the
+tools exactly, and every Simulations transcript is read against the catalogue before a result
+is recorded. References now quote descriptions verbatim instead of paraphrasing them.
+
+**Platform:** guardrail agents corrected (jailbreak attempts → Jailbreak agent, out of scope →
+General). Out-of-scope blocking is switched on but has no effect in Shadow mode. Samuel checked
+the language on the test page by hand: Spanish in, Spanish out.
