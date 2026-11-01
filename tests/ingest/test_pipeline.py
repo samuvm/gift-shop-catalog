@@ -1,11 +1,13 @@
 """The ingest pipeline: rules applied, decisions applied, and every unexplained anomaly stops it."""
 
+import csv
+import io
 from pathlib import Path
 
 import pytest
 
 from catalog.ingest.decisions import Decisions, load_decisions
-from catalog.ingest.pipeline import EXPECTED_COLUMNS, IngestResult, run_ingest
+from catalog.ingest.pipeline import EXPECTED_COLUMNS, IngestResult, ingest_export, read_export, run_ingest
 
 
 @pytest.fixture(scope="module")
@@ -43,6 +45,75 @@ def ingest(rows: list[dict[str, str]], decisions: Decisions, **kwargs: object) -
 
 def codes(result: IngestResult) -> list[str]:
     return sorted(a.code for a in result.anomalies)
+
+
+def export_text(rows: list[dict[str, str]], columns: list[str] | None = None) -> str:
+    out = io.StringIO()
+    writer = csv.writer(out, lineterminator="\n")
+    writer.writerow(columns or EXPECTED_COLUMNS)
+    writer.writerows([r[c] for c in (columns or EXPECTED_COLUMNS)] for r in rows)
+    return out.getvalue()
+
+
+class TestReadingTheExport:
+    def test_a_utf8_export_reads_with_or_without_a_byte_order_mark(self) -> None:
+        text = export_text([row(description="Café crème, hand-thrown.")])
+        plain, with_bom = (
+            read_export(text.encode("utf-8")),
+            read_export(b"\xef\xbb\xbf" + text.encode("utf-8")),
+        )
+        assert plain.anomalies == with_bom.anomalies == []
+        assert plain.columns == with_bom.columns == list(EXPECTED_COLUMNS)
+        assert plain.rows == with_bom.rows == [row(description="Café crème, hand-thrown.")]
+
+    @pytest.mark.parametrize("encoding", ["cp1252", "latin-1", "utf-16", "utf-16-le"])
+    def test_an_export_that_is_not_utf8_stops_and_is_not_guessed(self, encoding: str) -> None:
+        export = read_export(export_text([row(description="Café crème.")]).encode(encoding))
+        assert [a.code for a in export.anomalies] == ["unreadable_export"]
+        assert "UTF-8" in export.anomalies[0].detail
+        assert export.rows == []
+
+    def test_a_row_with_more_fields_than_the_header_stops_naming_the_row(self) -> None:
+        text = export_text([row(), row(product_id="HL-002", name="Other")])
+        lines = text.splitlines(keepends=True)
+        lines[2] = lines[2].rstrip("\n") + ",EXTRA\n"
+        export = read_export("".join(lines).encode("utf-8"))
+        assert [(a.code, a.product_ids) for a in export.anomalies] == [("malformed_row", ["HL-002"])]
+        assert "line 3" in export.anomalies[0].detail
+        assert "18 fields" in export.anomalies[0].detail
+
+    def test_a_row_with_fewer_fields_than_the_header_stops(self) -> None:
+        text = export_text([row()]).rstrip("\n").rsplit(",", 1)[0] + "\n"
+        assert [a.code for a in read_export(text.encode("utf-8")).anomalies] == ["malformed_row"]
+
+    def test_blank_lines_are_ignored(self) -> None:
+        header, *body = export_text([row(), row(product_id="HL-002", name="Other")]).splitlines(keepends=True)
+        export = read_export((header + "\n\r\n" + "".join(body) + "\n\n").encode("utf-8"))
+        assert export.anomalies == []
+        assert [r["product_id"] for r in export.rows] == ["HL-001", "HL-002"]
+
+    @pytest.mark.parametrize("raw", [b"", b"\n\n", b"\xef\xbb\xbf"])
+    def test_an_empty_file_stops(self, raw: bytes) -> None:
+        assert [a.code for a in read_export(raw).anomalies] == ["empty_export"]
+
+    def test_the_source_hash_is_of_the_bytes_as_received(self) -> None:
+        raw = export_text([row()]).encode("utf-8")
+        assert read_export(raw).source_sha256 == read_export(raw).source_sha256
+        assert read_export(raw).source_sha256 != read_export(b"\xef\xbb\xbf" + raw).source_sha256
+
+    def test_a_problem_reading_the_export_stops_before_any_row_is_ingested(
+        self, decisions: Decisions
+    ) -> None:
+        _, result = ingest_export(export_text([row()]).encode("utf-16"), decisions)
+        assert result.status == "stopped"
+        assert codes(result) == ["unreadable_export"]
+        assert result.products == []
+
+    def test_a_readable_export_is_ingested(self, decisions: Decisions) -> None:
+        export, result = ingest_export(export_text([row()]).encode("utf-8"), decisions)
+        assert result.status == "ok"
+        assert [p.product_id for p in result.products] == ["HL-001"]
+        assert len(export.rows) == 1
 
 
 class TestCleanRows:
@@ -156,6 +227,19 @@ class TestStoppingAnomalies:
         result = ingest([row(description=injected)], decisions)
         assert codes(result) == ["instruction_like_text"]
         assert "description" in result.anomalies[0].detail
+
+    def test_a_duplicated_column_stops_as_schema_mismatch(self, decisions: Decisions) -> None:
+        # A second price_eur would otherwise silently win over the first for every row.
+        columns = [*EXPECTED_COLUMNS, "price_eur"]
+        text = export_text([{**row(), "price_eur": "42.00"}], columns).replace("42.00\n", "1.00\n")
+        _, result = ingest_export(text.encode("utf-8"), decisions)
+        assert codes(result) == ["schema_mismatch"]
+        assert "duplicated columns: ['price_eur']" in result.anomalies[0].detail
+
+    def test_a_header_with_no_rows_stops_even_on_a_first_build(self, decisions: Decisions) -> None:
+        result = run_ingest([], list(EXPECTED_COLUMNS), decisions, previous=None)
+        assert codes(result) == ["empty_export"]
+        assert result.products == []
 
     def test_schema_mismatch_stops_before_reading_rows(self, decisions: Decisions) -> None:
         columns = [c for c in EXPECTED_COLUMNS if c != "stock"] + ["discount"]
