@@ -897,3 +897,31 @@ target weaknesses found while gathering their facts, so they are expected to exp
   recipient filter matches them.
 - "gardening" matches nothing while "garden" finds three products: the stemmer does not
   strip "-ing".
+
+### Block 21 · Two branches merged, and a layout fix seen on the test page (≈ 30 min)
+
+**Search: possessives stay one word** (branch `search-apostrophe`). The tokenizer split
+"chef's" into `chef` + `s`, on both the query side and the product index, so every product
+carried a meaningless `s` match or a stray `missing_terms: ["s"]`. One rule now covers
+`chef's`, `kids'` and `don't`. Single letters and digits are kept on purpose: the catalogue
+uses them ("Vitamin C", "E-Reader", "3-cup"). The level-1 oracle got its own independent
+splitter; a fuzz run of 800,000 random strings found no difference from the domain's. No
+level-1 case changed. Tests 274 → 304.
+
+**API: tolerant where tolerance is free, strict where it informs** (branch `api-hardening`).
+- Closed-set values are read in any case (`HER`, `Birthday`), and empty list items are
+  ignored. A model that capitalises a value should not pay a round trip for it.
+- A wrong value now returns `allowed_values`, `did_you_mean` and a hint, not a regex.
+- `nan`, `inf` and `min_price > max_price` are now 400s with a hint. The inverted range used to
+  return an empty 200, which a model reads as "the shop has nothing".
+- Normalisation lives in the shared service layer, so the MCP server gets the same behaviour.
+- A new test compares FastAPI's own route parameters with the hand-built spec. It found one
+  real drift: `category` had a 50-character limit the spec did not advertise.
+- The spec snapshot test now fails when the file is missing, instead of silently writing it.
+- Tests 304 → 336. `make eval-l1` 74/74, `make spec-lint` 0, coverage 99.72%.
+
+**Prompt v5, layout only.** On the test page, the agent put the blank line between a
+product's name and its reason instead of between products, so the products ran together.
+The format section now spells out the layout with placeholders (not real products, which
+the model could copy as recommendations). Level 2 is being re-measured to confirm a layout
+change leaves tool choice alone.
