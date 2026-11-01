@@ -2,7 +2,7 @@
   "parity_rate": 1.0,
   "conformance_rate": 1.0,
   "n": {
-    "parity_cases": 74,
+    "parity_cases": 81,
     "conformance_checks": 16
   },
   "target": "in-process, today pinned to 2026-10-30",

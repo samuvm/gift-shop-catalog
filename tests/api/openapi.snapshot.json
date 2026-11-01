@@ -99,7 +99,8 @@
                           "him",
                           "her",
                           "couple",
-                          "kids"
+                          "kids",
+                          "pet"
                         ]
                       }
                     },
@@ -225,7 +226,8 @@
                     "him",
                     "her",
                     "couple",
-                    "kids"
+                    "kids",
+                    "pet"
                   ],
                   "occasions": [
                     "birthday",
@@ -237,7 +239,7 @@
                   ],
                   "meta": {
                     "today": "2026-10-30",
-                    "catalog_version": "f1f1dbad"
+                    "catalog_version": "a28ffe5f"
                   }
                 }
               }
@@ -436,10 +438,10 @@
             "name": "recipient",
             "in": "query",
             "required": false,
-            "description": "Who the gift is for: anyone, him, her, couple or kids, or several separated by commas. Products marked 'anyone' are always included, after the ones for the recipients asked for. Leave it out when unknown. For a partner (an anniversary, for example), pass 'her,couple' or 'him,couple'.",
+            "description": "Who the gift is for: anyone, him, her, couple, kids or pet, or several separated by commas. Products marked 'anyone' (any person) are included after the ones for the recipients asked for, except for 'pet' alone. Leave it out when unknown. For a partner (an anniversary, for example), pass 'her,couple' or 'him,couple'. For a dog or a cat, pass 'pet'.",
             "schema": {
               "type": "string",
-              "pattern": "^ *(anyone|him|her|couple|kids) *(, *(anyone|him|her|couple|kids) *)*$",
+              "pattern": "^ *(anyone|him|her|couple|kids|pet) *(, *(anyone|him|her|couple|kids|pet) *)*$",
               "maxLength": 40
             }
           },
@@ -590,7 +592,8 @@
                               "him",
                               "her",
                               "couple",
-                              "kids"
+                              "kids",
+                              "pet"
                             ]
                           },
                           "occasions": {
@@ -823,7 +826,7 @@
                       "max_price": 60.0
                     },
                     "today": "2026-10-30",
-                    "catalog_version": "f1f1dbad"
+                    "catalog_version": "a28ffe5f"
                   }
                 }
               }
@@ -1060,10 +1063,10 @@
             "name": "recipient",
             "in": "query",
             "required": false,
-            "description": "Who the gift is for: anyone, him, her, couple or kids, or several separated by commas. Products marked 'anyone' are always included, after the ones for the recipients asked for. Leave it out when unknown. For a partner (an anniversary, for example), pass 'her,couple' or 'him,couple'.",
+            "description": "Who the gift is for: anyone, him, her, couple, kids or pet, or several separated by commas. Products marked 'anyone' (any person) are included after the ones for the recipients asked for, except for 'pet' alone. Leave it out when unknown. For a partner (an anniversary, for example), pass 'her,couple' or 'him,couple'. For a dog or a cat, pass 'pet'.",
             "schema": {
               "type": "string",
-              "pattern": "^ *(anyone|him|her|couple|kids) *(, *(anyone|him|her|couple|kids) *)*$",
+              "pattern": "^ *(anyone|him|her|couple|kids|pet) *(, *(anyone|him|her|couple|kids|pet) *)*$",
               "maxLength": 40
             }
           },
@@ -1214,7 +1217,8 @@
                               "him",
                               "her",
                               "couple",
-                              "kids"
+                              "kids",
+                              "pet"
                             ]
                           },
                           "occasions": {
@@ -1453,7 +1457,7 @@
                       "max_price": 100.0
                     },
                     "today": "2026-10-30",
-                    "catalog_version": "f1f1dbad"
+                    "catalog_version": "a28ffe5f"
                   },
                   "over_budget_matches": [
                     {
@@ -1667,7 +1671,8 @@
                             "him",
                             "her",
                             "couple",
-                            "kids"
+                            "kids",
+                            "pet"
                           ]
                         },
                         "occasions": {
@@ -1789,7 +1794,8 @@
                               "him",
                               "her",
                               "couple",
-                              "kids"
+                              "kids",
+                              "pet"
                             ]
                           },
                           "occasions": {
@@ -1886,7 +1892,7 @@
                   },
                   "meta": {
                     "today": "2026-10-30",
-                    "catalog_version": "f1f1dbad"
+                    "catalog_version": "a28ffe5f"
                   },
                   "in_stock_alternatives": [
                     {

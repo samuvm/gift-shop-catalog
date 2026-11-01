@@ -1,9 +1,10 @@
 """Build the level-1 golden set: tool + arguments -> exactly what the tool must return.
 
-Each case states the behaviour it pins. Expected values come from `oracle.py` (ADR-002 and ADR-005
-semantics), then a person reviews every case in REVIEW.md against the catalogue before the set is
-frozen. A case whose arguments and expected result are unchanged since the previous version keeps
-its approval; every other case goes back to review, with the previous comment shown next to it.
+Each case states the behaviour it pins. Expected values come from `oracle.py` (ADR-002, ADR-005,
+ADR-006 and ADR-010 semantics), then a person reviews every case in REVIEW.md against the catalogue
+before the set is frozen. A case whose arguments and expected result are unchanged since the previous
+version keeps its approval; every other case goes back to review, with the previous comment shown
+next to it. A case still waiting for review, or deferred, carries the reviewer's last words forward.
 
 Usage: uv run python evals/golden/l1/build.py   (writes v<VERSION>.jsonl and REVIEW.md next to this file)
 """
@@ -16,8 +17,9 @@ from typing import Any
 from oracle import TOOLS, load
 
 HERE = Path(__file__).resolve().parent
-VERSION = 4
-REVIEWER, REVIEWED_AT = "Samuel Viciana", "2026-10-30"  # who approved the previous version
+VERSION = 5
+# Who approved the previous version, for kept cases that do not already carry an approval.
+REVIEWER, REVIEWED_AT = "Samuel Viciana", "2026-10-30"
 C, B, S, D = "get_categories", "get_products_by_category", "search_products", "get_product_details"
 
 # (tool, args, what the case pins). Order is the id order; ids are never reused.
@@ -181,6 +183,26 @@ CASES: list[tuple[str, dict[str, Any], str]] = [
     (S, {"query": "anniversary", "recipient": "him,couple", "max_price": 120}, "held out: two recipients"),
     # --- after the held-out cases, so their ids stay as registered.
     (S, {"query": "anniversary", "recipient": "her,couple", "max_price": 100}, "a partner: her and couple"),
+    # --- ADR-010: found by the platform's simulations and by running the tools in conversation tests.
+    (S, {"query": "chef's knife"}, "an apostrophe in the query: the possessive reads as its word"),
+    (S, {"query": "toy", "recipient": "kids", "max_price": 30}, "a dog toy is for a pet, not for kids"),
+    (S, {"recipient": "pet"}, "a pet gets pet products only, not the ones for any person"),
+    (
+        S,
+        {"query": "gardening", "recipient": "him", "max_price": 60},
+        "the activity finds the Garden subcategory through a synonym",
+    ),
+    (
+        S,
+        {"query": "cooking", "recipient": "her", "max_price": 50},
+        "the activity finds the cookbook, the herb kit and the kitchen aisle",
+    ),
+    (
+        S,
+        {"query": "tech gadget", "recipient": "kids", "max_price": 100},
+        "a category word: the tech aisle, after the products that say tech",
+    ),
+    (S, {"query": "kitchen", "max_price": 60}, "a category word: the aisle after the product tagged kitchen"),
 ]
 
 
@@ -199,19 +221,25 @@ DEFERRED = {
 }
 
 
-def previous() -> tuple[dict[str, dict[str, Any]], dict[str, str]]:
-    """The previous version's cases and the reviewer's comment on each, by case id."""
+def previous() -> tuple[dict[str, dict[str, Any]], dict[str, str], dict[str, str]]:
+    """The previous version's cases, the reviewer's verdict on each, and the earlier comment its sheet
+    carried forward (`*vN comment:* ...`), by case id."""
     cases_path, review_path = HERE / f"v{VERSION - 1}.jsonl", HERE / f"review-v{VERSION - 1}.md"
     cases = {c["id"]: c for c in map(json.loads, cases_path.read_text(encoding="utf-8").splitlines())}
-    comments = dict(
-        re.findall(r"^## (l1-\d+) .*?^Review: ?(.*?)$", review_path.read_text(encoding="utf-8"), re.M | re.S)
-    )
-    return cases, comments
+    sheet = review_path.read_text(encoding="utf-8")
+    sections = re.findall(r"^## (l1-\d+) (.*?)(?=^## |\Z)", sheet, re.M | re.S)
+    comments, carried = {}, {}
+    for cid, text in sections:
+        if verdict := re.search(r"^Review: ?(.*?)$", text, re.M):
+            comments[cid] = verdict.group(1)
+        if earlier := re.search(r"^\*v\d+ comment:\*.*$", text, re.M):
+            carried[cid] = earlier.group(0)
+    return cases, comments, carried
 
 
 def main() -> None:
     by_id = {p["product_id"]: p for p in load()}
-    old_cases, old_comments = previous()
+    old_cases, old_comments, carried = previous()
     lines: list[str] = []
     pending: list[str] = []
     review = [
@@ -239,8 +267,8 @@ def main() -> None:
             "expect": expect,
             "covers": covers,
             "provenance": "llm_generated_reviewed_human",
-            "reviewed_by": REVIEWER if kept else None,
-            "reviewed_at": REVIEWED_AT if kept else None,
+            "reviewed_by": (old["reviewed_by"] or REVIEWER) if old and kept else None,
+            "reviewed_at": (old["reviewed_at"] or REVIEWED_AT) if old and kept else None,
         }
         lines.append(json.dumps(case, ensure_ascii=False))
         review += [f"## {cid} · `{tool}` `{json.dumps(args, ensure_ascii=False)}`", f"*{covers}*", ""]
@@ -267,20 +295,22 @@ def main() -> None:
             review += ["", f"Review: ok (v{VERSION - 1})", ""]
             continue
         unchanged = old is not None and (old["tool"], old["args"], old["expect"]) == (tool, args, expect)
-        if unchanged and cid in DEFERRED:
-            review += [
-                "",
-                f"*v{VERSION - 1} comment:* {old_comments[cid].strip()}",
-                "",
-                f"Review: deferred to level 2 (ADR-006 freeze): {DEFERRED[cid]}",
-                "",
-            ]
+        verdict = old_comments.get(cid, "").strip()
+        # Not reviewed yet, or deferred: the sheet's words are the reviewer's earlier comment, not a verdict.
+        earlier = carried.get(cid) if verdict == "" or verdict.startswith("deferred") else None
+        if unchanged and cid in DEFERRED and verdict:  # still deferred; never reviewed is still pending
+            comment = earlier or f"*v{VERSION - 1} comment:* {verdict}"
+            review += ["", comment, "", f"Review: deferred to level 2 (ADR-006 freeze): {DEFERRED[cid]}", ""]
             continue
         pending.append(cid)
         if old is None:
             review += ["", "*New in this version.*"]
-        elif old_comments.get(cid, "").strip() not in ("", "ok"):
-            review += ["", f"*v{VERSION - 1} comment:* {old_comments[cid].strip()}"]
+        elif verdict == "" or verdict.startswith("deferred"):
+            status = "deferred to level 2" if verdict else "not reviewed yet"
+            changed = "" if unchanged else "; the expected result changed"
+            review += ["", f"*In v{VERSION - 1}: {status}{changed}.*"] + (["", earlier] if earlier else [])
+        elif verdict != "ok":
+            review += ["", f"*v{VERSION - 1} comment:* {verdict}"]
         else:
             review += ["", f"*Approved in v{VERSION - 1}; the expected result changed.*"]
         review += ["", "Review: ", ""]

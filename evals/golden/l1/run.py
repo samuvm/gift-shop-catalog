@@ -17,7 +17,7 @@ from urllib.parse import quote, urlencode
 import tiktoken
 
 ROOT = Path(__file__).resolve().parents[3]
-CASES = ROOT / "evals" / "golden" / "l1" / "v4.jsonl"
+CASES = ROOT / "evals" / "golden" / "l1" / "v5.jsonl"
 REPORT = ROOT / "evals" / "reports" / "l1-latest.json"
 ENCODING = tiktoken.get_encoding("o200k_base")
 PATHS = {

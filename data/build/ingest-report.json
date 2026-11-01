@@ -9,9 +9,9 @@
   },
   "catalog_version": {
     "source_sha256": "3e32e993f5d198a35ea8148cd8d02236718589a3700ebf34b35be99dd47aead6",
-    "decisions_sha256": "0035b8e880b7ad28e12f2c385ee77ae061653b0fdc953982e922b1e8619c3167",
-    "products_sha256": "6b3c871eac48be71b874195b81281b9d1a01b9e57ce60acb347226edf142a630",
-    "served_sha256": "f1f1dbad838e3caeb696b6d9c8baaa5b1bdc34a0e4c1573c0568c64051f6c2b0"
+    "decisions_sha256": "efed956551333057936cc9c6fb4414ed091c2e8adde34839c545b7eda0c03dcc",
+    "products_sha256": "77561bb6a4085d61182e671d95b9dbddb8c96148b979fabd507e54513912b0de",
+    "served_sha256": "a28ffe5f6017754dbb49c8f9c0e55173865eda0ef5c0eeb3341ed945c1942934"
   },
   "anomalies": [],
   "quality_warnings": [
@@ -82,6 +82,15 @@
       "detail": "one product, primary HL-024: Amber Glass Tumbler Set, identical in every field but category. Listed in both on purpose; both IDs stay valid."
     },
     {
+      "rule": "recipient_override",
+      "product_ids": [
+        "PT-001",
+        "PT-002",
+        "PT-003"
+      ],
+      "detail": "'anyone' read as 'pet' in pets: Dog bed, rope toys, cat tree: for an animal. As 'anyone' they matched every person filter (a dog toy for kids)."
+    },
+    {
       "rule": "unlimited_stock",
       "product_ids": [
         "EX-001",
@@ -101,6 +110,16 @@
   "diff": {
     "added": [],
     "removed": [],
-    "changed": {}
+    "changed": {
+      "PT-001": [
+        "recipient"
+      ],
+      "PT-002": [
+        "recipient"
+      ],
+      "PT-003": [
+        "recipient"
+      ]
+    }
   }
 }
