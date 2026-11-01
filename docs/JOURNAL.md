@@ -863,3 +863,37 @@ is recorded. References now quote descriptions verbatim instead of paraphrasing 
 **Platform:** guardrail agents corrected (jailbreak attempts → Jailbreak agent, out of scope →
 General). Out-of-scope blocking is switched on but has no effect in Shadow mode. Samuel checked
 the language on the test page by hand: Spanish in, Spanish out.
+
+### Block 20 · Planning the last stretch, and six more conversations (≈ 45 min)
+
+**Starting point:** the agent works on the platform, and two bonus items remain (MCP, landing).
+Before building them, two read-only investigations ran in parallel: one audited the tests, one
+researched MCP and the widget.
+
+**What the audit found** changed the priorities. A realistic new export breaks the ingest in
+ways no test covered. A duplicated `price_eur` column set all 152 prices to 1.00 and the
+ingest reported `ok`. A header-only file on a first build served an empty catalogue. A
+Windows-encoded export crashed it with no report. A row longer than the header silently lost a
+value. Each is fixed test-first in its own branch, with a guard on mass changes that mirrors
+the existing guard on mass removals (ADR-009). The audit also confirmed the `chef's` → `s`
+tokenisation bug and that the API rejects `HER` or `Birthday` for their capitals, which an LLM
+will send sooner or later.
+
+**MCP:** the platform can connect external MCP servers with static headers but does not
+document its protocol revision, and the current MCP revision dropped the `initialize`
+handshake. The server will speak both eras. That is the reason for the official SDK over a
+hand-rolled JSON-RPC endpoint (ADR-008).
+
+**How the work is split:** four branches built in parallel in separate worktrees (ingest,
+search, API, MCP), each merged only with `make gate-fast` green and its eval at target.
+
+**Six more Simulations scenarios** (suite `extended`), each built from the tools' real output:
+a vegan sister (exclusions), an anniversary, a child on a small budget, a whole category with
+"show me more", comparing two products, and a budget that rises mid-conversation. Two of them
+target weaknesses found while gathering their facts, so they are expected to expose them:
+
+- With only `recipient=kids` and a 30-euro budget, the top results include a dog toy
+  (Rope Toy Bundle) and incense. Pet products carry `recipient: anyone`, so any human
+  recipient filter matches them.
+- "gardening" matches nothing while "garden" finds three products: the stemmer does not
+  strip "-ing".
