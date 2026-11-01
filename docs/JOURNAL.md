@@ -995,3 +995,29 @@ hashes were reviewed into the baseline).
 
 One deliberate addition: `GET /mcp` returns 405. Without it the SDK holds the GET open
 indefinitely, which a stateless JSON server has no use for.
+
+### Block 24 · First run of the fifteen scenarios: two real weaknesses, both in the vocabulary (≈ 30 min)
+
+One run per suite, prompt v4 still on the draft (the v5 layout had not been pasted yet): core
+4/6, extra 2/3, extended 5/6. Every Fail was read against the tools' real output:
+
+- **core-1, real.** "She likes cooking" → `search_products("cooking")` returns only the
+  cookbook. The agent said truthfully "the only cooking match within 50", but a shopper means
+  kitchen things: the Herb Garden Kit and the Moka Pot fit. The tool is right by its own rules
+  and wrong for the shopper. This is a vocabulary gap, not a prompt problem.
+- **core-4, real.** "Tech gadgets for a 12-year-old" → "gadget" matches nothing and "tech"
+  matches three products by description (alarm clock, noise machine, smart plug). The category
+  is literally "Tech & Gadgets", but category names are not searched, so the speaker and the
+  Instant Camera never came up.
+- **extra-7, judge.** The agent said the catalogue does not mention a gift note, which is the
+  honest answer. The criterion is now explicit that pointing to customer service is optional.
+- **ext-13, judge.** The agent offered to look above the budget without raising it. The
+  criterion now separates offering from raising.
+
+Both real failures share a cause with the two found while writing the scenarios (pets matching
+human recipients, "gardening" ≠ "garden"). Samuel approved fixing them as one change: branch
+`search-quality`, ADR-010, measured on level 1 before and after.
+
+The format problem Samuel reported (products running together in the widget) was observed on
+the published v4. The v5 layout has not been on the platform yet, so it is not yet known
+whether it fixes it.
