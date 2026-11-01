@@ -210,17 +210,18 @@ by the benchmark failed here (wrong language; raw tool-call tokens in the chat).
 
 ### Conversation design
 
-The prompt (v5) is written in the platform's fields: description, goal, tone, ten general rules
+The prompt (v6) is written in the platform's fields: description, goal, tone, ten general rules
 and five sections (asking questions, recommendation format, using the catalogue, reading the
 results, outside the shop). The rules that shape a conversation:
 
 - **At most one question per message, and at most two before showing products.** As soon as
   the person, a budget or a kind of product is known, search and show, then ask. A vague
   "I need a gift" gets one light question: who is it for, and roughly how much?
-- **Up to three products per message**, best first, each a two-line block with a blank line
-  between products, so it reads in a phone-width widget: `**Name** · €price · usually ships in
-  N days`, then one reason tied to what the shopper said. "Only N left" when stock is low. One
-  short next step at the end.
+- **Up to three products per message**, best first, as a numbered list with one line per
+  product: `1. **Name** · €price · usually ships in N days — one reason tied to what the shopper
+  said`. "Only N left" when stock is low. One short next step after the list. Decided: a list,
+  because the widget's rendering ran two-line blocks together however the blank lines were
+  placed (prompt v5 on the platform), and numbers let the shopper say "the second one".
 - **Every product fact comes from a tool call.** Search again whenever a condition changes.
   Before saying the shop has or lacks something, search for it.
 - **Reply in the language of the shopper's last message**; tool queries stay in English
@@ -272,7 +273,7 @@ the served OpenAPI and a check that the route parameters match the spec.
   table gives both numbers.
 
 **G-L2-TOOL is not reached, and the threshold was not lowered.** Tool choice on the local model:
-prompt v3 87.3%, v4 81.3%, v5 88.0%, against ≥ 90%. Most misses are the model answering from
+prompt v3 87.3%, v4 81.3%, v5 88.0%, v6 88.7%, against ≥ 90%. Most misses are the model answering from
 earlier messages instead of calling a tool. Decided: keep 90%, because lowering it after the
 fact would move the goalpost, and tuning the prompt further for a model that is not in
 production would optimise the wrong thing. The production model passes the core scenarios. The
@@ -285,33 +286,34 @@ All numbers below are the latest run of each command. Reports are in `evals/repo
 
 | Metric | Value | Threshold | n | Command | Artefact |
 |---|---|---|---|---|---|
-| Unit and contract tests | 460 passed | all | 460 | `make test` | — |
-| Line coverage, domain + ingest | 99.75% | ≥ 85% | 807 statements | `make test` | `coverage-latest.json` |
+| Unit and contract tests | 517 passed | all | 517 | `make test` | — |
+| Line coverage, domain + ingest | 99.77% | ≥ 85% | 864 lines | `make test` | `coverage-latest.json` |
 | Layer violations (domain ↛ api/mcp, api ↮ mcp) | 0 | 0 | — | `make test` | `arch-latest.json` |
 | Data endpoints rejecting a missing, wrong or empty key | 12/12 | all | 12 | `make test` | `auth-latest.json` |
-| Level 1: exact product IDs | 74/74 | all | 74 | `make eval-l1` | `l1-latest.json` |
-| Level 1: largest response, default / max page | 622 / 1,046 tokens | ≤ 1,150 / 1,800 | 74 | `make eval-l1` | `l1-latest.json` |
-| Level 1: cases approved by the owner | 60 approved, 5 deferred to level 2, 9 pending | — | 74 | review sheet | `evals/golden/l1/REVIEW.md` |
-| Level 2: right tool (gemma4:26b, prompt v5) | 88.0% | ≥ 90% (**not met**) | 150 | `make eval-l2` | `l2-latest.json` |
+| Level 1: exact product IDs | 81/81 | all | 81 | `make eval-l1` | `l1-latest.json` |
+| Level 1: largest response, default / max page | 621 / 1,045 tokens | ≤ 1,150 / 1,800 | 81 | `make eval-l1` | `l1-latest.json` |
+| Level 1: cases approved by the owner | 60 approved, 3 deferred to level 2, 18 pending | — | 81 | review sheet | `evals/golden/l1/REVIEW.md` |
+| Level 2: right tool (gemma4:26b, prompt v6) | 88.7% | ≥ 90% (**not met**) | 150 | `make eval-l2` | `l2-latest.json` |
 | Level 2: right arguments, given the right tool | 95.3% | ≥ 85% | 150 | `make eval-l2` | `l2-latest.json` |
 | Level 2: off-topic cases that call a tool | 0% | ≤ 5% | 36 | `make eval-l2` | `l2-latest.json` |
 | Level 2: replay mismatches | 0 | 0 | 150 | `make eval-l2` | `l2-latest.json` |
-| Simulations, core (gpt-5.6-luna), judge / after reading | 4/6 / 4/6 | 6/6 | 6 | platform Simulations | `docs/JOURNAL.md` block 24 |
-| Simulations, extra, judge / after reading | 2/3 / 3/3 | — | 3 | platform Simulations | `docs/JOURNAL.md` block 24 |
-| Simulations, extended, judge / after reading | 5/6 / 6/6 | — | 6 | platform Simulations | `docs/JOURNAL.md` block 24 |
+| Simulations, core (gpt-5.6-luna), judge / after reading | 79% / 92% | 100% | 24 (4 runs × 6) | `make sim-report` | `simulations-latest.json` |
+| Simulations, extra, judge / after reading | 56% / 89% | — | 9 (3 runs × 3) | `make sim-report` | `simulations-latest.json` |
+| Simulations, extended, judge / after reading | 5/6 / 6/6 | — | 6 (1 run) | `make sim-report` | `simulations-latest.json` |
 | Ingest: client export, decisions pending | 0 | 0 | 152 rows | `make ingest` | `data/build/ingest-report.json` |
 | Ingest: seeded anomalies stopped exactly | 17/17 | all | 17 | `make eval-ingest` | `ingest-latest.json` |
-| MCP: same result as REST | 74/74 | all | 74 | `make eval-mcp` | `mcp-latest.json` |
+| MCP: same result as REST | 81/81 | all | 81 | `make eval-mcp` | `mcp-latest.json` |
 | MCP: protocol checks over Streamable HTTP | 16/16 | all | 16 | `make eval-mcp` | `mcp-latest.json` |
 | OpenAPI rule violations | 0 | 0 | — | `make spec-lint` | `spec-lint-latest.json` |
 | New secrets outside the reviewed baseline | 0 | 0 | — | `make secrets` | `secrets-latest.json` |
-| Deployed p95 latency, list and search | 264.8 ms | ≤ 300 ms | 3 runs × 20 calls | `make latency URL=…` | `latency-latest.json` |
+| Deployed p95 latency, list and search | 264.8 ms | ≤ 300 ms | 3 runs × 20 calls (before the sealed 200-call protocol was enforced) | `make latency URL=…` | `latency-latest.json` |
 | Public checks from outside | 6/6 | all | 6 | `make check-public URL=…` | `public-latest.json` |
 
-Simulations are one run per suite, prompt v4. The two core runs before this one passed 6/6
-after reading. The two real core failures here share one cause, vocabulary: "she likes cooking"
-found only the cookbook, and "tech gadgets" missed the speaker and the camera because category
-names are not searched. Both are addressed in the search vocabulary (ADR-010). The latency
+Simulations are recorded per run in `evals/simulations/results.csv` with both verdicts; runs
+of the same model and agent version count together, so re-running cannot turn a result green.
+The numbers above are prompt v4 on gpt-5.6-luna. The only real core failures (one run) share one
+cause, vocabulary: "she likes cooking" found only the cookbook, and "tech gadgets" missed the
+speaker and the camera because category names were not searched. ADR-010 fixes both. The latency
 figure is pessimistic on purpose: every call opens a new TLS connection.
 
 ## Running it locally
