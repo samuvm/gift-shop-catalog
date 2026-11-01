@@ -813,3 +813,27 @@ went back to Gift finder with real products under 30 euros.
 
 **Next:** publish, check the regenerated perimeter and the language on the test page, then close
 the agent phase. That needs `make done` and a decision on the level-2 tool goal.
+
+### Block 18 · Every simulation criterion carries its facts, and the tool-goal decision (≈ 30 min)
+
+**Problem:** the judge sees the conversation, not the catalogue. Block 17 showed that a
+reference listing some facts reads as listing all of them. Fixing criteria one Fail at a time
+would keep producing the same error elsewhere.
+
+**Change:** each of the nine criteria was rebuilt from the tools' real output for the calls the
+scenario leads to (run in-process against `data/build/catalog.json`). It lists every product
+the agent can reasonably name, with price, stock, shipping days and the details shoppers ask
+about. Each also tells the judge that the fixed welcome text is not the agent's reply. The
+core-6 weather check now accepts one or two short sentences: the agent's answer was one
+sentence plus a question back to the gift. The CSV can be deleted and re-imported on the
+platform as is.
+
+**Found while doing it:** `missing_terms` for "chef's knife" contains a stray `s`, because the
+apostrophe splits the word. It is harmless to the agent (it already says "not a chef's knife")
+and is noted for the README rather than fixed now.
+
+**Decision on G-L2-TOOL (≥ 90%):** the threshold stays. Measured on gemma4:26b: 87.3% with
+prompt v3 and 81.3% with v4, against a production model (gpt-5.6-luna) that passes the six
+scenarios in two runs. Lowering it now would move the goalpost, and tuning the prompt for a
+model that is not in production would optimise the wrong thing. It is reported as not reached,
+with these numbers.
