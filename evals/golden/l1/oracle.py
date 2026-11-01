@@ -83,7 +83,7 @@ def load() -> list[Product]:
 def vocabulary() -> tuple[dict[str, str], dict[str, set[str]]]:
     """Phrases and synonym groups from the served catalogue, both keyed by normalised words."""
     search = json.loads(CATALOG.read_text(encoding="utf-8")).get("search") or {}
-    phrases = {" ".join(re.findall(r"[a-z0-9]+", k.lower())): v for k, v in search.get("phrases", {}).items()}
+    phrases = {" ".join(split(k)): v for k, v in search.get("phrases", {}).items()}
     groups: dict[str, set[str]] = {}
     for group in search.get("synonyms", []):
         stems = {stem(w) for w in group}
@@ -112,8 +112,20 @@ def stem(word: str) -> str:
     return word
 
 
+def split(text: str) -> list[str]:
+    """Lowercase words. An apostrophe, straight or curly, is part of the word, never a break: a
+    possessive 's goes ("chef's" -> chef), any other apostrophe is dropped ("don't" -> dont)."""
+    out = []
+    for raw in re.findall(r"[a-z0-9'\u2019]+", text.lower()):
+        parts = raw.replace("\u2019", "'").split("'")
+        kept = [w for i, w in enumerate(parts) if not (w == "s" and i > 0 and parts[i - 1])]
+        if "".join(kept):
+            out.append("".join(kept))
+    return out
+
+
 def words(text: str) -> set[str]:
-    return {stem(w) for w in re.findall(r"[a-z0-9]+", text.lower())}
+    return {stem(w) for w in split(text)}
 
 
 def terms(query: str | None) -> list[str]:
@@ -131,7 +143,7 @@ def main_word(query: str | None) -> str | None:
 
 def all_terms(query: str | None) -> list[str]:
     phrases, _ = vocabulary()
-    text = " ".join(re.findall(r"[a-z0-9]+", (query or "").lower()))
+    text = " ".join(split(query or ""))
     for phrase in sorted(phrases, key=lambda k: (-len(k), k)):
         text = re.sub(rf"\b{re.escape(phrase)}\b", phrases[phrase], text)
     seen: dict[str, None] = {}

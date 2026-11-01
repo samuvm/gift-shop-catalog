@@ -4,6 +4,10 @@ import re
 from collections.abc import Iterable, Mapping
 
 _WORD = re.compile(r"[a-z0-9]+")
+# An apostrophe never splits a word: "chef's" is "chef", "kids'" is "kids", "don't" is "dont".
+# Straight and curly (phone keyboards type the curly one).
+_POSSESSIVE = re.compile(r"(?<=[a-z0-9])['\u2019]s(?![a-z0-9])")
+_APOSTROPHE = re.compile(r"['\u2019]")
 
 # Words that carry no product meaning in a gift-shop query.
 # fmt: off
@@ -29,14 +33,21 @@ def stem(word: str) -> str:
     return word
 
 
+def tokens(text: str | None) -> list[str]:
+    """The lowercase words of a text, unstemmed. Single letters and digits stay: in this catalogue
+    they carry meaning ("Vitamin C", "E-Reader", "3-cup")."""
+    lowered = _APOSTROPHE.sub("", _POSSESSIVE.sub("", (text or "").lower()))
+    return _WORD.findall(lowered)
+
+
 def words(text: str) -> set[str]:
     """Every stemmed word in a piece of product text."""
-    return {stem(w) for w in _WORD.findall(text.lower())}
+    return {stem(w) for w in tokens(text)}
 
 
 def query_terms(query: str | None) -> list[str]:
     """The meaningful, stemmed words of a query, in order, without repeats."""
-    terms = (stem(w) for w in _WORD.findall((query or "").lower()) if w not in STOPWORDS)
+    terms = (stem(w) for w in tokens(query) if w not in STOPWORDS)
     return list(dict.fromkeys(terms))
 
 
@@ -56,7 +67,7 @@ class Vocabulary:
         synonyms: Iterable[Iterable[str]] = (),
         generic: Iterable[str] = (),
     ) -> None:
-        normalised = ((" ".join(_WORD.findall(k.lower())), v.lower()) for k, v in (phrases or {}).items())
+        normalised = ((" ".join(tokens(k)), v.lower()) for k, v in (phrases or {}).items())
         self._phrases = sorted(normalised, key=lambda kv: (-len(kv[0]), kv[0]))
         self._groups: dict[str, frozenset[str]] = {}
         for group in synonyms:
@@ -66,7 +77,7 @@ class Vocabulary:
         self._generic = frozenset(stem(w.lower()) for w in generic)
 
     def _words(self, query: str | None) -> list[str]:
-        text = " ".join(_WORD.findall((query or "").lower()))
+        text = " ".join(tokens(query))
         for phrase, word in self._phrases:
             text = re.sub(rf"\b{re.escape(phrase)}\b", word, text)
         return query_terms(text)
