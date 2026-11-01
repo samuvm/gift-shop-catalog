@@ -74,6 +74,12 @@ class TestReadingTheExport:
         assert "UTF-8" in export.anomalies[0].detail
         assert export.rows == []
 
+    def test_an_ascii_only_utf16_export_without_a_byte_order_mark_stops(self) -> None:
+        # Every byte pair is valid UTF-8 here; the NUL halves give it away.
+        export = read_export(export_text([row()]).encode("utf-16-le"))
+        assert [a.code for a in export.anomalies] == ["unreadable_export"]
+        assert "UTF-16" in export.anomalies[0].detail
+
     def test_a_row_with_more_fields_than_the_header_stops_naming_the_row(self) -> None:
         text = export_text([row(), row(product_id="HL-002", name="Other")])
         lines = text.splitlines(keepends=True)
