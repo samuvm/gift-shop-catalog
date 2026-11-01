@@ -8,12 +8,14 @@ The key comes from CATALOG_API_KEY and the test page from TEST_PAGE_URL, both in
 environment (a local .env, never the repository).
 """
 
+import http.client
 import json
 import os
 import statistics
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any
@@ -39,27 +41,41 @@ def get(url: str, key: str | None = None) -> tuple[int, bytes]:
 
 
 def latency(base: str, key: str) -> dict[str, Any]:
-    for _ in range(WARMUP):  # discarded: wake the connection pool and the container
-        get(base + LATENCY_CALLS["search"], key)
+    # Decided (option A, 2 Nov): one connection reused for the warm-up and every call, because the
+    # sealed protocol's warm-up only means something if the connection survives it, and a
+    # server-to-server client such as the platform keeps its connection open. Opening a new TCP and
+    # TLS connection per call measured the network handshake (~115 ms of ~170 ms), not the service.
+    parts = urllib.parse.urlsplit(base)
+    if parts.scheme != "https":
+        raise SystemExit(f"latency needs an https URL: {base!r}")
+    conn = http.client.HTTPSConnection(parts.netloc, timeout=10)
+    headers = {"X-API-Key": key}
+
+    def timed(path: str) -> float:
+        start = time.perf_counter()
+        conn.request("GET", parts.path.rstrip("/") + path, headers=headers)
+        response = conn.getresponse()
+        response.read()
+        if response.status != 200:
+            raise SystemExit(f"{path}: HTTP {response.status}")
+        return (time.perf_counter() - start) * 1000
+
+    for _ in range(WARMUP):  # discarded
+        timed(LATENCY_CALLS["search"])
     runs = []
     for _ in range(RUNS):
         run: dict[str, float] = {}
         for name, path in LATENCY_CALLS.items():
-            times = []
-            for _ in range(CALLS_PER_RUN):
-                start = time.perf_counter()
-                status, _ = get(base + path, key)
-                times.append((time.perf_counter() - start) * 1000)
-                if status != 200:
-                    raise SystemExit(f"{path}: HTTP {status}")
-            times.sort()
+            times = sorted(timed(path) for _ in range(CALLS_PER_RUN))
             run[f"{name}_p50_ms"] = round(statistics.median(times), 1)
             run[f"{name}_p95_ms"] = round(times[int(len(times) * 0.95) - 1], 1)
         runs.append(run)
+    conn.close()
     worst = max(v for run in runs for k, v in run.items() if k.endswith("p95_ms"))
     return {
         "base_url": base,
         "runs": runs,
+        "connection": "reused",
         "warmup_calls": WARMUP,
         "calls_per_run": CALLS_PER_RUN,
         "p95_ms_max_of_runs": worst,

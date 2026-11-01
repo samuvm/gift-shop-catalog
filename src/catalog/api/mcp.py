@@ -5,6 +5,7 @@ The tool list is generated from `catalog.tools.TOOLS` and every call goes throug
 """
 
 import json
+import logging
 import math
 import secrets
 from collections.abc import AsyncIterator, Callable
@@ -20,7 +21,7 @@ from mcp.server.transport_security import TransportSecuritySettings
 from mcp.shared.exceptions import MCPError
 from starlette.responses import JSONResponse, Response
 from starlette.routing import Route
-from starlette.types import Receive, Scope, Send
+from starlette.types import Message, Receive, Scope, Send
 
 from catalog import __version__
 from catalog.domain.errors import CatalogError
@@ -38,6 +39,8 @@ TRUE, FALSE = {"1", "on", "t", "true", "y", "yes"}, {"0", "off", "f", "false", "
 LEFT_TO_THE_SERVICE = ("enum", "pattern")
 CLAMPED = {"limit": "maximum"}
 UNAUTHORIZED_RPC = -32001
+# uvicorn configures this logger, so its lines reach the container log without extra setup.
+LOG = logging.getLogger("uvicorn.error")
 
 
 def input_schema(tool: Tool) -> dict[str, Any]:
@@ -174,6 +177,22 @@ class Endpoint:
             yield
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        # Decided: one line per request with the JSON-RPC method, the protocol headers and the status
+        # (never the key), because a client that fails to connect shows nothing on its own side.
+        body, receive = await _buffered(receive)
+        status: list[int] = []
+
+        async def send_and_note(message: Message) -> None:
+            if message["type"] == "http.response.start":
+                status.append(message["status"])
+            await send(message)
+
+        try:
+            await self._handle(scope, receive, send_and_note)
+        finally:
+            LOG.info(_describe(scope, body, status[0] if status else 0))
+
+    async def _handle(self, scope: Scope, receive: Receive, send: Send) -> None:
         sent = dict(scope["headers"]).get(b"x-api-key", b"")
         if not secrets.compare_digest(sent, self._key):
             # No WWW-Authenticate: Bearer would send OAuth-capable clients looking for an
@@ -196,3 +215,44 @@ class Endpoint:
             await Response(status_code=405, headers={"Allow": "POST"})(scope, receive, send)
             return
         await self._manager.handle_request(scope, receive, send)
+
+
+async def _buffered(receive: Receive) -> tuple[bytes, Receive]:
+    """Read the request body once and hand the transport a receive that replays it."""
+    chunks, more = [], True
+    while more:
+        message = await receive()
+        if message["type"] != "http.request":
+            break
+        chunks.append(message.get("body", b""))
+        more = message.get("more_body", False)
+    body = b"".join(chunks)
+    replayed = False
+
+    async def replay() -> Message:
+        nonlocal replayed
+        if not replayed:
+            replayed = True
+            return {"type": "http.request", "body": body, "more_body": False}
+        return await receive()
+
+    return body, replay
+
+
+def _describe(scope: Scope, body: bytes, status: int) -> str:
+    headers = {k.decode("latin-1"): v.decode("latin-1") for k, v in scope["headers"]}
+    try:
+        message = json.loads(body) if body else {}
+        rpc = message.get("method", "-") if isinstance(message, dict) else "batch"
+    except ValueError:
+        rpc = "unparsable"
+    fields = {
+        "http": scope["method"],
+        "rpc": rpc,
+        "status": status,
+        "protocol": headers.get("mcp-protocol-version", "-"),
+        "session": "yes" if "mcp-session-id" in headers else "no",
+        "accept": headers.get("accept", "-"),
+        "agent": headers.get("user-agent", "-")[:80],
+    }
+    return "mcp " + " ".join(f"{k}={v}" for k, v in fields.items())

@@ -212,3 +212,27 @@ class TestAuth:
 
     def test_the_key_is_checked_before_the_method(self, client: TestClient) -> None:
         assert client.get("/mcp").status_code == 401
+
+
+class TestRequestLog:
+    """One log line per /mcp request, so a client's failure can be read from the server side."""
+
+    def test_a_request_logs_its_method_protocol_and_status_without_the_key(
+        self, client: TestClient, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        caplog.set_level("INFO", logger="uvicorn.error")
+        headers = {**HEADERS, "MCP-Protocol-Version": "2025-06-18", "User-Agent": "probe/1"}
+        rpc(client, "tools/list", {}, headers)
+        line = next(r.getMessage() for r in caplog.records if r.getMessage().startswith("mcp "))
+        assert "rpc=tools/list" in line
+        assert "protocol=2025-06-18" in line
+        assert "status=200" in line
+        assert "agent=probe/1" in line
+        assert KEY not in line
+
+    def test_a_refused_key_is_logged_too(self, client: TestClient, caplog: pytest.LogCaptureFixture) -> None:
+        caplog.set_level("INFO", logger="uvicorn.error")
+        rpc(client, "tools/list", {}, {**HEADERS, "X-API-Key": "wrong"})
+        line = next(r.getMessage() for r in caplog.records if r.getMessage().startswith("mcp "))
+        assert "status=401" in line
+        assert "wrong" not in line
