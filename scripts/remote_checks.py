@@ -57,7 +57,13 @@ def latency(base: str, key: str) -> dict[str, Any]:
             run[f"{name}_p95_ms"] = round(times[int(len(times) * 0.95) - 1], 1)
         runs.append(run)
     worst = max(v for run in runs for k, v in run.items() if k.endswith("p95_ms"))
-    return {"base_url": base, "runs": runs, "warmup_calls": WARMUP, "calls_per_run": CALLS_PER_RUN, "p95_ms_max_of_runs": worst}
+    return {
+        "base_url": base,
+        "runs": runs,
+        "warmup_calls": WARMUP,
+        "calls_per_run": CALLS_PER_RUN,
+        "p95_ms_max_of_runs": worst,
+    }
 
 
 def public(base: str, key: str, test_page: str | None) -> dict[str, Any]:
