@@ -1066,3 +1066,47 @@ Writing it was also an audit, and it turned up three gaps between what is sealed
   compares it with its sealed threshold.
 - `docs/PLATFORM.md` still says the agent fields come from prompt v3. It is updated once v5 is
   confirmed on the platform.
+
+### Block 27 · Vocabulary fixed, and a gate that says "not done" (≈ 30 min to review and merge)
+
+**Search vocabulary (branch `search-quality`, ADR-010).** The simulations and the scenario
+writing found four queries that failed a shopper while following the search's own rules. All
+four were fixed with data judgements, not ranking changes:
+
+- **Pets get their own recipient.** A `recipient_overrides` entry reads the export's `anyone`
+  as `pet` for the Pets category. `anyone` now means any person, so a dog toy no longer
+  answers "toy for kids".
+- **Two synonym groups:** `[garden, gardening, gardener]` and `[cooking, cook, kitchen]`.
+- **Chosen category-name words** (`kitchen`, `tech`, `gadget`, `pet`) are searchable as the
+  weakest field. Four options were measured on the 74 approved cases, and this was the only
+  one that fixed the queries and changed none of them. A whole category name as a field
+  changed two or three approved cases.
+- **The unused-synonym check had a blind spot.** It looked in text that included category
+  names, so a group found only there passed while matching nothing. It now runs the search.
+
+Before → after:
+- "cooking" (her, ≤50): the cookbook only → cookbook, Herb Garden Kit, Moka Pot, Tea Flight.
+- "gardening" (him, ≤60): nothing → three garden products.
+- "tech gadget" (kids, ≤100): 3 → 10 matches.
+- "toy" (kids, ≤30): a dog toy → nothing in budget, and the right over-budget items.
+
+Level 1 is now v5: 81 cases, including "chef's knife" over HTTP. 18 cases await Samuel's
+review. No approved case changed.
+
+**`make sim-report` and `make done F=<n>`.**
+- Simulation verdicts are recorded by hand per run in `evals/simulations/results.csv`, with
+  both the judge's verdict and the verdict after reading.
+- A suite's result counts every run of the same model and agent version together, so
+  re-running until one run passes cannot turn a setup green.
+- `make done F=<n>` reads each goal's artifact, compares it with the sealed threshold and
+  checks the lock.
+
+Today: `make done F=3` → 17/19.
+- G-L2-TOOL fails (0.88 < 0.90), as known.
+- G-SIM-CORE fails (0.9167 < 1.0): the two real core-1/core-4 failures of run r6 are counted
+  with the earlier v4 runs. They were fixed by ADR-010, which is not deployed yet. Runs after
+  the deploy carry a new agent version label (v6), so they are counted on their own.
+
+On main: `make gate-fast` 517 passed, coverage 99.77%; `make eval-l1` 81/81; `make eval-mcp`
+81/81 and 16/16; `make eval-ingest` 17/17; `make spec-lint` 0; `make secrets` 0. Level 2 is
+being re-recorded, because the recipient description changed the tools hash.
