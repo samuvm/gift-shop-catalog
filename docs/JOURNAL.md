@@ -1158,3 +1158,34 @@ connection survives the warm-up. Even so, changing how the number is measured af
 is Samuel's call, not mine. Stopped and asked, with the three options and the numbers. The
 first published value (264.8 ms at 20 calls per run) was below the threshold only because of
 its small sample.
+
+### Block 30 · Latency option A, an MCP connection that fails on the platform, and prompt v7 (≈ 40 min)
+
+**Latency: option A, decided by Samuel.** The script now reuses one connection for the warm-up
+and every call. It records `"connection": "reused"` in the report, and its comment says why.
+Both numbers stay in the record: 357.9–384.9 ms opening a connection per call, 145.8 ms over a
+reused one. It is re-measured after the deploy.
+
+**MCP on the platform: "Connected", then nothing.** Adding the server showed Connected, but the
+Agent Block's tool dropdown stayed empty, and a later Save reported "connection failed". From
+here, every probe of the public endpoint answers as the spec expects:
+- `initialize` for 2025-03-26 and 2025-06-18;
+- `tools/list` with or without a prior initialize and with or without the version header;
+- `notifications/initialized` → 202, `ping`, and the modern `server/discover` envelope check;
+- `Accept: application/json` alone is accepted; `text/event-stream` alone gets 406;
+- GET, DELETE, OPTIONS and HEAD get 405.
+
+The two candidates left are clients that expect SSE responses, or that call
+`resources/list`/`prompts/list` and treat "method not found" as a failure. Guessing would be
+cheap but blind. Decided: log one line per `/mcp` request instead — HTTP method, JSON-RPC
+method, protocol header, session header, Accept, user agent and status, never the key. The
+container log then shows exactly what the platform sends. Tests first:
+`TestRequestLog` (2 tests).
+
+**Prompt v7, one line.** On the landing page, over-budget products were shown as "shipping time
+not listed". Near-miss products are pointers by design (ADR-007) and carry no shipping time, so
+the model filled the format line with that phrase. They are now listed as "**Name** · €price ·
+€N over budget". Decided: a prompt line rather than adding `shipping_days` to every near-miss
+reference, because the reference is deliberately small, and the change would rewrite the
+expectations of every level-1 case that has one, the night before submission. Level 2 is
+being re-recorded.
