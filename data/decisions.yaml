@@ -16,8 +16,13 @@ categories:          # canonical names; the ID prefix must match (152/152 in the
   - {name: "Pets",               slug: pets,             id_prefix: PT}
   - {name: "Experiences",        slug: experiences,      id_prefix: EX}
 
-recipients: [anyone, him, her, couple, kids]
+recipients: [anyone, him, her, couple, kids, pet]   # "anyone" is any person; "pet" is for an animal (ADR-010)
 occasions: [birthday, christmas, anniversary, housewarming, thank-you, graduation]
+
+recipient_overrides:   # in these categories the export's "anyone" is read as another recipient (ADR-010)
+  - category: pets
+    recipient: pet
+    reason: "Dog bed, rope toys, cat tree: for an animal. As 'anyone' they matched every person filter (a dog toy for kids)."
 
 cross_listed:
   - ids: [HL-021, KD-024]
@@ -62,6 +67,14 @@ search:   # shopper words the catalogue spells differently (ADR-005). Taken from
     - [wood, wooden]                              # "olive wood board", "wooden blocks"; the catalogue tags both
     - [notebook, journal]                         # a leather journal cover holds notebooks; shoppers ask for either
     - [wireless, bluetooth]                       # after the third review: the portable speaker says "bluetooth"; "wireless" in the conversations
+    # Added after the platform's simulations (ADR-010): a hobby asked for as the activity.
+    - [garden, gardening, gardener]               # "gardening" found nothing; the Garden subcategory holds the planters and herb kit
+    - [cooking, cook, kitchen]                    # "likes cooking": the cookbook, the herb kit tagged "kitchen", the kitchen aisle
+  category_words:                # words of a category's name a shopper uses for the whole aisle (ADR-010):
+                                 # searched as the weakest field. The rest of the name is not searched.
+    kitchen-dining: [kitchen]    # no Kitchen & Dining product says "kitchen" anywhere else
+    tech-gadgets: [tech, gadget] # "a tech gadget for my nephew"; only five products say "tech", none "gadget"
+    pets: [pet]                  # "something for my pet"; no pet product says "pet"
   generic:                       # how a product is packaged, not what it is (ADR-006): dropped when
                                  # the query has another word, so "tea set" searches for tea
     [set, kit, pack, pair, collection, bundle, trio, duo]   # "box" is left out: it can be the product

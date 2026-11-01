@@ -14,8 +14,9 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from catalog.domain.catalog import Catalog
 from catalog.domain.models import Availability, Product
-from catalog.domain.text import stem, words
+from catalog.domain.text import Vocabulary
 from catalog.ingest.decisions import Category, Decisions
 from catalog.ingest.rules import (
     category_key,
@@ -233,6 +234,8 @@ def run_ingest(
     listing_anomalies, warnings, applied, links, secondary = _resolve_cross_listings(parsed, decisions)
     anomalies.extend(listing_anomalies)
 
+    parsed, overridden = _override_recipients(parsed, decisions)
+    applied.extend(overridden)
     products = sorted(
         (
             _to_product(r, decisions, links.get(r.product_id, []), r.product_id not in secondary)
@@ -440,6 +443,30 @@ def _resolve_cross_listings(
     return anomalies, warnings, applied, links, secondary
 
 
+def _override_recipients(rows: list[_Row], decisions: Decisions) -> tuple[list[_Row], list[Finding]]:
+    """Read the export's 'anyone' as the recipient a person decided for a category (ADR-010). After
+    cross-listings are resolved, so a pair across two categories is still recognised as one product."""
+    by_category = {o.category: o for o in decisions.recipient_overrides}
+    out: list[_Row] = []
+    changed: dict[str, list[str]] = defaultdict(list)
+    for row in rows:
+        override = by_category.get(row.category.slug)
+        if override is not None and row.values["recipient"] == "anyone":
+            row = row.model_copy(update={"values": {**row.values, "recipient": override.recipient}})
+            changed[override.category].append(row.product_id)
+        out.append(row)
+    findings = [
+        Finding(
+            rule="recipient_override",
+            product_ids=sorted(changed[o.category]),
+            detail=f"'anyone' read as {o.recipient!r} in {o.category}: {o.reason}",
+        )
+        for o in decisions.recipient_overrides
+        if changed[o.category]
+    ]
+    return out, findings
+
+
 def _to_product(row: _Row, decisions: Decisions, also_listed_as: list[str], primary: bool) -> Product:
     v = row.values
     tags = split_multi(v["tags"])
@@ -558,15 +585,30 @@ def _quality_warnings(products: list[Product], decisions: Decisions) -> list[Ano
     warnings = [
         Anomaly(code=code, product_ids=ids, detail=detail) for code, (ids, detail) in checks.items() if ids
     ]
-    used = set().union(*(words(p.search_text) for p in products))
+    # Through the search itself: a word only in unsearched text (the category name, "For: kids") is
+    # not a match, and a word the vocabulary makes searchable (ADR-010) is.
+    search = decisions.search
+    catalog = Catalog(
+        products, Vocabulary(search.phrases, search.synonyms, search.generic, search.category_words)
+    )
     warnings += [
         Anomaly(
             code="unused_synonym",
             product_ids=[],
             detail=f"synonym group {group} matches no product; remove it or check the spelling",
         )
-        for group in decisions.search.synonyms
-        if not used & {stem(w) for w in group}
+        for group in search.synonyms
+        if catalog.search(group[0]).unmatched_terms
+    ]
+    present = {p.category_slug for p in products}
+    warnings += [
+        Anomaly(
+            code="unused_decision",
+            product_ids=[],
+            detail=f"recipient override for {o.category} matches no product in the export",
+        )
+        for o in decisions.recipient_overrides
+        if o.category not in present
     ]
     return warnings
 
