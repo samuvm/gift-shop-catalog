@@ -71,3 +71,25 @@ def test_malformed_search_vocabulary_is_rejected(
     raw["search"] = search
     with pytest.raises(ValueError, match=message):
         load_decisions(yaml.safe_dump(raw))
+
+
+def test_an_empty_list_of_accepted_exports_loads(raw: dict[str, object]) -> None:
+    raw["change_guard"] = {"max_changed_ratio": 0.5, "accepted_exports": None}
+    assert load_decisions(yaml.safe_dump(raw)).change_guard.accepted_exports == []
+
+
+@pytest.mark.parametrize(
+    ("accepted", "message"),
+    [
+        ([{"source_sha256": "abc", "reason": "Winter sale"}], "sha256"),
+        ([{"source_sha256": "A" * 64, "reason": "Winter sale"}], "sha256"),
+        ([{"source_sha256": "a" * 64, "reason": "  "}], "reason"),
+        ([{"source_sha256": "a" * 64, "reason": "x"}, {"source_sha256": "a" * 64, "reason": "y"}], "twice"),
+    ],
+)
+def test_malformed_accepted_export_is_rejected(
+    raw: dict[str, object], accepted: list[dict[str, str]], message: str
+) -> None:
+    raw["change_guard"] = {"max_changed_ratio": 0.5, "accepted_exports": accepted}
+    with pytest.raises(ValueError, match=message):
+        load_decisions(yaml.safe_dump(raw))

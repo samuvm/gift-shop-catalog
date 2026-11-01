@@ -180,7 +180,7 @@ def ingest_export(
     export = read_export(raw)
     if export.anomalies:
         return export, _stopped(export.anomalies)
-    return export, run_ingest(export.rows, export.columns, decisions, previous)
+    return export, run_ingest(export.rows, export.columns, decisions, previous, export.source_sha256)
 
 
 def run_ingest(
@@ -188,6 +188,7 @@ def run_ingest(
     columns: list[str],
     decisions: Decisions,
     previous: list[Product] | None = None,
+    source_sha256: str | None = None,
 ) -> IngestResult:
     missing = [c for c in EXPECTED_COLUMNS if c not in columns]
     unexpected = [c for c in columns if c not in EXPECTED_COLUMNS]
@@ -250,6 +251,10 @@ def run_ingest(
                 f"above the allowed {decisions.removal_guard.max_removed_ratio:.0%}",
             )
         )
+    if previous:
+        changed_too_much, accepted = _mass_change(diff, len(previous), decisions, source_sha256)
+        anomalies.extend(changed_too_much)
+        applied.extend(accepted)
 
     findings = [
         Finding(rule=k, product_ids=sorted(set(v)), detail=_rule_detail(k, respellings))
@@ -502,6 +507,29 @@ def _diff(previous: list[Product] | None, current: list[Product]) -> Diff:
         removed=sorted(before.keys() - after.keys()),
         changed=changed,
     )
+
+
+def _mass_change(
+    diff: Diff, previous: int, decisions: Decisions, source_sha256: str | None
+) -> tuple[list[Anomaly], list[Finding]]:
+    """Too many prices or stock counts changed at once: stop, unless a person accepted this export."""
+    guard = decisions.change_guard
+    moved = [pid for pid, fields in diff.changed.items() if {"price_eur", "stock"} & set(fields)]
+    share = len(moved) / previous
+    if share <= guard.max_changed_ratio:
+        return [], []
+    summary = f"{len(moved)} of {previous} products changed price or stock ({share:.0%})"
+    accepted = next((a for a in guard.accepted_exports if a.source_sha256 == source_sha256), None)
+    if accepted is not None:
+        return [], [
+            Finding(rule="mass_change_accepted", product_ids=moved, detail=f"{summary}: {accepted.reason}")
+        ]
+    line = f'- {{source_sha256: {source_sha256 or "<sha256 of the export>"}, reason: "<why>"}}'
+    detail = (
+        f"{summary}, above the allowed {guard.max_changed_ratio:.0%}. If the export is right "
+        f"(a sale, a stocktake), accept it under change_guard.accepted_exports: {line}"
+    )
+    return [Anomaly(code="mass_change", product_ids=moved, detail=detail)], []
 
 
 def _sentinel_findings(products: list[Product], decisions: Decisions) -> list[Finding]:

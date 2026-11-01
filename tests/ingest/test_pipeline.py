@@ -6,7 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from catalog.ingest.decisions import Decisions, load_decisions
+from catalog.domain.models import Product
+from catalog.ingest.decisions import AcceptedExport, Decisions, load_decisions
 from catalog.ingest.pipeline import EXPECTED_COLUMNS, IngestResult, ingest_export, read_export, run_ingest
 
 
@@ -308,6 +309,71 @@ class TestSnapshotDiff:
         result = ingest(current, decisions, previous=previous)
         assert codes(result) == ["mass_removal"]
         assert result.anomalies[0].product_ids == ["HL-008", "HL-009", "HL-010"]
+
+
+class TestMassChangeGuard:
+    SALE = "a" * 64
+
+    @pytest.fixture
+    def previous(self, decisions: Decisions) -> list[Product]:
+        return ingest([row(product_id=f"HL-{i:03d}", name=f"P{i}") for i in range(1, 11)], decisions).products
+
+    @staticmethod
+    def repriced(n: int, **change: str) -> list[dict[str, str]]:
+        return [
+            row(product_id=f"HL-{i:03d}", name=f"P{i}", **(change if i <= n else {})) for i in range(1, 11)
+        ]
+
+    def test_changing_more_than_the_allowed_share_stops(
+        self, decisions: Decisions, previous: list[Product]
+    ) -> None:
+        result = ingest(self.repriced(6, price_eur="33.60"), decisions, previous=previous)
+        assert codes(result) == ["mass_change"]
+        assert result.anomalies[0].product_ids == [f"HL-{i:03d}" for i in range(1, 7)]
+        assert "6 of 10" in result.anomalies[0].detail
+        assert result.products == []
+
+    def test_stock_changes_count_too(self, decisions: Decisions, previous: list[Product]) -> None:
+        assert codes(ingest(self.repriced(6, stock="0"), decisions, previous=previous)) == ["mass_change"]
+
+    def test_changing_exactly_the_allowed_share_passes(
+        self, decisions: Decisions, previous: list[Product]
+    ) -> None:
+        result = ingest(self.repriced(5, price_eur="33.60"), decisions, previous=previous)
+        assert result.status == "ok"
+        assert len(result.diff.changed) == 5
+
+    def test_other_fields_do_not_count(self, decisions: Decisions, previous: list[Product]) -> None:
+        result = ingest(self.repriced(10, description="Reworded copy."), decisions, previous=previous)
+        assert result.status == "ok"
+
+    def test_an_export_accepted_by_its_hash_passes_and_records_why(
+        self, decisions: Decisions, previous: list[Product]
+    ) -> None:
+        sale = AcceptedExport(source_sha256=self.SALE, reason="Winter sale: every price -20%")
+        accepting = decisions.model_copy(
+            update={"change_guard": decisions.change_guard.model_copy(update={"accepted_exports": [sale]})}
+        )
+        result = ingest(
+            self.repriced(10, price_eur="33.60"), accepting, previous=previous, source_sha256=self.SALE
+        )
+        assert result.status == "ok"
+        accepted = [f for f in result.decisions_applied if f.rule == "mass_change_accepted"]
+        assert accepted[0].product_ids == [f"HL-{i:03d}" for i in range(1, 11)]
+        assert "Winter sale" in accepted[0].detail
+
+    def test_an_acceptance_for_another_export_does_not_apply(
+        self, decisions: Decisions, previous: list[Product]
+    ) -> None:
+        sale = AcceptedExport(source_sha256=self.SALE, reason="Winter sale: every price -20%")
+        accepting = decisions.model_copy(
+            update={"change_guard": decisions.change_guard.model_copy(update={"accepted_exports": [sale]})}
+        )
+        result = ingest(
+            self.repriced(10, price_eur="33.60"), accepting, previous=previous, source_sha256="b" * 64
+        )
+        assert codes(result) == ["mass_change"]
+        assert "b" * 64 in result.anomalies[0].detail  # the line to add names this export
 
 
 class TestQualityWarnings:
