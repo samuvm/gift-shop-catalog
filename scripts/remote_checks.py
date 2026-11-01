@@ -2,7 +2,7 @@
 
     latency URL   p95 of list and search calls over several runs (G-LATENCY-P95)
     public  URL   spec reachable, 401 without or with a wrong key, 200 with the key, HTTPS,
-                  and the agent's test page up (G-PUBLIC-CHECK)
+                  the shop's landing page public, and the agent's test page up (G-PUBLIC-CHECK)
 
 The key comes from CATALOG_API_KEY and the test page from TEST_PAGE_URL, both in the
 environment (a local .env, never the repository).
@@ -66,6 +66,7 @@ def public(base: str, key: str, test_page: str | None) -> dict[str, Any]:
     checks["401_without_key"] = get(base + "/categories")[0] == 401
     checks["401_with_wrong_key"] = get(base + "/categories", "wrong-key")[0] == 401
     checks["200_with_key"] = get(base + "/categories", key)[0] == 200
+    checks["landing_page_without_key"] = get(base + "/")[0] == 200
     checks["test_page_up"] = bool(test_page) and get(test_page or "")[0] == 200
     return {"base_url": base, "checks": checks, "pass_rate": round(sum(checks.values()) / len(checks), 3)}
 
