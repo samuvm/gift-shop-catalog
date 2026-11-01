@@ -792,3 +792,24 @@ choosing what to try, not for deciding.
 Still open, noted not fixed: `over_budget_matches` ranks the 115-euro grinder above the
 78-euro pour-over set for "coffee" (name match beats tag match), and the judge treats the fixed
 welcome text as the agent's.
+
+### Block 17 · Stability of the chosen model, and where the project stands (≈ 30 min, with Samuel)
+
+**Starting point:** gpt-5.6-luna chosen on one run per suite. One run can be luck, so the core
+suite ran twice and the extra suite once more, nothing else changed.
+
+**Result:** core 5/6 and 5/6, extra 2/3 from the judge; 6/6, 6/6 and 3/3 after reading every
+Fail against the catalogue. The three Fails were the judge's, and two were caused by our own
+criteria. core-6's reference listed three of the nine products under 30 euros, so the judge
+called the Notebook Trio A6 (24 euros, in stock) unverified. extra-7's reference mentioned gift
+wrap next to the pour-over set only, and the judge took that as "only the pour-over set has
+gift wrap". The moka pot has it too. A reference that lists some facts reads as listing all of
+them. Both criteria now give the complete facts. The agent itself was right: in extra-7 it said
+it had no information about adding a note, instead of inventing one.
+
+**Routing seen in every run:** weather and returns went to the General agent, which answered in
+Italian without inventing a policy; the injection went to the Jailbreak agent; the gift request
+went back to Gift finder with real products under 30 euros.
+
+**Next:** publish, check the regenerated perimeter and the language on the test page, then close
+the agent phase. That needs `make done` and a decision on the level-2 tool goal.

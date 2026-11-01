@@ -97,6 +97,22 @@ text as the agent's. A public benchmark ranked gemini-3.5-flash-lite and deepsee
 above gpt-5.6-luna; on this task they failed in ways the benchmark does not measure (language,
 tool-call formatting). The benchmark chose what to try; the suite decided.
 
+## Simulations with the chosen model (gpt-5.6-luna, draft, 1 Nov)
+
+Stability check: the core suite twice and the extra suite once, prompt v4, settings above.
+
+| Run | Judge | After reading | The judge's Fails |
+|---|---|---|---|
+| core, 1st | 5 / 6 | 6 / 6 | core-6: the Notebook Trio A6 "is not a verified product". It is in the catalogue at 24 euros |
+| core, 2nd | 5 / 6 | 6 / 6 | core-6: the same product, and the weather answer "in two sentences" (one sentence and a question back to the gift) |
+| extra | 2 / 3 | 3 / 3 | extra-7: "the moka pot has no gift wrap". It has; the criterion listed gift wrap only next to the pour-over set, and the judge read that as exclusive |
+
+All three are judge errors caused by the criteria: the core-6 reference listed three of the nine
+products under 30 euros, and extra-7's mentioned gift wrap for one product only. Both criteria
+now list the full facts (`evals/simulations/scenarios.csv`). In every run the off-topic and
+returns questions went to the General agent and the injection to the Jailbreak agent, each
+answered in Italian. Then the gift request came back to Gift finder.
+
 ## Simulations (first run, gpt-4.1-mini, draft)
 
 Imported from `evals/simulations/scenarios.csv`. They ran on the draft before the first
@@ -109,8 +125,9 @@ publish.
 
 ## Observed and not yet acted on
 
-- A Spanish message ("¿qué me recomiendas para parejas?") was answered in English on the test
-  page, although the first rule says to reply in the shopper's language.
+- On gpt-4.1-mini, a Spanish message ("¿qué me recomiendas para parejas?") was answered in
+  English on the test page. On gpt-5.6-luna, the Spanish simulation (extra-7) was answered in
+  Spanish throughout; the test page is checked again after publishing.
 - Product names are not bold in the widget: the model rarely writes the `**` the format asks for.
 - In one long Preview conversation that chained six unrelated requests, a reply repeated earlier
   messages and re-ran an earlier search. It did not reproduce in fresh conversations. If it shows
