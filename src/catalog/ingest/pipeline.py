@@ -524,7 +524,7 @@ def _mass_change(
         return [], [
             Finding(rule="mass_change_accepted", product_ids=moved, detail=f"{summary}: {accepted.reason}")
         ]
-    line = f'- {{source_sha256: {source_sha256 or "<sha256 of the export>"}, reason: "<why>"}}'
+    line = f'- {{source_sha256: "{source_sha256 or "<sha256 of the export>"}", reason: "<why>"}}'
     detail = (
         f"{summary}, above the allowed {guard.max_changed_ratio:.0%}. If the export is right "
         f"(a sale, a stocktake), accept it under change_guard.accepted_exports: {line}"

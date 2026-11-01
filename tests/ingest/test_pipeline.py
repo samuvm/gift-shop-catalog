@@ -5,6 +5,7 @@ import io
 from pathlib import Path
 
 import pytest
+import yaml
 
 from catalog.domain.models import Product
 from catalog.ingest.decisions import AcceptedExport, Decisions, load_decisions
@@ -406,10 +407,13 @@ class TestMassChangeGuard:
             update={"change_guard": decisions.change_guard.model_copy(update={"accepted_exports": [sale]})}
         )
         result = ingest(
-            self.repriced(10, price_eur="33.60"), accepting, previous=previous, source_sha256="b" * 64
+            self.repriced(10, price_eur="33.60"), accepting, previous=previous, source_sha256="1" * 64
         )
         assert codes(result) == ["mass_change"]
-        assert "b" * 64 in result.anomalies[0].detail  # the line to add names this export
+        # The report prints the line to add, naming this export. It must paste as valid YAML, and an
+        # all-digit hash must stay a string.
+        line = result.anomalies[0].detail.split("accepted_exports: ")[1]
+        assert yaml.safe_load(line) == [{"source_sha256": "1" * 64, "reason": "<why>"}]
 
 
 class TestQualityWarnings:
