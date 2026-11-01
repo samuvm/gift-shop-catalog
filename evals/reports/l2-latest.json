@@ -1,20 +1,20 @@
 {
   "model": "gemma4:26b",
-  "recording": "evals/l2/recordings/gemma4-26b__prompt-051d2feb__tools-75e51725.jsonl",
+  "recording": "evals/l2/recordings/gemma4-26b__prompt-d5c2513c__tools-75e51725.jsonl",
   "n": 150,
   "n_negative": 36,
-  "tool_accuracy": 0.8733,
-  "args_accuracy": 0.9535,
+  "tool_accuracy": 0.8133,
+  "args_accuracy": 0.973,
   "negative_false_call_rate": 0.0,
   "replay_mismatches": 0,
-  "seconds_calling_model": 184.3,
+  "seconds_calling_model": 258.8,
   "failures": [
     {
       "id": "l2-003",
       "kind": "positive",
       "tool": "search_products",
       "args": {
-        "max_price": 45,
+        "max_price": 40,
         "query": "cat gift",
         "recipient": "her"
       },
@@ -26,6 +26,16 @@
       "text": ""
     },
     {
+      "id": "l2-008",
+      "kind": "positive",
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": "Per aiutarti a trovare il regalo perfetto, quanto vorresti spendere indicativamente?"
+    },
+    {
       "id": "l2-009",
       "kind": "positive",
       "tool": null,
@@ -33,23 +43,17 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "Purtroppo l'anello non arriverebbe in tempo per martedì, poiché tra spedizione e incisione servono circa 14 giorni.\n\nPosso cercare altri regali che arrivano entro lunedì? Se mi dici il tuo budget, cer"
+      "text": "Mi dispiace, ma l'anello non arriverebbe in tempo per martedì. Considerando i 7 giorni di spedizione e la settimana per l'incisione, ci vorrebbero almeno 14 giorni.\n\nVuoi che cerchi altri regali che p"
     },
     {
       "id": "l2-017",
       "kind": "positive",
-      "tool": "search_products",
-      "args": {
-        "max_price": 100,
-        "occasion": "graduation",
-        "recipient": "her"
-      },
-      "tool_ok": true,
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
       "args_ok": false,
-      "wrong_args": [
-        "exclude"
-      ],
-      "text": ""
+      "wrong_args": [],
+      "text": "Understood, no jewelry. Since it's for a promotion, would you like to see some professional or relaxation gifts instead?\n\n**Leather Notebook, A5** · €45 · ships in 3 days\nA sophisticated choice for he"
     },
     {
       "id": "l2-019",
@@ -59,7 +63,17 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "No tenemos agendas para el año 2027 en la tienda. ¿Te gustaría que buscara algún otro tipo de regalo para tu tío, como algo de tecnología o juegos?"
+      "text": "No tengo ninguna agenda para 2027 en el catálogo. ¿Te gustaría que buscara algún otro tipo de regalo para tu tío, como algo de tecnología o juegos?"
+    },
+    {
+      "id": "l2-021",
+      "kind": "positive",
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": "Il Pasta Making Kit (KD-015) di solito viene spedito in 3 giorni. Oggi è giovedì 31 ottobre, quindi dovrebbe arrivare entro domenica.\n\nVuoi che controlli i dettagli del kit o preferisci vedere le ciot"
     },
     {
       "id": "l2-028",
@@ -79,18 +93,12 @@
     {
       "id": "l2-030",
       "kind": "positive",
-      "tool": "search_products",
-      "args": {
-        "max_price": 50,
-        "query": "pen",
-        "recipient": "him"
-      },
-      "tool_ok": true,
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
       "args_ok": false,
-      "wrong_args": [
-        "max_price"
-      ],
-      "text": ""
+      "wrong_args": [],
+      "text": "Ho trovato la Rollerball Pen (BS-002) a 64 €, ma se cerchi qualcosa di ancora più economico per l'ufficio, posso suggerirti il Travel Mug, Leakproof (OT-002) a 38 €.\n\nVuoi che ti mostri i dettagli del"
     },
     {
       "id": "l2-031",
@@ -110,7 +118,7 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "Entiendo. Como la de higo está agotada, tengo estas opciones de velas por menos de 40 € que podrían gustarle:\n\n**Ember Ceramic Candle** · €42 · envía en 3 días\nSe pasa solo por 2 €, es una vela muy va"
+      "text": "Entiendo. Como la de higo está agotada, tengo estas opciones por menos de 40 € que podrían gustarle:\n\n**Ember Ceramic Candle** · 42 € · suele enviarse en 3 días\nSe pasa solo por 2 €, pero es una vela "
     },
     {
       "id": "l2-040",
@@ -120,7 +128,7 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "El Trio Votive Set (HL-005) tarda 4 días en enviarse. Si lo pides hoy, llegaría el viernes. ¿Quieres que te ayude con algo más?"
+      "text": "El Trio Votive Set (HL-005) suele enviarse en 3 días. Como hoy es 31 de octubre, no llegaría para este miércoles. ¿Quieres que busque otras opciones que lleguen antes?"
     },
     {
       "id": "l2-043",
@@ -145,6 +153,16 @@
       "text": ""
     },
     {
+      "id": "l2-053",
+      "kind": "positive",
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": "Il quaderno più economico è il **Pocket Notebook** (BS-005) a 12,00 €.\n\nSe scegli questo, il totale con penna, inchiostro e biglietto scende a 187,50 €.\n\nVuoi che ti mostri i dettagli del quaderno più"
+    },
+    {
       "id": "l2-059",
       "kind": "positive",
       "tool": null,
@@ -152,7 +170,17 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "Per chi è il regalo e che tipo di cose gli piacciono?"
+      "text": "Per chi è il regalo? E hai un'idea di cosa gli piaccia o di cosa potrebbe servirti?"
+    },
+    {
+      "id": "l2-061",
+      "kind": "positive",
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": "La funda de cuero BS-006 se envía en 3 días, pero el grabado de las iniciales añade una semana adicional al plazo. ¿Te gustaría que compruebe si hay algún otro detalle sobre ella?"
     },
     {
       "id": "l2-085",
@@ -162,7 +190,7 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "No tengo información sobre los horarios de apertura o festivos de la tienda. Le sugiero contactar con el servicio de atención al cliente de la tienda para esa consulta.\n\nEn cuanto a la agenda para su "
+      "text": "Solo puedo ayudarte con regalos de nuestra tienda. No tengo información sobre horarios de apertura o festivos.\n\nPara tu hermano, ¿tienes algún presupuesto pensado para la agenda?"
     },
     {
       "id": "l2-102",
@@ -172,14 +200,34 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "Ciao. Posso aiutarti solo con i regali presenti nel nostro catalogo.\n\nPer trovare il regalo perfetto per la laurea di tuo fratello, mi servirebbe sapere un budget indicativo. Hai già in mente un tipo "
+      "text": "Ciao! Posso aiutarti a trovare un regalo perfetto per la laurea di tuo fratello tra i prodotti del nostro catalogo.\n\nPer poterti dare i consigli migliori, quanto vorresti spendere indicativamente?"
+    },
+    {
+      "id": "l2-106",
+      "kind": "positive",
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": "¡Entendido! Un regalo para el amigo invisible en el trabajo con un máximo de 20€.\n\n¿Es para un hombre, una mujer o para cualquier persona?"
+    },
+    {
+      "id": "l2-116",
+      "kind": "positive",
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": "Perfecto, aquí tienes opciones para una amante de la fotografía por ese presupuesto:\n\nInstant Camera · 119 € · suele enviarse en 3 días\nEs una opción muy divertida para capturar momentos, aunque se pa"
     },
     {
       "id": "l2-118",
       "kind": "positive",
       "tool": "search_products",
       "args": {
-        "query": "slate cheese board set"
+        "query": "slate cheese board"
       },
       "tool_ok": false,
       "args_ok": false,
@@ -214,7 +262,7 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "Ecco le opzioni disponibili tra i 60 e i 70 EUR:\n\n**Laptop Stand, Folding** · €64 · spedisce in 3 giorni\nPratico per studiare comodamente in biblioteca o in camera.\n\n**Power Bank 20000mAh** · €69 · sp"
+      "text": "Ottima scelta, è molto pratica per chi studia fuori casa.\n\n**Power Bank 20000mAh** · €69 · spedisce in 3 giorni\nIdeale per non restare mai senza batteria durante le lezioni.\n\nVuoi che controlli i dett"
     },
     {
       "id": "l2-132",
@@ -224,17 +272,17 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "Perfecto, aquí tienes unas opciones que unen vuestras pasiones:\n\n**Enamel Casserole 24cm** · 189 € · envía en 3 días\nIdeal para que ella cocine platos espectaculares y tú los disfrutes.\n\n**Cast Iron S"
+      "text": "Perfecto, aquí tienes unas opciones que unen vuestras pasiones:\n\n**Enamel Casserole 24cm** · 189 € · suele enviarse en 3 días\nIdeal para que ella cocine platos espectaculares para vuestro aniversario."
     },
     {
       "id": "l2-133",
       "kind": "positive",
-      "tool": "get_categories",
+      "tool": null,
       "args": {},
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": ""
+      "text": "No tengo opciones de spa o cenas en el catálogo, solo productos físicos. ¿Te gustaría que busque algún kit de cocina o algo de bienestar para que podáis disfrutar en casa?"
     },
     {
       "id": "l2-136",
@@ -244,7 +292,7 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "Perfetto, allora un vaso è un'ottima idea. Ecco tre opzioni compatte per un appartamento piccolo:\n\n**Stoneware Vase, Squat** · €49 · spedisce in 3 giorni\nUn vaso compatto e decorativo, perfetto per i "
+      "text": "Perfetto, allora un vaso è un'ottima idea. Ecco tre opzioni che non occupano troppo spazio:\n\n**Stoneware Vase, Squat** · €49 · spedisce in 3 giorni\nUn vaso compatto e decorativo, perfetto per i fiori "
     },
     {
       "id": "l2-138",
@@ -254,7 +302,7 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "**Brass Picture Frame 13x18** · 39 € · se envía en 3 días\nEs un detalle clásico y elegante para que luzca la foto de todos sus nietos.\n\n¿Quieres que busque otros modelos de marcos o prefieres ver algo"
+      "text": "**Brass Picture Frame 13x18** · 39 € · suele enviarse en 3 días\nEs un detalle clásico y elegante para que luzca la foto de todos sus nietos.\n\n¿Quieres que busque algún otro modelo de marco o te intere"
     },
     {
       "id": "l2-139",
@@ -264,7 +312,17 @@
       "tool_ok": false,
       "args_ok": false,
       "wrong_args": [],
-      "text": "I hear you. Since they'll likely be exhausted, here are a few things to help them relax or stay fueled:\n\n**Lavender Scented Candle** · €18.50 · ships in 3 days\nPerfect for creating a calm atmosphere w"
+      "text": "I agree, they'll definitely need it. Since you want to focus on the parents, would you like to see some relaxing items or perhaps something practical for them?"
+    },
+    {
+      "id": "l2-140",
+      "kind": "positive",
+      "tool": null,
+      "args": {},
+      "tool_ok": false,
+      "args_ok": false,
+      "wrong_args": [],
+      "text": "Capito, un budget di circa 60 EUR. Ecco due opzioni che potrebbero aiutarlo con la postura o il relax:\n\n**Laptop Stand, Folding** · €64 · spedisce in 3 giorni\nAiuta a tenere lo schermo all'altezza deg"
     }
   ]
 }
