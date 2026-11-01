@@ -1021,3 +1021,29 @@ human recipients, "gardening" ≠ "garden"). Samuel approved fixing them as one 
 The format problem Samuel reported (products running together in the widget) was observed on
 the published v4. The v5 layout has not been on the platform yet, so it is not yet known
 whether it fixes it.
+
+### Block 25 · A landing page that belongs to the shop (merge of `landing`, ≈ 15 min to review)
+
+The brief asks for the widget embedded and customised so it feels like the client's brand. The
+shop is now **Ribbon & Co.** (invented). Its page is served at `/` by the same service, with no
+key, outside both specs. It has a brand header, a hero, four example prompts that open the
+chat and send themselves, a three-step "how it works", and a footer that names the demo, the
+OpenAPI spec and the MCP endpoint.
+
+Decisions:
+- **The chat opens on its own on desktop only, once per visit.** On a phone it would cover
+  the page, so a pop-up message invites instead.
+- **The workspace token is not in the repository.** It is read from `WIDGET_TOKEN` at start,
+  embedded only if it is `[A-Za-z0-9-]{1,64}`, and otherwise the page renders without the
+  chat.
+- **No web font and no other third-party script**, so the widget is the page's only outside
+  dependency.
+- **Contrast at AA everywhere.** The lowest is 5.9:1.
+- **Security headers stop framing by other sites, but scripts are not restricted.** The
+  platform does not document the widget's script origins, and a guessed policy could break it.
+
+The colours, texts and launcher icon (`/ribbon.svg`) the platform needs are entered by hand in
+Web Chat → Style/Home. Checked: `make gate-fast` 460 passed, `make spec-lint` 0,
+`make eval-mcp` 74/74 and 16/16, `make secrets` 0. The page was also rendered headless at 390 px
+and 1440 px; that caught two layout faults, both fixed. The widget itself is untested until
+the deploy carries `WIDGET_TOKEN`.
