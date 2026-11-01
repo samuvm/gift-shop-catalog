@@ -932,3 +932,31 @@ The prompt change was layout only, and the tool schemas changed in one place (`c
 maxLength). A swing of 6.7 points from a layout edit says more about this model's sensitivity
 to wording than about a real improvement; it is recorded, not claimed. G-L2-TOOL (≥ 90%) stays
 not reached, as decided.
+
+### Block 22 · A new export that cannot quietly break the shop (merge of `ingest-hardening`, ≈ 15 min to review)
+
+ADR-001 checked what the rows say and assumed the file was read correctly. Planting the
+mistakes a spreadsheet export really makes showed four ways it was not. Each now stops with a
+named code, the previous catalogue stays live, and each has a seeded fixture (ADR-009):
+
+- `schema_mismatch` covers a duplicated column. This one used to set all 152 prices to 1.00
+  and report `ok`.
+- `empty_export` stops a 0-byte or header-only file on every build, including the first.
+- `unreadable_export` stops anything that is not UTF-8. A UTF-8 BOM, which Excel writes, is
+  accepted. Decided: never guess cp1252, because a wrong guess changes product text with no
+  error at all.
+- `malformed_row` stops a row longer or shorter than the header, naming the line. Rows are now
+  read with `csv.reader`; `DictReader` silently dropped or padded fields.
+- The injection check matches on an NFKC-folded copy with invisible characters removed. Before,
+  4 of 5 hidden-character variants passed. The served text is unchanged.
+- **Change guard:** if more than 50% of products change price or stock, the ingest stops. A
+  real sale is accepted with one line in `decisions.yaml`, keyed by the hash of that exact
+  file, with a reason. The stop report prints the line to paste.
+
+Numbers on main after the merge: `make gate-fast` 409 passed, coverage 99.75%;
+`make eval-ingest` 17/17 (was 11/11); `make ingest` 0 pending, empty diff, served products
+byte-identical; `make eval-l1` 74/74; `make spec-lint` 0.
+
+Left out, and listed in ADR-009: a per-export acceptance for the removal guard (today only
+the ratio can be raised), header names in other cases (`PRICE_EUR` stops), and look-alike
+letters from other alphabets inside injection phrases.
