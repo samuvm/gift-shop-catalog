@@ -30,6 +30,9 @@ eval-l2-refresh: ## Level 2 calling the local model (Ollama, gemma4:26b) for cas
 eval-mcp: ## MCP vs REST on the level-1 cases + protocol checks (G-MCP-PARITY, G-MCP-CONFORMANCE); URL=https://... for a deployment
 	$(if $(URL),set -a; [ -f .env ] && . ./.env; set +a;) $(UV) python evals/mcp/run.py $(URL)
 
+sim-report: ## Simulation verdicts recorded in evals/simulations/results.csv -> report (G-SIM-CORE)
+	$(UV) python evals/simulations/report.py
+
 secrets: ## Secrets in tracked files that are not in the reviewed baseline (G-SECRETS)
 	$(UV) python scripts/secrets_check.py
 
@@ -44,6 +47,10 @@ check-public: ## Spec, auth and test page from outside (G-PUBLIC-CHECK); make ch
 
 gate-fast: lint typecheck test ## Everything that must stay green after each change
 
+done: ## Definition of done for phase F from the goal artifacts (reads only); make done F=<phase>
+	@$(if $(F),,echo "usage: make done F=<phase>" >&2; exit 2)
+	$(UV) python scripts/done.py $(F)
+
 ingest: ## CSV + data/decisions.yaml -> data/build/catalog.json + ingest-report.json (exit 1 = decision needed)
 	$(UV) python -m catalog.ingest
 
@@ -56,4 +63,4 @@ golden-l1: ## Rebuild level-1 cases from the reference semantics (evals/golden/l
 audit-csv: ## Independent audit of the raw export (stdlib only)
 	python3 -I scripts/audit_csv.py data/gift-shop-catalog.csv
 
-.PHONY: help lint typecheck test spec-lint eval-l1 eval-l2 eval-l2-refresh eval-mcp secrets run latency check-public gate-fast ingest eval-ingest golden-l1 audit-csv
+.PHONY: help lint typecheck test spec-lint eval-l1 eval-l2 eval-l2-refresh eval-mcp sim-report secrets run latency check-public gate-fast done ingest eval-ingest golden-l1 audit-csv

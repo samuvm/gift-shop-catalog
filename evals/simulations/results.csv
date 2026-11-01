@@ -1,0 +1,40 @@
+run,date,model,prompt_version,suite,scenario,judge,after_reading,note
+r1,2026-11-01T18:59,gpt-5.6-luna,v4,core,core-1,pass,pass,
+r1,2026-11-01T18:59,gpt-5.6-luna,v4,core,core-2,pass,pass,
+r1,2026-11-01T18:59,gpt-5.6-luna,v4,core,core-3,pass,pass,
+r1,2026-11-01T18:59,gpt-5.6-luna,v4,core,core-4,pass,pass,
+r1,2026-11-01T18:59,gpt-5.6-luna,v4,core,core-5,pass,pass,
+r1,2026-11-01T18:59,gpt-5.6-luna,v4,core,core-6,fail,pass,judge: Notebook Trio A6 unverified; it is in the catalogue (24)
+r2,2026-11-01T19:02,gpt-5.6-luna,v4,core,core-1,pass,pass,
+r2,2026-11-01T19:02,gpt-5.6-luna,v4,core,core-2,pass,pass,
+r2,2026-11-01T19:02,gpt-5.6-luna,v4,core,core-3,pass,pass,
+r2,2026-11-01T19:02,gpt-5.6-luna,v4,core,core-4,pass,pass,
+r2,2026-11-01T19:02,gpt-5.6-luna,v4,core,core-5,pass,pass,
+r2,2026-11-01T19:02,gpt-5.6-luna,v4,core,core-6,fail,pass,judge: same product; weather in one sentence plus a question
+r3,2026-11-01T19:03,gpt-5.6-luna,v4,extra,extra-7,fail,pass,judge: moka gift wrap; criterion listed it only for the pour-over
+r3,2026-11-01T19:03,gpt-5.6-luna,v4,extra,extra-8,pass,pass,
+r3,2026-11-01T19:03,gpt-5.6-luna,v4,extra,extra-9,pass,pass,
+r4,2026-11-01T20:24,gpt-5.6-luna,v4,extra,extra-7,fail,pass,judge: 'one-handed open' is the catalogue description
+r4,2026-11-01T20:24,gpt-5.6-luna,v4,extra,extra-8,pass,pass,
+r4,2026-11-01T20:24,gpt-5.6-luna,v4,extra,extra-9,fail,fail,pour-over at 78 not marked over budget after show me more
+r5,2026-11-01T20:25,gpt-5.6-luna,v4,core,core-1,fail,pass,judge: real products shown before cooking came up; book description is real
+r5,2026-11-01T20:25,gpt-5.6-luna,v4,core,core-2,pass,pass,
+r5,2026-11-01T20:25,gpt-5.6-luna,v4,core,core-3,pass,pass,
+r5,2026-11-01T20:25,gpt-5.6-luna,v4,core,core-4,pass,pass,
+r5,2026-11-01T20:25,gpt-5.6-luna,v4,core,core-5,pass,pass,
+r5,2026-11-01T20:25,gpt-5.6-luna,v4,core,core-6,pass,pass,
+r6,2026-11-01T20:58,gpt-5.6-luna,v4,core,core-1,fail,fail,"'cooking' returns only the cookbook; kitchen items not found (vocabulary gap, ADR-010)"
+r6,2026-11-01T20:58,gpt-5.6-luna,v4,core,core-2,pass,pass,
+r6,2026-11-01T20:58,gpt-5.6-luna,v4,core,core-3,pass,pass,
+r6,2026-11-01T20:58,gpt-5.6-luna,v4,core,core-4,fail,fail,"'gadget' unmatched, 'tech' matches three products by description; Instant Camera 119 not found (ADR-010)"
+r6,2026-11-01T20:58,gpt-5.6-luna,v4,core,core-5,pass,pass,
+r6,2026-11-01T20:58,gpt-5.6-luna,v4,core,core-6,pass,pass,
+r7,2026-11-01T21:02,gpt-5.6-luna,v4,extra,extra-7,fail,pass,judge: not pointing to customer service for a gift note; honest answer
+r7,2026-11-01T21:02,gpt-5.6-luna,v4,extra,extra-8,pass,pass,
+r7,2026-11-01T21:02,gpt-5.6-luna,v4,extra,extra-9,pass,pass,
+r8,2026-11-01T21:03,gpt-5.6-luna,v4,extended,ext-10,pass,pass,
+r8,2026-11-01T21:03,gpt-5.6-luna,v4,extended,ext-11,pass,pass,
+r8,2026-11-01T21:03,gpt-5.6-luna,v4,extended,ext-12,pass,pass,
+r8,2026-11-01T21:03,gpt-5.6-luna,v4,extended,ext-13,fail,pass,"judge: offered to look above 60, did not raise the budget"
+r8,2026-11-01T21:03,gpt-5.6-luna,v4,extended,ext-14,pass,pass,
+r8,2026-11-01T21:03,gpt-5.6-luna,v4,extended,ext-15,pass,pass,
