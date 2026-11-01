@@ -1,6 +1,7 @@
 """Layer boundaries (goal G-ARCH-LAYERS), checked on the import statements of the source tree.
 
-The domain imports no transport or web framework; REST and MCP do not import each other.
+The domain imports no transport or web framework. The MCP transport (api/mcp.py) imports nothing
+from REST: the app only serves it at /mcp, and the OpenAPI document knows nothing of it.
 """
 
 import ast
@@ -17,13 +18,12 @@ FORBIDDEN = {
         "mcp",
         "httpx",
         "catalog.api",
-        "catalog.mcp_server",
         "catalog.service",
         "catalog.storage",
         "catalog.ingest",
     ),
-    "api": ("catalog.mcp_server",),
-    "mcp_server": ("catalog.api",),
+    "api/mcp": ("fastapi", "catalog.api.app", "catalog.api.openapi"),
+    "api/openapi": ("mcp", "catalog.api.mcp"),
 }
 
 
@@ -57,3 +57,9 @@ def test_the_check_would_catch_a_violation(tmp_path: Path) -> None:
     bad = tmp_path / "bad.py"
     bad.write_text("from fastapi import FastAPI\nimport catalog.api.app\n")
     assert {"fastapi", "catalog.api.app"} <= imports(bad)
+
+
+def test_every_rule_points_at_code_that_exists() -> None:
+    for layer in FORBIDDEN:
+        base = SRC / layer
+        assert base.with_suffix(".py").exists() or base.is_dir(), layer

@@ -27,6 +27,9 @@ eval-l2: ## Level-2 cases replayed from the recorded model responses (G-L2-TOOL,
 eval-l2-refresh: ## Level 2 calling the local model (Ollama, gemma4:26b) for cases without a recording
 	$(UV) python evals/l2/run.py --refresh
 
+eval-mcp: ## MCP vs REST on the level-1 cases + protocol checks (G-MCP-PARITY, G-MCP-CONFORMANCE); URL=https://... for a deployment
+	$(if $(URL),set -a; [ -f .env ] && . ./.env; set +a;) $(UV) python evals/mcp/run.py $(URL)
+
 secrets: ## Secrets in tracked files that are not in the reviewed baseline (G-SECRETS)
 	$(UV) python scripts/secrets_check.py
 
@@ -53,4 +56,4 @@ golden-l1: ## Rebuild level-1 cases from the reference semantics (evals/golden/l
 audit-csv: ## Independent audit of the raw export (stdlib only)
 	python3 -I scripts/audit_csv.py data/gift-shop-catalog.csv
 
-.PHONY: help lint typecheck test spec-lint eval-l1 eval-l2 eval-l2-refresh secrets run latency check-public gate-fast ingest eval-ingest golden-l1 audit-csv
+.PHONY: help lint typecheck test spec-lint eval-l1 eval-l2 eval-l2-refresh eval-mcp secrets run latency check-public gate-fast ingest eval-ingest golden-l1 audit-csv

@@ -6,6 +6,8 @@ readme = "README.md"
 requires-python = "==3.13.*"
 dependencies = [
     "fastapi==0.162.0",
+    "jsonschema==4.26.0",
+    "mcp==2.3.0",
     "pydantic==2.14.2",
     "pyyaml==6.0.3",
     "uvicorn==0.54.0",
@@ -50,6 +52,11 @@ python_version = "3.13"
 strict = true
 mypy_path = "src"
 packages = ["catalog"]
+
+[[tool.mypy.overrides]]
+# jsonschema ships no type information; its stubs would be one more dependency for one import.
+module = ["jsonschema", "jsonschema.*"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
