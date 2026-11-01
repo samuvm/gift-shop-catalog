@@ -343,7 +343,7 @@ GET_PRODUCTS_BY_CATEGORY = Tool(
         Param(
             "category",
             "path",
-            {"type": "string", "enum": SLUGS},
+            {"type": "string", "enum": SLUGS, "maxLength": 50},
             "Category slug, as listed by get_categories. Names in other spellings ('Kitchen and Dining') "
             "or a single word ('kitchen') are also accepted. If the shopper's word is none of these "
             "categories, call search_products with it instead of choosing the nearest one.",
