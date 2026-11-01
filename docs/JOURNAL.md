@@ -1047,3 +1047,22 @@ Web Chat → Style/Home. Checked: `make gate-fast` 460 passed, `make spec-lint` 
 `make eval-mcp` 74/74 and 16/16, `make secrets` 0. The page was also rendered headless at 390 px
 and 1440 px; that caught two layout faults, both fixed. The widget itself is untested until
 the deploy carries `WIDGET_TOKEN`.
+
+### Block 26 · README, and what writing it uncovered (≈ 20 min to review)
+
+The README was drafted from the ADRs, this journal, `docs/PLATFORM.md` and the reports, with
+every number kept in a single "Measured" table so it can be refreshed in one place before
+submission. The test page link is a placeholder until submission.
+
+Writing it was also an audit, and it turned up three gaps between what is sealed and what runs:
+
+- **Latency protocol.** `docs/GOALS.yaml` seals "20 warm-up requests discarded, then 200
+  requests per run, 3 runs". The script ran 20 per run with no warm-up, so the published p95
+  (264.8 ms) was measured on n=20 per run. The script now follows the sealed protocol, and the
+  goal is re-measured after the next deploy. The old number stays in history as what it was.
+- **`make sim-report` and `make done`** are named in the goals and `CLAUDE.md`-level rules but
+  did not exist. They are being built: Simulations results are recorded by hand per run (the
+  platform has no reliable export), and `make done F=<n>` reads every goal's artifact and
+  compares it with its sealed threshold.
+- `docs/PLATFORM.md` still says the agent fields come from prompt v3. It is updated once v5 is
+  confirmed on the platform.
