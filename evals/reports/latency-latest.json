@@ -2,24 +2,25 @@
   "base_url": "https://catalog.178.18.243.118.sslip.io",
   "runs": [
     {
-      "browse_p50_ms": 182.9,
-      "browse_p95_ms": 264.8,
-      "search_p50_ms": 177.0,
-      "search_p95_ms": 259.7
+      "browse_p50_ms": 230.0,
+      "browse_p95_ms": 332.1,
+      "search_p50_ms": 209.0,
+      "search_p95_ms": 298.0
     },
     {
-      "browse_p50_ms": 200.8,
-      "browse_p95_ms": 254.5,
-      "search_p50_ms": 175.7,
-      "search_p95_ms": 258.0
+      "browse_p50_ms": 220.7,
+      "browse_p95_ms": 338.1,
+      "search_p50_ms": 233.2,
+      "search_p95_ms": 357.9
     },
     {
-      "browse_p50_ms": 174.5,
-      "browse_p95_ms": 249.1,
-      "search_p50_ms": 179.8,
-      "search_p95_ms": 247.4
+      "browse_p50_ms": 208.5,
+      "browse_p95_ms": 313.1,
+      "search_p50_ms": 248.1,
+      "search_p95_ms": 333.1
     }
   ],
-  "calls_per_run": 20,
-  "p95_ms_max_of_runs": 264.8
+  "warmup_calls": 20,
+  "calls_per_run": 200,
+  "p95_ms_max_of_runs": 357.9
 }

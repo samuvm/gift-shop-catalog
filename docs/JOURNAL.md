@@ -1133,3 +1133,28 @@ negatives calling a tool 0%, replay mismatches 0. It is to be confirmed on the p
 landing page, level 1 and MCP against the public URL, re-import of the tool descriptions on
 the platform (the recipient description changed), MCP connection on the platform, and the
 final Simulations under agent version v6.
+
+### Block 29 · The deploy, measured from outside, and a latency goal that fails (≈ 30 min)
+
+Samuel added `WIDGET_TOKEN` in Coolify and redeployed commit f2ecc6e. Coolify also shows
+webhook deploys now, so pushes to `main` deploy on their own. Measured from the client
+machine against https://catalog.178.18.243.118.sslip.io:
+
+- `make check-public`: 7/7, now including the landing page answering without a key.
+- Level 1 over the public URL (`CATALOG_URL=… evals/golden/l1/run.py`): 81/81 exact.
+- `make eval-mcp URL=…`: parity 81/81, conformance 16/16.
+- Prompt v6 on the platform: the numbered list renders with each product clearly apart.
+
+**G-LATENCY-P95 (≤ 300 ms) fails under the sealed protocol.** Two measured attempts, 20 warm-up
+calls, 3 runs × 200 calls per endpoint: max p95 384.9 ms, then 357.9 ms. The medians are
+200–250 ms. A curl breakdown of one call from this machine: TCP connect ≈ 50 ms, TLS done at
+≈ 115 ms, first byte at ≈ 170 ms. The script opens a new TCP and TLS connection for every
+call, so about two thirds of each measurement is the handshake across the network, not the
+service. The same protocol over one reused connection (keep-alive, as a server-to-server
+client such as the platform would use) gives a max p95 of 145.8 ms, medians ≈ 60 ms.
+
+The sealed protocol says "20 warm-up requests discarded", which only means something if the
+connection survives the warm-up. Even so, changing how the number is measured after it failed
+is Samuel's call, not mine. Stopped and asked, with the three options and the numbers. The
+first published value (264.8 ms at 20 calls per run) was below the threshold only because of
+its small sample.
