@@ -1110,3 +1110,26 @@ Today: `make done F=3` → 17/19.
 On main: `make gate-fast` 517 passed, coverage 99.77%; `make eval-l1` 81/81; `make eval-mcp`
 81/81 and 16/16; `make eval-ingest` 17/17; `make spec-lint` 0; `make secrets` 0. Level 2 is
 being re-recorded, because the recipient description changed the tools hash.
+
+### Block 28 · Prompt v6 for the widget's rendering, and closing the loose ends (≈ 45 min)
+
+**Format, second attempt.** Samuel pasted v5 into the platform and the products still ran
+together in Preview: a gap after each name line, none between products. The model followed the
+layout; the widget's Markdown rendering decides the spacing. Rather than guess the renderer's
+rules, v6 removes the dependency on blank lines: each product is one numbered list item on a
+single line (`1. **Name** · €price · usually ships in N days — reason`). A list separates
+items in any renderer, and the numbers let a shopper say "the second one". Level 2 with v6
+and the ADR-010 tool descriptions (`make eval-l2-refresh`, n=150): tool 88.7%, args 95.3%,
+negatives calling a tool 0%, replay mismatches 0. It is to be confirmed on the platform.
+
+**Loose ends.**
+- The README's single "Measured" table was refreshed: tests 517, level 1 81/81, MCP 81/81,
+  simulations through `make sim-report`. The latency row is marked as measured before the
+  sealed protocol was enforced.
+- `.env.example` now lists every variable (`WIDGET_TOKEN`, `SHOP_TIMEZONE`, `TEST_PAGE_URL`),
+  as the deliverables checklist expects.
+
+**Waiting on the deploy:** latency under the sealed protocol, public checks including the
+landing page, level 1 and MCP against the public URL, re-import of the tool descriptions on
+the platform (the recipient description changed), MCP connection on the platform, and the
+final Simulations under agent version v6.
