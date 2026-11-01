@@ -110,16 +110,6 @@
   "diff": {
     "added": [],
     "removed": [],
-    "changed": {
-      "PT-001": [
-        "recipient"
-      ],
-      "PT-002": [
-        "recipient"
-      ],
-      "PT-003": [
-        "recipient"
-      ]
-    }
+    "changed": {}
   }
 }
