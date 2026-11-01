@@ -31,7 +31,7 @@ from mcp_types.version import HANDSHAKE_PROTOCOL_VERSIONS
 from catalog.tools import TOOLS
 
 ROOT = Path(__file__).resolve().parents[2]
-CASES = ROOT / "evals" / "golden" / "l1" / "v4.jsonl"
+CASES = ROOT / "evals" / "golden" / "l1" / "v5.jsonl"
 REPORT = ROOT / "evals" / "reports" / "mcp-latest.json"
 TODAY = date(2026, 10, 30)
 HANDSHAKE, MODERN = "2025-11-25", "2026-07-28"

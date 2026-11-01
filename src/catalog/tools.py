@@ -21,7 +21,7 @@ SLUGS = [
     "pets",
     "tech-gadgets",
 ]
-RECIPIENTS = ["anyone", "him", "her", "couple", "kids"]
+RECIPIENTS = ["anyone", "him", "her", "couple", "kids", "pet"]
 # One recipient or several, comma-separated ("her,couple"), as exclude takes several words (ADR-006).
 RECIPIENT_PATTERN = rf"^ *({'|'.join(RECIPIENTS)}) *(, *({'|'.join(RECIPIENTS)}) *)*$"
 OCCASIONS = ["birthday", "christmas", "anniversary", "housewarming", "thank-you", "graduation"]
@@ -64,9 +64,10 @@ FILTERS = [
         "recipient",
         "query",
         {"type": "string", "pattern": RECIPIENT_PATTERN, "maxLength": 40},
-        "Who the gift is for: anyone, him, her, couple or kids, or several separated by commas. Products "
-        "marked 'anyone' are always included, after the ones for the recipients asked for. Leave it out "
-        "when unknown. For a partner (an anniversary, for example), pass 'her,couple' or 'him,couple'.",
+        "Who the gift is for: anyone, him, her, couple, kids or pet, or several separated by commas. "
+        "Products marked 'anyone' (any person) are included after the ones for the recipients asked for, "
+        "except for 'pet' alone. Leave it out when unknown. For a partner (an anniversary, for example), "
+        "pass 'her,couple' or 'him,couple'. For a dog or a cat, pass 'pet'.",
     ),
     Param(
         "occasion",

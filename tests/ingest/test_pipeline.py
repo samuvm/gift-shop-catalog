@@ -433,7 +433,7 @@ class TestQualityWarnings:
 
     def test_a_declared_pair_absent_from_the_export_is_noted_not_blocking(self, decisions: Decisions) -> None:
         result = ingest([row()], decisions)
-        unused = [w for w in result.quality_warnings if w.code == "unused_decision"]
+        unused = [w for w in result.quality_warnings if w.code == "unused_decision" and w.product_ids]
         assert result.status == "ok"
         assert [w.product_ids for w in unused] == [["HL-021", "KD-024"], ["HL-024", "KD-023"]]
 
@@ -443,3 +443,50 @@ class TestQualityWarnings:
         assert result.status == "ok"
         assert any("headphone" in d for d in unused)
         assert not any("scented" in d for d in unused)  # the candle row is tagged "scented"
+
+    def test_a_synonym_group_found_only_in_unsearched_text_is_noted(self, decisions: Decisions) -> None:
+        # "dining" is in the category name, which is not searched; only the chosen words are (ADR-010).
+        search = decisions.search.model_copy(update={"synonyms": [["dining", "supper"]]})
+        kitchen = row(product_id="KD-001", category="Kitchen & Dining")
+        result = ingest([kitchen], with_search(decisions, search))
+        assert [w.detail for w in result.quality_warnings if w.code == "unused_synonym"] == [
+            "synonym group ['dining', 'supper'] matches no product; remove it or check the spelling"
+        ]
+
+    def test_a_synonym_group_reached_through_a_category_word_is_used(self, decisions: Decisions) -> None:
+        search = decisions.search.model_copy(update={"synonyms": [["cooking", "kitchen"]]})
+        kitchen = row(product_id="KD-001", category="Kitchen & Dining")
+        result = ingest([kitchen], with_search(decisions, search))
+        assert "unused_synonym" not in {w.code for w in result.quality_warnings}
+
+    def test_an_override_no_product_is_in_is_noted(self, decisions: Decisions) -> None:
+        result = ingest([row()], decisions)
+        unused = [w.detail for w in result.quality_warnings if w.code == "unused_decision"]
+        assert unused[-1:] == ["recipient override for pets matches no product in the export"]
+
+
+def with_search(decisions: Decisions, search: object) -> Decisions:
+    return decisions.model_copy(update={"search": search})
+
+
+class TestRecipientOverrides:
+    """ADR-010: in a category decided by a person, the export's 'anyone' means another recipient."""
+
+    def test_anyone_in_the_category_becomes_the_decided_recipient(self, decisions: Decisions) -> None:
+        pets = [
+            row(product_id="PT-001", name="Dog Bed", category="Pets", recipient="anyone"),
+            row(product_id="PT-002", name="Rope Toy Bundle", category="Pets", recipient="Anyone"),
+        ]
+        result = ingest([*pets, row()], decisions)
+        assert [p.recipient for p in result.products] == ["her", "pet", "pet"]
+        applied = [f for f in result.decisions_applied if f.rule == "recipient_override"]
+        assert [f.product_ids for f in applied] == [["PT-001", "PT-002"]]
+        assert applied[0].detail.startswith("'anyone' read as 'pet' in pets: ")
+
+    def test_a_recipient_the_export_names_is_kept(self, decisions: Decisions) -> None:
+        result = ingest([row(product_id="PT-001", category="Pets", recipient="kids")], decisions)
+        assert result.products[0].recipient == "kids"
+
+    def test_the_overridden_recipient_is_what_the_text_says(self, decisions: Decisions) -> None:
+        result = ingest([row(product_id="PT-001", category="Pets", recipient="anyone")], decisions)
+        assert "For: pet." in result.products[0].search_text

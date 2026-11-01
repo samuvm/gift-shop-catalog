@@ -12,8 +12,9 @@ from typing import Any
 from fastapi.testclient import TestClient
 
 from catalog.api.app import create_app
+from catalog.ingest.decisions import load_decisions
 from catalog.service import CHOICES
-from catalog.tools import RECIPIENTS, SLUGS, TOOLS
+from catalog.tools import OCCASIONS, RECIPIENTS, SLUGS, TOOLS
 
 ROOT = Path(__file__).resolve().parents[2]
 SNAPSHOT = Path(__file__).with_name("openapi.snapshot.json")
@@ -101,3 +102,8 @@ def test_what_fastapi_leaves_open_is_enforced_with_the_advertised_values(client:
     assert enums == {"category": SLUGS, **CHOICES}
     pattern = served[("/products/search", "recipient")]["pattern"]
     assert all(r in pattern for r in RECIPIENTS)
+
+
+def test_the_advertised_recipients_and_occasions_are_the_decided_ones() -> None:
+    decisions = load_decisions((ROOT / "data" / "decisions.yaml").read_text(encoding="utf-8"))
+    assert (decisions.recipients, decisions.occasions) == (RECIPIENTS, OCCASIONS)

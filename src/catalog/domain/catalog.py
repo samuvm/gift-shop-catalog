@@ -22,8 +22,9 @@ MAX_SUGGESTIONS = 3
 MAX_ALTERNATIVES = 3
 
 # Where a query term hits, and how much that hit is worth. The best field per term counts (ADR-005).
-# Strong fields say what the product is; weak ones only describe it. The category name is not
-# searched: it would match a whole category, which get_products_by_category already lists.
+# Strong fields say what the product is; weak ones only describe it. Of the category name, only the
+# words decisions.yaml names are searched ("kitchen", "gadget"), as the weakest field: they say which
+# aisle a product is in, not what it is (ADR-010). The whole name would match a whole category.
 STRONG_FIELDS: tuple[tuple[str, float], ...] = (
     ("name", 3.0),
     ("subcategory", 2.0),
@@ -31,7 +32,12 @@ STRONG_FIELDS: tuple[tuple[str, float], ...] = (
     ("occasions", 1.5),
     ("brand", 1.5),
 )
-WEAK_FIELDS: tuple[tuple[str, float], ...] = (("material", 1.5), ("color", 1.5), ("description", 1.0))
+WEAK_FIELDS: tuple[tuple[str, float], ...] = (
+    ("material", 1.5),
+    ("color", 1.5),
+    ("description", 1.0),
+    ("category", 1.0),
+)
 FIELD_WEIGHTS = STRONG_FIELDS + WEAK_FIELDS
 STRONG = frozenset(f for f, _ in STRONG_FIELDS)
 # Descriptions name materials to compare or deny them ("the everyday version of the alpaca").
@@ -39,6 +45,8 @@ EXCLUDE_FIELDS = ("name", "subcategory", "tags", "material")
 # Filters a suggestion may relax, in the order ties are broken.
 # Not `exclude`: an exclusion is a deliberate constraint (vegan, allergic), never one to relax (ADR-007).
 RELAXABLE = ("min_price", "max_price", "recipient", "occasion", "max_shipping_days")
+# 'anyone' in the client's data means any person: it is added to a person, not to a pet (ADR-010).
+NOT_A_PERSON = frozenset({"pet"})
 _ID = re.compile(r"\s*([A-Za-z]{2})\s*-?\s*(\d{1,3})\s*")
 
 
@@ -67,6 +75,10 @@ class Filters(_Model):
 
     def active(self) -> dict[str, Any]:
         return {k: v for k, v in self.model_dump().items() if v not in (None, [], False)}
+
+    @property
+    def for_a_person(self) -> bool:
+        return any(r not in NOT_A_PERSON for r in self.recipient)
 
     @property
     def narrowed(self) -> bool:
@@ -152,7 +164,9 @@ def _passes(p: Product, f: Filters, skip: str | None = None) -> bool:
     checks: dict[str, Callable[[], bool]] = {
         "min_price": lambda: f.min_price is None or p.price_eur >= f.min_price,
         "max_price": lambda: f.max_price is None or p.price_eur <= f.max_price,
-        "recipient": lambda: not f.recipient or p.recipient in (*f.recipient, "anyone"),
+        "recipient": lambda: (
+            not f.recipient or p.recipient in f.recipient or (p.recipient == "anyone" and f.for_a_person)
+        ),
         "occasion": lambda: f.occasion is None or f.occasion in p.occasions,
         "max_shipping_days": lambda: f.max_shipping_days is None or p.shipping_days <= f.max_shipping_days,
         "exclude": lambda: not any(term in _exclusion_text(p) for term in f.exclude),
@@ -171,7 +185,11 @@ class Catalog:
         self._by_id = {p.product_id: p for p in self._products}
         self._names = {p.category_slug: p.category for p in self._products}
         self._field_words = {
-            p.product_id: {f: _field_words(p, f) for f, _ in FIELD_WEIGHTS} for p in products
+            p.product_id: {
+                f: self._vocabulary.category_words(p.category_slug) if f == "category" else _field_words(p, f)
+                for f, _ in FIELD_WEIGHTS
+            }
+            for p in products
         }
 
     # ---------- get_categories

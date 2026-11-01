@@ -1,5 +1,5 @@
-"""Reference semantics of the four tools (ADR-002, ADR-005, ADR-006), written independently of the
-service.
+"""Reference semantics of the four tools (ADR-002, ADR-005, ADR-006, ADR-010), written independently
+of the service.
 
 Stdlib only and reads the served catalogue directly. It exists to produce the expected answers
 of the level-1 cases; the service is then checked against them. Two implementations that agree
@@ -55,7 +55,8 @@ STOPWORDS = {
     "idea",
     "ideas",
 }
-# Where a query term hits, and how much that hit is worth (ADR-005). Category is not searched.
+# Where a query term hits, and how much that hit is worth (ADR-005). Of the category name, only the
+# words the vocabulary chose are searched, as the weakest field (ADR-010).
 FIELD_WEIGHTS = (
     ("name", 3.0),
     ("subcategory", 2.0),
@@ -65,6 +66,7 @@ FIELD_WEIGHTS = (
     ("material", 1.5),
     ("color", 1.5),
     ("description", 1.0),
+    ("category", 1.0),
 )
 STRONG = {"name", "subcategory", "tags", "occasions", "brand"}
 # Not the description: it names materials to compare or deny them ("the everyday version of the alpaca").
@@ -90,6 +92,12 @@ def vocabulary() -> tuple[dict[str, str], dict[str, set[str]]]:
         for w in stems:
             groups[w] = stems
     return phrases, groups
+
+
+def category_words(slug: str) -> set[str]:
+    """The words of a category's name a person chose to make searchable (ADR-010)."""
+    search = json.loads(CATALOG.read_text(encoding="utf-8")).get("search") or {}
+    return {stem(w) for w in (search.get("category_words") or {}).get(slug, [])}
 
 
 def generic() -> set[str]:
@@ -163,7 +171,7 @@ def fields_hit(p: Product, term: str) -> list[tuple[str, float]]:
     group = groups.get(term, {term})
     out = []
     for f, w in FIELD_WEIGHTS:
-        found = words(field_text(p, f))
+        found = category_words(p["category_slug"]) if f == "category" else words(field_text(p, f))
         if group & found:
             out.append((f, w if term in found else w / 2))  # a synonym alone counts half (ADR-006)
     return out
@@ -193,7 +201,9 @@ def passes(p: Product, a: dict[str, Any], skip: str | None = None) -> bool:
         return False
     if on("max_price") and p["price_eur"] > a["max_price"]:
         return False
-    if on("recipient") and p["recipient"] not in (*recipients(a), "anyone"):
+    # 'anyone' is any person: added for a person, not for a pet alone (ADR-010).
+    people = [r for r in recipients(a) if r != "pet"]
+    if on("recipient") and p["recipient"] not in (*recipients(a), *(["anyone"] if people else [])):
         return False
     if on("occasion") and a["occasion"] not in p["occasions"]:
         return False

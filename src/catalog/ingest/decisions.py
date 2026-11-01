@@ -5,6 +5,8 @@ import re
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from catalog.domain.text import stem, words
+
 
 class _Strict(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
@@ -19,6 +21,14 @@ class Category(_Strict):
 class CrossListing(_Strict):
     ids: list[str]
     primary: str
+    reason: str
+
+
+class RecipientOverride(_Strict):
+    """In one category, the export's 'anyone' (any person) is read as another recipient (ADR-010)."""
+
+    category: str
+    recipient: str
     reason: str
 
 
@@ -57,11 +67,13 @@ class QualityRules(_Strict):
 
 
 class SearchVocabulary(_Strict):
-    """Shopper words the catalogue spells differently (ADR-005), and packaging words (ADR-006)."""
+    """Shopper words the catalogue spells differently (ADR-005), packaging words (ADR-006), and the
+    words of a category's name that are searched (ADR-010)."""
 
     phrases: dict[str, str] = Field(default_factory=dict)
     synonyms: list[list[str]] = Field(default_factory=list)
     generic: list[str] = Field(default_factory=list)
+    category_words: dict[str, list[str]] = Field(default_factory=dict)
 
 
 class Decisions(_Strict):
@@ -70,6 +82,7 @@ class Decisions(_Strict):
     recipients: list[str]
     occasions: list[str]
     cross_listed: list[CrossListing]
+    recipient_overrides: list[RecipientOverride] = Field(default_factory=list)
     stock: StockRules
     shipping: ShippingRules
     removal_guard: RemovalGuard
@@ -117,6 +130,33 @@ def _check_search(search: SearchVocabulary) -> None:
             raise ValueError(f"search: {word!r} is both generic and in a synonym group")
 
 
+def _check_categories(decisions: Decisions) -> None:
+    """Category words and recipient overrides name a declared category, and stay within it."""
+    names = {c.slug: c.name for c in decisions.categories}
+    for slug, chosen in decisions.search.category_words.items():
+        if slug not in names:
+            raise ValueError(f"search.category_words {slug!r}: not a category slug")
+        if not chosen:
+            raise ValueError(f"search.category_words {slug!r}: no words")
+        for word in chosen:
+            if not _WORD.fullmatch(word):
+                raise ValueError(f"search.category_words {slug!r}: {word!r} must be one lower-case word")
+            if stem(word) not in words(names[slug]):
+                raise ValueError(f"search.category_words {slug!r}: {word!r} is not a word of {names[slug]!r}")
+    seen: set[str] = set()
+    for override in decisions.recipient_overrides:
+        where = f"recipient_overrides {override.category!r}"
+        if override.category not in names:
+            raise ValueError(f"{where}: not a category slug")
+        if override.recipient not in decisions.recipients or override.recipient == "anyone":
+            raise ValueError(f"{where}: {override.recipient!r} is not one of the recipients but 'anyone'")
+        if not override.reason.strip():
+            raise ValueError(f"{where}: an override needs a reason")
+        if override.category in seen:
+            raise ValueError(f"{where}: overridden twice")
+        seen.add(override.category)
+
+
 def load_decisions(text: str) -> Decisions:
     """Parse and check the decisions file. A malformed decision is an error, never a silent default."""
     decisions = Decisions.model_validate(yaml.safe_load(text))
@@ -130,4 +170,5 @@ def load_decisions(text: str) -> Decisions:
         raise ValueError("categories: two categories share an ID prefix")
     _check_change_guard(decisions.change_guard)
     _check_search(decisions.search)
+    _check_categories(decisions)
     return decisions

@@ -8,6 +8,7 @@ SEARCH = {
     "phrases": {"noise cancelling": "anc"},
     "synonyms": [["headphone", "earbud"]],
     "generic": ["set"],
+    "category_words": {"tech-gadgets": ["gadget"]},
 }
 
 
@@ -18,6 +19,7 @@ def test_vocabulary_round_trips(tmp_path: Path) -> None:
     assert vocabulary.terms("noise cancelling earbuds") == ["anc", "earbud"]
     assert vocabulary.group("earbud") == {"headphone", "earbud"}
     assert vocabulary.terms("tea set") == ["tea"]
+    assert vocabulary.category_words("tech-gadgets") == {"gadget"}
     assert read_catalog(tmp_path / "catalog.json")[1] == []
 
 

@@ -1,9 +1,9 @@
 {
   "version": {
     "source_sha256": "3e32e993f5d198a35ea8148cd8d02236718589a3700ebf34b35be99dd47aead6",
-    "decisions_sha256": "0035b8e880b7ad28e12f2c385ee77ae061653b0fdc953982e922b1e8619c3167",
-    "products_sha256": "6b3c871eac48be71b874195b81281b9d1a01b9e57ce60acb347226edf142a630",
-    "served_sha256": "f1f1dbad838e3caeb696b6d9c8baaa5b1bdc34a0e4c1573c0568c64051f6c2b0"
+    "decisions_sha256": "efed956551333057936cc9c6fb4414ed091c2e8adde34839c545b7eda0c03dcc",
+    "products_sha256": "77561bb6a4085d61182e671d95b9dbddb8c96148b979fabd507e54513912b0de",
+    "served_sha256": "a28ffe5f6017754dbb49c8f9c0e55173865eda0ef5c0eeb3341ed945c1942934"
   },
   "search": {
     "phrases": {
@@ -50,6 +50,16 @@
       [
         "wireless",
         "bluetooth"
+      ],
+      [
+        "garden",
+        "gardening",
+        "gardener"
+      ],
+      [
+        "cooking",
+        "cook",
+        "kitchen"
       ]
     ],
     "generic": [
@@ -61,7 +71,19 @@
       "bundle",
       "trio",
       "duo"
-    ]
+    ],
+    "category_words": {
+      "kitchen-dining": [
+        "kitchen"
+      ],
+      "tech-gadgets": [
+        "tech",
+        "gadget"
+      ],
+      "pets": [
+        "pet"
+      ]
+    }
   },
   "products": [
     {
@@ -4281,7 +4303,7 @@
       "availability": "in_stock",
       "rating": 4.5,
       "reviews_count": 178,
-      "recipient": "anyone",
+      "recipient": "pet",
       "occasions": [
         "christmas",
         "birthday"
@@ -4300,8 +4322,8 @@
       "description": "Removable washable cover, memory foam base. Large size fits a labrador.",
       "also_listed_as": [],
       "search_primary": true,
-      "search_text": "Dog Bed, Orthopaedic. Dogs, Pets. Brand: Bramblewood. For: anyone. Occasions: christmas, birthday. Tags: dogbed, memoryfoam, washable, large. Colour: Grey. Material: Memory foam, canvas. Removable washable cover, memory foam base. Large size fits a labrador.",
-      "search_text_compact": "Dog Bed, Orthopaedic. Dogs, Pets. Brand: Bramblewood. For: anyone. Occasions: christmas, birthday. Tags: dogbed, memoryfoam, washable, large. Colour: Grey. Material: Memory foam, canvas."
+      "search_text": "Dog Bed, Orthopaedic. Dogs, Pets. Brand: Bramblewood. For: pet. Occasions: christmas, birthday. Tags: dogbed, memoryfoam, washable, large. Colour: Grey. Material: Memory foam, canvas. Removable washable cover, memory foam base. Large size fits a labrador.",
+      "search_text_compact": "Dog Bed, Orthopaedic. Dogs, Pets. Brand: Bramblewood. For: pet. Occasions: christmas, birthday. Tags: dogbed, memoryfoam, washable, large. Colour: Grey. Material: Memory foam, canvas."
     },
     {
       "product_id": "PT-002",
@@ -4315,7 +4337,7 @@
       "availability": "in_stock",
       "rating": 4.1,
       "reviews_count": 264,
-      "recipient": "anyone",
+      "recipient": "pet",
       "occasions": [
         "thank-you"
       ],
@@ -4333,8 +4355,8 @@
       "description": "Four toys. Two will survive the month.",
       "also_listed_as": [],
       "search_primary": true,
-      "search_text": "Rope Toy Bundle. Dogs, Pets. Brand: Bramblewood. For: anyone. Occasions: thank-you. Tags: dogtoy, rope, durable, set. Colour: Multi. Material: Cotton rope. Four toys. Two will survive the month.",
-      "search_text_compact": "Rope Toy Bundle. Dogs, Pets. Brand: Bramblewood. For: anyone. Occasions: thank-you. Tags: dogtoy, rope, durable, set. Colour: Multi. Material: Cotton rope."
+      "search_text": "Rope Toy Bundle. Dogs, Pets. Brand: Bramblewood. For: pet. Occasions: thank-you. Tags: dogtoy, rope, durable, set. Colour: Multi. Material: Cotton rope. Four toys. Two will survive the month.",
+      "search_text_compact": "Rope Toy Bundle. Dogs, Pets. Brand: Bramblewood. For: pet. Occasions: thank-you. Tags: dogtoy, rope, durable, set. Colour: Multi. Material: Cotton rope."
     },
     {
       "product_id": "PT-003",
@@ -4348,7 +4370,7 @@
       "availability": "out_of_stock",
       "rating": 4.0,
       "reviews_count": 96,
-      "recipient": "anyone",
+      "recipient": "pet",
       "occasions": [
         "christmas"
       ],
@@ -4366,8 +4388,8 @@
       "description": "Fits a corner rather than dominating a room. Sisal posts, two platforms.",
       "also_listed_as": [],
       "search_primary": true,
-      "search_text": "Cat Tree, Compact. Cats, Pets. Brand: Bramblewood. For: anyone. Occasions: christmas. Tags: cattree, scratching, compact, sisal. Colour: Beige. Material: Plywood, sisal, plush. Fits a corner rather than dominating a room. Sisal posts, two platforms.",
-      "search_text_compact": "Cat Tree, Compact. Cats, Pets. Brand: Bramblewood. For: anyone. Occasions: christmas. Tags: cattree, scratching, compact, sisal. Colour: Beige. Material: Plywood, sisal, plush."
+      "search_text": "Cat Tree, Compact. Cats, Pets. Brand: Bramblewood. For: pet. Occasions: christmas. Tags: cattree, scratching, compact, sisal. Colour: Beige. Material: Plywood, sisal, plush. Fits a corner rather than dominating a room. Sisal posts, two platforms.",
+      "search_text_compact": "Cat Tree, Compact. Cats, Pets. Brand: Bramblewood. For: pet. Occasions: christmas. Tags: cattree, scratching, compact, sisal. Colour: Beige. Material: Plywood, sisal, plush."
     },
     {
       "product_id": "TG-001",
