@@ -15,7 +15,7 @@ from catalog.domain.errors import CatalogError
 from catalog.storage import read_catalog, read_vocabulary
 
 ROOT = Path(__file__).resolve().parents[2]
-CASES = [json.loads(line) for line in (ROOT / "evals" / "golden" / "l1" / "v5.jsonl").open(encoding="utf-8")]
+CASES = [json.loads(line) for line in (ROOT / "evals" / "golden" / "l1" / "v6.jsonl").open(encoding="utf-8")]
 FILTER_KEYS = set(Filters.model_fields)
 
 
