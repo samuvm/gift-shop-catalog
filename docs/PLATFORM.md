@@ -144,7 +144,10 @@ publish.
 
 Recorded per run in `evals/simulations/results.csv` and summarised by `make sim-report`. On
 gpt-5.6-luna: prompt v8, three runs: core 18/18, extra 9/9, extended 16/18 after reading.
-Prompt v10, one run: core 6/6, extended 6/6, extra 2/3 (a minor slip, not pursued).
+Prompt v10, one run: core 6/6, extended 6/6, extra 2/3. The one Fail, extra-9, named a sold-out
+52-euro product without saying it was also over the budget; rerun alone it passed with a score of
+100, so it is recorded as an occasional slip. `results.csv` holds whole-suite runs only, so the
+rerun is noted here.
 
 ## Observed
 

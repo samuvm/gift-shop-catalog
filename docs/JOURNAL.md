@@ -1353,3 +1353,30 @@ It has ten chapters: overview, data, tools, search, agent, model, evaluation, MC
 what was left out, and a timed script. The script says what to show and what to say in each
 scene, so the video can use the same page on screen. Time so far: about 33 h over five
 calendar days. The total is finalised in the README at submission.
+
+### Block 37 · Review against the brief, and submission polish (≈ 1 h 15)
+
+Approach: read the whole project as the reviewers would, criterion by criterion in the brief's
+order, reproducing each published number with its command. The engineering held up; the
+weak points were presentation. The hours did not match between the README and this journal,
+`docs/PLATFORM.md` still described an older prompt, and two next-steps items were already
+done. All three were fixed.
+
+From the same review:
+- **A five-minute tour** at the top of each README, so a reviewer knows what to open first.
+- **One screenshot** of the landing with the chat answering a coffee request, because the UX of
+  the messages is a criterion and the README showed none.
+- **The test page link** filled in. Its token is the widget's, which the landing already serves
+  in its HTML.
+- **The General agent** gained a rule to reply in the language of the shopper's last message.
+  The model already did so on gpt-5.6-luna; the rule makes it explicit.
+- **Part 1, question 2** now opens with a concrete incident, as the question asks: a coding
+  agent met a new "never repeat a question" requirement by bypassing the deep-learning model it
+  was built around. The PDFs still fit on one page.
+- **extra-9 rerun alone** passed with a score of 100, so the r16 Fail is recorded as an
+  occasional slip. `make sim-report` accepts whole-suite runs only, so it is noted in
+  `docs/PLATFORM.md` rather than in `results.csv`.
+
+Kept as is: the `max_price` description, which suggests a margin above the budget. The margin is
+what lets the agent show a product slightly over budget and flag it as such, which the
+Simulations check.

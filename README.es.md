@@ -18,12 +18,14 @@ indigo.ai, convierte una petición vaga o concreta en un máximo de tres product
 motivo, en el idioma del cliente. Vive en el chat de la landing de una tienda inventada,
 *Ribbon & Co.*
 
+![La landing de Ribbon & Co. con el chat: tres regalos para alguien a quien le encanta el café, cada uno con precio, envío y motivo](docs/img/landing-chat.png)
+
 ## Enlaces
 
 | Qué | Dónde |
 |---|---|
 | Landing con el chat | https://catalog.178.18.243.118.sslip.io/ |
-| Página de prueba del agente | `<TEST_PAGE_URL>` |
+| Página de prueba del agente | https://clair.platform.indigo.ai/chatbot/4d2ebdf6-1913-4efe-b742-c457ebaeed6c |
 | Documento OpenAPI (sin clave) | https://catalog.178.18.243.118.sslip.io/openapi.json |
 | Endpoint MCP (Streamable HTTP) | https://catalog.178.18.243.118.sslip.io/mcp |
 | Health | https://catalog.178.18.243.118.sslip.io/health |

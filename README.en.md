@@ -17,12 +17,14 @@ tools, over REST with an OpenAPI document written for a language model, and over
 three products, each with a reason, in the shopper's language. It runs in the web chat of the
 landing page of an invented shop, *Ribbon & Co.*
 
+![The Ribbon & Co. landing with the chat: three gifts for a coffee lover, each with price, shipping and a reason](docs/img/landing-chat.png)
+
 ## Links
 
 | What | Where |
 |---|---|
 | Landing page with the chat | https://catalog.178.18.243.118.sslip.io/ |
-| Agent test page | `<TEST_PAGE_URL>` |
+| Agent test page | https://clair.platform.indigo.ai/chatbot/4d2ebdf6-1913-4efe-b742-c457ebaeed6c |
 | OpenAPI document (no key needed) | https://catalog.178.18.243.118.sslip.io/openapi.json |
 | MCP endpoint (Streamable HTTP) | https://catalog.178.18.243.118.sslip.io/mcp |
 | Health | https://catalog.178.18.243.118.sslip.io/health |

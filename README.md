@@ -17,12 +17,14 @@ per un modello linguistico, e via MCP. L'**agente Gift finder**, sulla piattafor
 trasforma una richiesta vaga o precisa in al massimo tre prodotti, ciascuno con un motivo, nella
 lingua del cliente. Vive nella chat della landing di un negozio inventato, *Ribbon & Co.*
 
+![La landing di Ribbon & Co. con la chat: tre regali per chi ama il caffè, ognuno con prezzo, spedizione e motivo](docs/img/landing-chat.png)
+
 ## Link
 
 | Cosa | Dove |
 |---|---|
 | Landing con la chat | https://catalog.178.18.243.118.sslip.io/ |
-| Pagina di test dell'agente | `<TEST_PAGE_URL>` |
+| Pagina di test dell'agente | https://clair.platform.indigo.ai/chatbot/4d2ebdf6-1913-4efe-b742-c457ebaeed6c |
 | Documento OpenAPI (senza chiave) | https://catalog.178.18.243.118.sslip.io/openapi.json |
 | Endpoint MCP (Streamable HTTP) | https://catalog.178.18.243.118.sslip.io/mcp |
 | Health | https://catalog.178.18.243.118.sslip.io/health |

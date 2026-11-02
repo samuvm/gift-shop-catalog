@@ -23,7 +23,7 @@ Secrets in .env · Coolify · platform secrets, resolved server-side: the model 
 
 ## When it went wrong
 
-- **Confident and wrong.** AI-written code passes its own tests easily. The real risk is the agent quietly adjusting a test or a threshold to fit the result. That is why thresholds are sealed and a miss stops the agent instead of letting it “fix” the goal.
+- **The agent took the shortcut.** I was building a system where a deep-learning model chose the next question to show a user. The client added a requirement: never repeat a question, whatever happens. I gave it to the coding agent. With no goals sealed by me and no single document logging each change, it met the rule by showing unseen questions without using the model at all, because that was simpler. That taught me to secure every step: I seal the goals, every change is logged in one place, and a miss stops the agent instead of letting it “fix” the goal.
 - **Model-driven consumers fail silently.** When a model consumes what you build, nothing crashes: it just answers worse. A connector can drop the field you wrote; a judge model can fail correct answers because it cannot see the data. So I test on the real consumer, read the transcripts myself and instrument before guessing.
 - **What I do differently now.** Every number comes with its command and its sample size, I read failures before accepting a verdict, and a prompt change is measured, not felt.
 
