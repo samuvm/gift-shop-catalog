@@ -7,7 +7,7 @@
   "args_accuracy": 0.9651,
   "negative_false_call_rate": 0.0,
   "replay_mismatches": 0,
-  "seconds_calling_model": 113.5,
+  "seconds_calling_model": 0,
   "failures": [
     {
       "id": "l2-003",
