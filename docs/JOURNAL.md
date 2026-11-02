@@ -1320,3 +1320,19 @@ stay deferred with reasons: l1-049, client data; l1-062 and l1-080, ranking froz
 On main: `make gate-fast` 529 passed; `make eval-l1` 81/81; `make eval-mcp` 81/81 and 16/16;
 `make eval-l2` replays unchanged (the tool descriptions did not change); `make secrets` 0. Level
 1 is re-run against the URL after the webhook deploy.
+
+**Level 2 with prompt v10** (n=150): tool 85.3%, args 96.2%, negatives 0%, replay mismatches 0.
+Prompts v3 to v10 now span 81.3–90.0% on the local model, with no edit aimed at tool choice.
+G-L2-TOOL stays not met. The platform runs decide the prompt's content: v10 targets an
+observed production failure (ext-10). It is confirmed or reverted by the next Simulations run,
+not by this number.
+
+### Block 35 · Part 1, "How I work with AI" (≈ 30 min)
+
+Written from Samuel's points: rails rather than guidance, sealed goals and the lock only he
+regenerates, one decision log where the agent stops and asks, tests ≠ evals, and secrets kept
+away from the model. It answers the brief's three questions, with incidents from this
+project: the `summary` import, the judge that could not see the catalogue, and the MCP
+placeholder. It ends on the value-added reflection. One page, as the brief asks, in
+`AI_WORKFLOW.md`, plus PDFs in English, Spanish and Italian (`docs/ai-workflow/`) in
+indigo.ai's palette (#8946ec, #141414, #eeece6), with a diagram of the rails.
