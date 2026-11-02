@@ -193,8 +193,7 @@ class Endpoint:
             LOG.info(_describe(scope, body, status[0] if status else 0))
 
     async def _handle(self, scope: Scope, receive: Receive, send: Send) -> None:
-        sent = dict(scope["headers"]).get(b"x-api-key", b"")
-        if not secrets.compare_digest(sent, self._key):
+        if not secrets.compare_digest(_credential(scope), self._key):
             # No WWW-Authenticate: Bearer would send OAuth-capable clients looking for an
             # authorization server that does not exist.
             body = {
@@ -254,5 +253,22 @@ def _describe(scope: Scope, body: bytes, status: int) -> str:
         "session": "yes" if "mcp-session-id" in headers else "no",
         "accept": headers.get("accept", "-"),
         "agent": headers.get("user-agent", "-")[:80],
+        # Which credential header arrived and its length, never its value.
+        "auth": ",".join(f"{h}({len(headers[h])})" for h in ("x-api-key", "authorization") if h in headers)
+        or "none",
     }
     return "mcp " + " ".join(f"{k}={v}" for k, v in fields.items())
+
+
+def _credential(scope: Scope) -> bytes:
+    """The key from X-API-Key, or else from `Authorization: Bearer <key>`.
+
+    Decided: accept the bearer form too, because the platform's MCP client is configured with
+    "a bearer token or an API key" and MCP clients commonly send the first. It is the same key,
+    compared the same way; REST keeps X-API-Key only, as its spec documents.
+    """
+    headers = dict(scope["headers"])
+    if b"x-api-key" in headers:
+        return bytes(headers[b"x-api-key"]).strip()
+    scheme, _, token = bytes(headers.get(b"authorization", b"")).partition(b" ")
+    return token.strip() if scheme.lower() == b"bearer" else b""

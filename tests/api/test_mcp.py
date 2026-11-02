@@ -236,3 +236,24 @@ class TestRequestLog:
         line = next(r.getMessage() for r in caplog.records if r.getMessage().startswith("mcp "))
         assert "status=401" in line
         assert "wrong" not in line
+
+    def test_a_refused_request_logs_which_credential_headers_arrived_but_not_their_values(
+        self, client: TestClient, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        caplog.set_level("INFO", logger="uvicorn.error")
+        rpc(client, "tools/list", {}, {**HEADERS, "X-API-Key": "nope"})
+        line = next(r.getMessage() for r in caplog.records if r.getMessage().startswith("mcp "))
+        assert "auth=x-api-key(4)" in line
+        assert "nope" not in line
+
+
+class TestBearer:
+    """Clients configured with 'a bearer token or an API key' both reach the tools."""
+
+    def test_the_same_key_as_a_bearer_token_is_accepted(self, client: TestClient) -> None:
+        headers = {k: v for k, v in HEADERS.items() if k != "X-API-Key"} | {"Authorization": f"Bearer {KEY}"}
+        assert rpc(client, "tools/list", {}, headers).status_code == 200
+
+    def test_a_wrong_bearer_token_is_refused(self, client: TestClient) -> None:
+        headers = {k: v for k, v in HEADERS.items() if k != "X-API-Key"} | {"Authorization": "Bearer wrong"}
+        assert rpc(client, "tools/list", {}, headers).status_code == 401
