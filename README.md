@@ -492,7 +492,7 @@ passo di ingest), gira con un utente non-root e dichiara il suo health check.
 
 ## Tempo impiegato
 
-Circa **32 ore in quattro giorni**, dal diario di ingegneria, che registra ogni blocco di lavoro
+Circa **33 ore in cinque giorni**, dal diario di ingegneria, che registra ogni blocco di lavoro
 con la sua durata approssimativa (da finalizzare alla consegna).
 
 | Giorno | Lavoro principale | Tempo |
@@ -500,7 +500,7 @@ con la sua durata approssimativa (da finalizzare alla consegna).
 | Gio 29 ott | Consegna, guida della piattaforma, obiettivi, scelta dell'hosting, audit dei dati, design della pipeline | ≈ 7 h |
 | Ven 30 ott | Ingest e dominio con TDD, stress test di 100 conversazioni, interfaccia dei tool, REST e OpenAPI, tre revisioni dei casi di livello 1 | ≈ 7 h 20 |
 | Sab 31 ott | Deploy, livello 2 su un modello locale, prompt v2–v3, configurazione della piattaforma, prime Simulations | ≈ 6 h 15 |
-| Dom 1 nov, fino a notte | Prompt v4–v10, confronto tra modelli, sicurezza dei nuovi export, MCP, landing, vocabolario di ricerca, latenza, MCP sulla piattaforma, Simulations, revisione del banco v5, README, Parte 1 | ≈ 11 h 25 |
+| Dom 1 – lun 2 nov, fino a notte | Prompt v4–v10, confronto tra modelli, sicurezza dei nuovi export, MCP, landing, vocabolario di ricerca, latenza, MCP sulla piattaforma, Simulations, revisione del banco v5, README, Parte 1 | ≈ 12 h 25 |
 
 Per area, a grandi linee: l'agente (prompt, livello 2, piattaforma, scelta del modello,
 Simulations) ≈ 11,5 h; interfaccia dei tool e ricerca, revisioni comprese ≈ 8 h; comprensione
@@ -542,11 +542,7 @@ Prossimi passi, in ordine:
 5. **Ordine di `over_budget_matches`:** per "coffee" mette il macinino da 115 € sopra il set
    pour-over da 78 €, perché una corrispondenza nel nome batte una nei tag. Il prezzo più vicino è
    l'offerta migliore.
-6. **La lingua dell'agente General:** risponde ai messaggi fuori tema nella lingua del workspace
-   (italiano), non in quella del cliente.
-7. **Nomi dei prodotti in grassetto:** il modello scrive di rado i `**` che il formato chiede,
-   quindi nel widget i nomi non sono in grassetto.
-8. **Revisioni ancora aperte:** i 6 casi di livello 1 cambiati dall'ADR-011, e i casi di livello 2
+6. **Revisioni ancora aperte:** i 6 casi di livello 1 cambiati dall'ADR-011, e i casi di livello 2
    che il modello ha superato (una persona ha rivisto solo i fallimenti).
 
 ## Per approfondire

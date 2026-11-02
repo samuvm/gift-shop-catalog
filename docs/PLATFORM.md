@@ -46,7 +46,7 @@ key as `Authorization: Bearer <key>`.
 ## Agents
 
 **Gift finder**, the only agent with tools.
-- Fields are filled from `agent/system-prompt.md` v3: General Description (with `{{$date}}`),
+- Fields are filled from `agent/system-prompt.md` (v10, its header lists every version and why): General Description (with `{{$date}}`),
   Agent Goal, Tone of Voice, 9 General Rules, and 5 custom sections (Asking questions,
   Recommendation format, Using the catalogue, Reading the results, Outside the shop).
 - The trigger carries the routing text and 8 example questions in English, Spanish and Italian.
@@ -139,12 +139,18 @@ publish.
 | core (the brief's six scenarios) | 5 / 6 | core-1, vague shopper: more than two questions before products, the budget asked twice, one product recommended |
 | extra | 1 / 3 | extra-8, deadline: delivery not presented as an estimate. extra-9, "show me more": repeated two products; the judge also flagged a material that is in the product record, to be checked |
 
-## Observed and not yet acted on
+## Simulations, latest
 
-- On gpt-4.1-mini, a Spanish message ("¿qué me recomiendas para parejas?") was answered in
-  English on the test page. On gpt-5.6-luna, the Spanish simulation (extra-7) was answered in
-  Spanish throughout; the test page is checked again after publishing.
-- Product names are not bold in the widget: the model rarely writes the `**` the format asks for.
+Recorded per run in `evals/simulations/results.csv` and summarised by `make sim-report`. On
+gpt-5.6-luna: prompt v8, three runs: core 18/18, extra 9/9, extended 16/18 after reading.
+Prompt v10, one run: core 6/6, extended 6/6, extra 2/3 (a minor slip, not pursued).
+
+## Observed
+
+- Language: on gpt-5.6-luna, Spanish and Italian shoppers are answered in their language by
+  Gift finder and by the General agent (returns and purchase questions in the Spanish
+  simulation were answered in Spanish). Earlier, on gpt-4.1-mini, a Spanish message got an
+  English reply.
+- Product names are bold in the widget since the numbered-list format (prompt v6).
 - In one long Preview conversation that chained six unrelated requests, a reply repeated earlier
-  messages and re-ran an earlier search. It did not reproduce in fresh conversations. If it shows
-  up in multi-turn Simulations, the first lever is a shorter memory.
+  messages and re-ran an earlier search. It did not reproduce in fresh conversations.

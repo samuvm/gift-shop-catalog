@@ -498,7 +498,7 @@ ingest), se ejecuta con un usuario sin privilegios y declara su propio health ch
 
 ## Tiempo dedicado
 
-Unas **32 horas en cuatro días**, según la bitácora de ingeniería, que registra cada bloque de
+Unas **33 horas en cinco días**, según la bitácora de ingeniería, que registra cada bloque de
 trabajo con su duración aproximada (por cerrar en la entrega).
 
 | Día | Trabajo principal | Tiempo |
@@ -506,7 +506,7 @@ trabajo con su duración aproximada (por cerrar en la entrega).
 | Jue 29 oct | Enunciado, guía de la plataforma, metas, elección del hosting, auditoría de datos, diseño del pipeline | ≈ 7 h |
 | Vie 30 oct | Ingest y dominio con TDD, prueba de estrés de 100 conversaciones, interfaz de herramientas, REST y OpenAPI, tres revisiones de los casos de nivel 1 | ≈ 7 h 20 |
 | Sáb 31 oct | Despliegue, nivel 2 con un modelo local, prompt v2–v3, configuración de la plataforma, primeras Simulations | ≈ 6 h 15 |
-| Dom 1 nov, hasta la noche | Prompt v4–v10, comparación de modelos, seguridad ante nuevos exports, MCP, landing, vocabulario de búsqueda, latencia, MCP en la plataforma, Simulations, revisión del banco v5, README, Parte 1 | ≈ 11 h 25 |
+| Dom 1 – lun 2 nov, hasta la noche | Prompt v4–v10, comparación de modelos, seguridad ante nuevos exports, MCP, landing, vocabulario de búsqueda, latencia, MCP en la plataforma, Simulations, revisión del banco v5, README, Parte 1 | ≈ 12 h 25 |
 
 Por áreas, a grandes rasgos: el agente (prompt, nivel 2, plataforma, elección del modelo,
 Simulations) ≈ 11,5 h; interfaz de herramientas y búsqueda, revisiones incluidas ≈ 8 h; entender
@@ -548,11 +548,7 @@ Siguientes pasos, por orden:
 5. **Orden de `over_budget_matches`:** para "coffee" pone el molinillo de 115 € por encima del set
    pour-over de 78 €, porque una coincidencia en el nombre gana a una en las etiquetas. El precio
    más cercano es la mejor oferta.
-6. **El idioma del agente General:** responde a los mensajes fuera de tema en el idioma del
-   workspace (italiano), no en el del cliente.
-7. **Nombres de producto en negrita:** el modelo rara vez escribe los `**` que pide el formato,
-   así que en el widget los nombres no salen en negrita.
-8. **Revisiones aún abiertas:** los 6 casos de nivel 1 que cambió el ADR-011, y los casos de
+6. **Revisiones aún abiertas:** los 6 casos de nivel 1 que cambió el ADR-011, y los casos de
    nivel 2 que el modelo acertó (una persona solo revisó los fallos).
 
 ## Para saber más
