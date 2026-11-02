@@ -31,6 +31,18 @@ called the browse tool with `subcategory: "Lamps"`, got the 404, and called agai
 `Lighting`, the subcategory the error body names. The platform's debug view shows response
 bodies as `*** redacted ***`, so this was checked through behaviour.
 
+## MCP server (bonus)
+
+Connected under Agents settings → Integrations → MCP Servers as `https://catalog.178.18.243.118.sslip.io/mcp`.
+
+**Finding: the MCP client sends the secret's placeholder, not its value.** With the header
+`X-API-Key` set from the workspace secret `CATALOG_API_KEY`, every `initialize` reached the
+server with a 19-character key: the length of `[[CATALOG_API_KEY]]`, not of the 64-character
+key. The same secret resolves in the Tool Collection header. Found with the per-request log of
+`/mcp` (method, protocol, which credential header arrived and its length, never its value). The
+sandbox works around it with the key's value typed into the MCP header. `/mcp` also accepts the
+key as `Authorization: Bearer <key>`.
+
 ## Agents
 
 **Gift finder**, the only agent with tools.
@@ -68,6 +80,9 @@ who the gift is for, and the budget.
   workspace. The Improve menu shows only Issues, Simulations and Playground. Hallucination is
   covered instead by the prompt rule that every product fact must come from a tool call, which
   level 2 measures.
+- **Widget style.** Brand colour `#9E1F45` with white text, the ribbon icon as avatar and
+  launcher (uploaded as a PNG, because an SVG URL is refused), launcher text "Gift ideas". The
+  assistant name avoids `&`, which the widget shows escaped (`&amp;`).
 - **Web chat privacy settings: not enabled.** On a test page the consent banner only adds a
   click before typing. A production deployment would turn it on.
 

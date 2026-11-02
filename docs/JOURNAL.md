@@ -1228,3 +1228,26 @@ replay mismatches 0. G-L2-TOOL is met, exactly at its threshold. Recorded as it 
 added in v8 is about budgets, not tool choice, and layout-only edits earlier moved this number
 by up to 6.7 points. The honest reading is "about 88–90% on this local model", and the README
 says so next to the number.
+
+### Block 32 · The platform sends the secret's name, not its value (≈ 15 min)
+
+The credential log closed the MCP question. Every `initialize` from the platform's client
+carries `x-api-key` with **19 characters**. The service key has 64. `[[CATALOG_API_KEY]]`, the
+platform's placeholder for that secret, has exactly 19. So the MCP client sends the
+placeholder unresolved. The same secret is resolved in the Tool Collection's header, where
+REST works, and the platform's documentation says secrets in MCP server headers "are resolved
+server-side at runtime". Our server cannot fix this, and it should not accept the placeholder.
+
+Workaround for the sandbox: enter the key's value directly in the MCP header instead of as a
+secret. Decided: acceptable here, because the workspace is a test sandbox, and the cost (the
+key visible to workspace members in that one field) is written down. In production the right
+move is to report it to the platform and keep the secret.
+
+Two smaller platform findings while styling the widget:
+- The platform rejects an SVG URL for the avatar and launcher icon, so a 512 px PNG with a
+  transparent background is uploaded instead.
+- An `&` in the assistant name is shown escaped ("Ribbon &amp; Co."), so the widget uses
+  "Ribbon and Co.".
+
+Prompt v8 checked in Preview: "about 40" → the Ember candle is listed as "€2 over budget" and
+the agent asks before stretching.
