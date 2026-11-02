@@ -210,7 +210,7 @@ by the benchmark failed here (wrong language; raw tool-call tokens in the chat).
 
 ### Conversation design
 
-The prompt (v9) is written in the platform's fields: description, goal, tone, ten general rules
+The prompt (v10) is written in the platform's fields: description, goal, tone, ten general rules
 and five sections (asking questions, recommendation format, using the catalogue, reading the
 results, outside the shop). The rules that shape a conversation:
 
@@ -273,9 +273,9 @@ the served OpenAPI and a check that the route parameters match the spec.
   table gives both numbers.
 
 **G-L2-TOOL sat below its threshold for most of the project, and the threshold was not lowered.** Tool choice on the local model:
-prompt v3 87.3%, v4 81.3%, v5 88.0%, v6 88.7%, v7 87.3%, v8 90.0%, v9 88.7%, against ≥ 90%. v8 met it
-exactly and v9 fell back below; changes that did not touch tool choice moved this number by up
-to 6.7 points, so it reads as "about 88–90% on this local model", and the goal stays not met. Most misses are the model answering from
+prompt v3 87.3%, v4 81.3%, v5 88.0%, v6 88.7%, v7 87.3%, v8 90.0%, v9 88.7%, v10 85.3%, against ≥ 90%. v8
+met it exactly and the next two fell back below; changes that did not touch tool choice moved this number by up
+to 6.7 points, so it reads as "about 85–90% on this local model", and the goal stays not met. Most misses are the model answering from
 earlier messages instead of calling a tool. Decided: keep 90%, because lowering it after the
 fact would move the goalpost, and tuning the prompt further for a model that is not in
 production would optimise the wrong thing. The production model passes the core scenarios. The
@@ -295,8 +295,8 @@ All numbers below are the latest run of each command. Reports are in `evals/repo
 | Level 1: exact product IDs | 81/81 | all | 81 | `make eval-l1` | `l1-latest.json` |
 | Level 1: largest response, default / max page | 621 / 1,045 tokens | ≤ 1,150 / 1,800 | 81 | `make eval-l1` | `l1-latest.json` |
 | Level 1: cases approved by the owner | 60 approved, 3 deferred to level 2, 18 pending | — | 81 | review sheet | `evals/golden/l1/REVIEW.md` |
-| Level 2: right tool (gemma4:26b, prompt v9) | 88.7% | ≥ 90% (**not met**; see the note on noise) | 150 | `make eval-l2` | `l2-latest.json` |
-| Level 2: right arguments, given the right tool | 96.5% | ≥ 85% | 150 | `make eval-l2` | `l2-latest.json` |
+| Level 2: right tool (gemma4:26b, prompt v10) | 85.3% | ≥ 90% (**not met**; see the note on noise) | 150 | `make eval-l2` | `l2-latest.json` |
+| Level 2: right arguments, given the right tool | 96.2% | ≥ 85% | 150 | `make eval-l2` | `l2-latest.json` |
 | Level 2: off-topic cases that call a tool | 0% | ≤ 5% | 36 | `make eval-l2` | `l2-latest.json` |
 | Level 2: replay mismatches | 0 | 0 | 150 | `make eval-l2` | `l2-latest.json` |
 | Simulations, core (gpt-5.6-luna), judge / after reading | 79% / 92% | 100% | 24 (4 runs × 6) | `make sim-report` | `simulations-latest.json` |
