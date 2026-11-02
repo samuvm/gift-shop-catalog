@@ -1336,3 +1336,12 @@ project: the `summary` import, the judge that could not see the catalogue, and t
 placeholder. It ends on the value-added reflection. One page, as the brief asks, in
 `AI_WORKFLOW.md`, plus PDFs in English, Spanish and Italian (`docs/ai-workflow/`) in
 indigo.ai's palette (#8946ec, #141414, #eeece6), with a diagram of the rails.
+
+**Simulations on prompt v10** (run r16, 15 scenarios): core 6/6, extended 6/6 (ext-10 now opens
+with "the catalogue doesn't say whether it is vegan"), extra 2/3. The extra-9 failure is real
+but minor: the 52-euro Cold Brew Carafe is reported out of stock without saying it is also 2
+euros over "about 50". Decided with Samuel: stop iterating on the prompt here. Each further line
+fixes one wording and risks another; the remaining slip is recorded rather than chased.
+
+Part 1 was rewritten in general terms at Samuel's request. It describes how he works with AI
+and leaves this project's specifics to the README.

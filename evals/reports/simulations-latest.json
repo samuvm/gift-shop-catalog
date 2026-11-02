@@ -4,17 +4,17 @@
   "core_judge_pass_rate": 1.0,
   "n": 6,
   "model": "gpt-5.6-luna",
-  "prompt_version": "v9",
+  "prompt_version": "v10",
   "runs": [
-    "r15c"
+    "r16c"
   ],
   "fails": [],
   "suites": {
     "core": {
       "model": "gpt-5.6-luna",
-      "prompt_version": "v9",
+      "prompt_version": "v10",
       "runs": [
-        "r15c"
+        "r16c"
       ],
       "n": 6,
       "pass_rate": 1.0,
@@ -23,33 +23,33 @@
     },
     "extra": {
       "model": "gpt-5.6-luna",
-      "prompt_version": "v9",
+      "prompt_version": "v10",
       "runs": [
-        "r15x"
+        "r16x"
       ],
       "n": 3,
-      "pass_rate": 1.0,
-      "judge_pass_rate": 1.0,
-      "fails": []
+      "pass_rate": 0.6667,
+      "judge_pass_rate": 0.6667,
+      "fails": [
+        {
+          "run": "r16x",
+          "scenario": "extra-9",
+          "judge": "fail",
+          "after_reading": "fail",
+          "note": "mentioned the 52-euro Cold Brew Carafe as out of stock without saying it is also over a budget of about 50; minor, not pursued"
+        }
+      ]
     },
     "extended": {
       "model": "gpt-5.6-luna",
-      "prompt_version": "v9",
+      "prompt_version": "v10",
       "runs": [
-        "r15e"
+        "r16e"
       ],
       "n": 6,
-      "pass_rate": 0.8333,
-      "judge_pass_rate": 0.8333,
-      "fails": [
-        {
-          "run": "r15e",
-          "scenario": "ext-10",
-          "judge": "fail",
-          "after_reading": "fail",
-          "note": "still answered 'Sì' to 'is it vegan?' before listing the materials; the general clause in rule 7 was not enough (prompt v10)"
-        }
-      ]
+      "pass_rate": 1.0,
+      "judge_pass_rate": 1.0,
+      "fails": []
     }
   }
 }
