@@ -1345,3 +1345,11 @@ fixes one wording and risks another; the remaining slip is recorded rather than 
 
 Part 1 was rewritten in general terms at Samuel's request. It describes how he works with AI
 and leaves this project's specifics to the README.
+
+### Block 36 · Material for the video (≈ 45 min)
+
+A visual walkthrough of the whole project, kept outside the repository as presenter material.
+It has ten chapters: overview, data, tools, search, agent, model, evaluation, MCP and landing,
+what was left out, and a timed script. The script says what to show and what to say in each
+scene, so the video can use the same page on screen. Time so far: about 33 h over five
+calendar days. The total is finalised in the README at submission.
