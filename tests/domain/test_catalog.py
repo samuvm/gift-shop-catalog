@@ -4,7 +4,7 @@ from typing import Any
 
 import pytest
 
-from catalog.domain.catalog import Catalog, Filters
+from catalog.domain.catalog import Catalog, Filters, Suggestion
 from catalog.domain.errors import ProductNotFound, UnknownCategory, UnknownSubcategory
 from catalog.domain.models import Product
 from catalog.domain.text import Vocabulary
@@ -589,3 +589,66 @@ class TestVocabularyAndPets:
         result = aisles.search(None, filters=Filters(recipient="kids,pet"), limit=10)
         assert ids(result)[:3] == ["PT-001", "HL-001", "PT-002"]  # the recipients asked for first
         assert result.total_matches == 7
+
+
+@pytest.fixture
+def near() -> Catalog:
+    """A catalogue where relaxing a filter adds products that match less well (ADR-011)."""
+    return Catalog(
+        [
+            product("HL-050", name="Portable Speaker", subcategory="Audio", price_eur=99, tags=["bluetooth"]),
+            product("HL-051", name="Bookshelf Speakers", subcategory="Audio", price_eur=899),
+            product("HL-052", name="Ceramic Planter", subcategory="Garden", price_eur=52),
+            product("HL-053", name="Desk Fan", subcategory="Desk", price_eur=75, description="For a garden."),
+            product("HL-054", name="Travel Bottle", subcategory="Bags", tags=["travel"]),
+            product("HL-055", name="Travel Wallet", subcategory="Bags", tags=["travel"]),
+            product(
+                "HL-056",
+                name="Acupressure Mat",
+                subcategory="Recovery",
+                description="Mat and pillow with a carry bag.",
+                availability="out_of_stock",
+            ),
+        ],
+        vocabulary=Vocabulary(synonyms=[["wireless", "bluetooth"], ["garden", "gardening"]]),
+    )
+
+
+class TestSuggestionsAndMainWord:
+    """ADR-011: a suggestion only proposes what the request would report; the main word may be weak."""
+
+    def test_recipient_is_never_suggested_for_removal(self, aisles: Catalog) -> None:
+        toy = aisles.search("toy", filters=Filters(recipient="kids", max_price=30))
+        assert toy.suggestions == []  # not the dog toy
+        pet = aisles.search(None, filters=Filters(recipient="pet"))
+        assert pet.suggestions == []  # not the gifts for people
+
+    def test_a_raise_that_adds_only_weaker_matches_is_not_suggested(self, near: Catalog) -> None:
+        result = near.search("wireless speaker", filters=Filters(max_price=120))
+        assert ids(result) == ["HL-050"]
+        assert (result.over_budget_matches, result.suggestions) == ([], [])  # passive speakers lack it
+
+    def test_a_raise_that_adds_an_equal_match_is_suggested(self, near: Catalog) -> None:
+        result = near.search("speaker", filters=Filters(max_price=120))
+        assert [(s.change, s.to, s.would_match) for s in result.suggestions] == [("max_price", 899.0, 2)]
+
+    def test_a_weak_only_match_is_not_suggested(self, near: Catalog) -> None:
+        result = near.search("gardening", filters=Filters(max_price=60))
+        assert ids(result) == ["HL-052"]
+        assert result.suggestions == []  # the fan only mentions a garden
+
+    def test_with_nothing_listed_the_raise_goes_to_the_nearest_strong_match(self, near: Catalog) -> None:
+        result = near.search("gardening", filters=Filters(max_price=40))
+        assert ids(result) == []
+        assert [(s.change, s.to, s.would_match) for s in result.suggestions] == [("max_price", 52.0, 1)]
+        fan = near.search("gardening", filters=Filters(max_price=60, min_price=60))
+        assert fan.suggestions == [Suggestion(change="min_price", to=52.0, would_match=1)]
+
+    def test_a_main_word_found_only_in_a_weak_field_still_narrows(self, near: Catalog) -> None:
+        result = near.search("travel pillow")
+        assert (ids(result), result.total_matches) == ([], 0)  # the bottle and wallet are not pillows
+        assert [p.product_id for p in result.out_of_stock_matches] == ["HL-056"]
+        assert result.missing_terms == {"HL-056": ["travel"]}
+
+    def test_a_category_word_still_does_not_narrow(self, aisles: Catalog) -> None:
+        assert "KD-004" in ids(aisles.search("coffee pet"))  # 'pet' is only the aisle's word

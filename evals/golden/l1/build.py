@@ -1,7 +1,7 @@
 """Build the level-1 golden set: tool + arguments -> exactly what the tool must return.
 
 Each case states the behaviour it pins. Expected values come from `oracle.py` (ADR-002, ADR-005,
-ADR-006 and ADR-010 semantics), then a person reviews every case in REVIEW.md against the catalogue
+ADR-006, ADR-010 and ADR-011 semantics), then a person reviews every case in REVIEW.md against the catalogue
 before the set is frozen. A case whose arguments and expected result are unchanged since the previous
 version keeps its approval; every other case goes back to review, with the previous comment shown
 next to it. A case still waiting for review, or deferred, carries the reviewer's last words forward.
@@ -17,7 +17,7 @@ from typing import Any
 from oracle import TOOLS, load
 
 HERE = Path(__file__).resolve().parent
-VERSION = 5
+VERSION = 6
 # Who approved the previous version, for kept cases that do not already carry an approval.
 REVIEWER, REVIEWED_AT = "Samuel Viciana", "2026-10-30"
 C, B, S, D = "get_categories", "get_products_by_category", "search_products", "get_product_details"
@@ -209,15 +209,15 @@ CASES: list[tuple[str, dict[str, Any], str]] = [
 # Comments that ask for a different order or a semantic judgement on a result that did not change.
 # Ranking is frozen (ADR-006): these go to the level-2 evaluation, which decides whether the agent
 # recommends the wrong product because of them. They are shown, not counted as pending.
+# l1-070 and l1-071 left this list in v6: ADR-011 changed their results as the reviewer asked.
 DEFERRED = {
     "l1-038": "a sauna blanket listed for 'throw blanket'",
     "l1-044": "over-budget earbuds before the dearer headphones",
-    "l1-049": "incense listed for kids (client data says 'anyone')",
-    "l1-062": "chess and backgammon as wooden board games",
+    "l1-049": "incense listed for kids: the client's data says 'anyone', a data issue, not a rule",
+    "l1-062": "chess and backgammon expected higher as wooden board games: an order change",
     "l1-063": "incense as a scented gift",
     "l1-069": "a pepper mill for 'coffee grinder' (marked missing 'coffee')",
-    "l1-070": "a dog toy for 'wooden toy' with recipient kids",
-    "l1-071": "travel items for 'travel pillow' (all marked missing 'pillow')",
+    "l1-080": "the tech aisle by rating before Home Tech for kids: an order change",
 }
 
 

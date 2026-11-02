@@ -40,11 +40,14 @@ WEAK_FIELDS: tuple[tuple[str, float], ...] = (
 )
 FIELD_WEIGHTS = STRONG_FIELDS + WEAK_FIELDS
 STRONG = frozenset(f for f, _ in STRONG_FIELDS)
+# The product's own words: every field but the aisle's, which never names a product (ADR-010, ADR-011).
+OWN = frozenset(f for f, _ in FIELD_WEIGHTS if f != "category")
 # Descriptions name materials to compare or deny them ("the everyday version of the alpaca").
 EXCLUDE_FIELDS = ("name", "subcategory", "tags", "material")
-# Filters a suggestion may relax, in the order ties are broken.
-# Not `exclude`: an exclusion is a deliberate constraint (vegan, allergic), never one to relax (ADR-007).
-RELAXABLE = ("min_price", "max_price", "recipient", "occasion", "max_shipping_days")
+# Filters a suggestion may relax, in the order ties are broken. Not `exclude`: an exclusion is a
+# deliberate constraint (vegan, allergic) (ADR-007). Not `recipient`: dropping it brings a dog toy to
+# a child, or gifts for people to a pet (ADR-011).
+RELAXABLE = ("min_price", "max_price", "occasion", "max_shipping_days")
 # 'anyone' in the client's data means any person: it is added to a person, not to a pet (ADR-010).
 NOT_A_PERSON = frozenset({"pet"})
 _ID = re.compile(r"\s*([A-Za-z]{2})\s*-?\s*(\d{1,3})\s*")
@@ -385,13 +388,17 @@ class Catalog:
         return [(f, w if term in fields[f] else w / 2) for f, w in FIELD_WEIGHTS if fields[f] & group]
 
     def _matches(self, pool: list[Product], terms: list[str], main: str | None = None) -> dict[str, Match]:
-        """Match per product. Rarity counts over the whole pool. With a main word that some product has
-        in a strong field, only those products match (ADR-006)."""
+        """Match per product. Rarity counts over the whole pool, out of stock included. With a main word,
+        only the products that have it match: in a strong field if any product does (ADR-006), else in
+        any of its own fields (ADR-011). A main word no product has does not narrow."""
         hits = {p.product_id: {t: self._hits(p, t) for t in terms} for p in pool}
         df = {t: sum(1 for h in hits.values() if h[t]) for t in terms}
         if main is not None:
-            named = {p.product_id for p in pool if any(f in STRONG for f, _ in self._hits(p, main))}
-            hits = {pid: h for pid, h in hits.items() if pid in named} if named else hits
+            for fields in (STRONG, OWN):
+                named = {p.product_id for p in pool if any(f in fields for f, _ in self._hits(p, main))}
+                if named:
+                    hits = {pid: h for pid, h in hits.items() if pid in named}
+                    break
         found = {}
         for pid, by_term in hits.items():
             matched = [t for t in terms if by_term[t]]
@@ -480,7 +487,7 @@ class Catalog:
                 for p, _ in over[:MAX_OVER_BUDGET]
             ]
 
-        suggestions = self._suggestions(matching, f, len(hits)) if short else []
+        suggestions = self._suggestions(matching, f, hits, bool(terms)) if short else []
         return ListResult(
             products=[p for p, _ in page],
             total_matches=len(hits),
@@ -496,23 +503,36 @@ class Catalog:
 
     @staticmethod
     def _suggestions(
-        matching: Callable[[str | None], list[tuple[Product, Match]]], f: Filters, current: int
+        matching: Callable[[str | None], list[tuple[Product, Match]]],
+        f: Filters,
+        listed: list[tuple[Product, Match]],
+        query: bool,
     ) -> list[Suggestion]:
+        """A filter to relax, when relaxing it adds a product that matches at least as well as the weakest
+        one listed; with nothing listed and a query, one that matches in a strong field (ADR-011). A new
+        price is the nearest one that adds such a product; `would_match` counts all the relaxed request
+        lists."""
+        weakest = min((m for _, m in listed), default=None)
+        current = {p.product_id for p, _ in listed}
+
+        def worth(m: Match) -> bool:
+            return m >= weakest if weakest is not None else not query or m.strong > 0
+
         found = []
         for name in RELAXABLE:
-            if getattr(f, name) in (None, []):
+            if getattr(f, name) is None:
                 continue
-            freed = [p for p, _ in matching(name)]
+            relaxed = matching(name)
+            freed = [p for p, _ in relaxed]
+            gained = [p.price_eur for p, m in relaxed if p.product_id not in current and worth(m)]
             to: float | None = None
             if name == "max_price":
-                above = [p.price_eur for p in freed if p.price_eur > (f.max_price or 0)]
-                to = min(above) if above else None
+                to = min(gained, default=None)
                 freed = [p for p in freed if to is not None and p.price_eur <= to]
             elif name == "min_price":
-                below = [p.price_eur for p in freed if p.price_eur < (f.min_price or 0)]
-                to = max(below) if below else None
+                to = max(gained, default=None)
                 freed = [p for p in freed if to is not None and p.price_eur >= to]
-            if len(freed) > current:
+            if gained:
                 found.append(Suggestion(change=name, to=to, would_match=len(freed)))
         found.sort(key=lambda s: (-s.would_match, RELAXABLE.index(s.change)))
         return found[:MAX_SUGGESTIONS]

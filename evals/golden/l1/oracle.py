@@ -1,4 +1,4 @@
-"""Reference semantics of the four tools (ADR-002, ADR-005, ADR-006, ADR-010), written independently
+"""Reference semantics of the four tools (ADR-002, ADR-005, ADR-006, ADR-010, ADR-011), written independently
 of the service.
 
 Stdlib only and reads the served catalogue directly. It exists to produce the expected answers
@@ -71,8 +71,8 @@ FIELD_WEIGHTS = (
 STRONG = {"name", "subcategory", "tags", "occasions", "brand"}
 # Not the description: it names materials to compare or deny them ("the everyday version of the alpaca").
 EXCLUDE_FIELDS = ("name", "subcategory", "tags", "material")
-# An exclusion is a deliberate constraint, never suggested for removal (ADR-007).
-REMOVABLE = ("min_price", "max_price", "recipient", "occasion", "max_shipping_days")
+# Neither an exclusion (ADR-007) nor the recipient (ADR-011) is ever suggested for removal.
+REMOVABLE = ("min_price", "max_price", "occasion", "max_shipping_days")
 
 Product = dict[str, Any]
 
@@ -253,10 +253,14 @@ def _list(
         df = {t: sum(1 for p in pool if fields_hit(p, t)) for t in query_terms}
         found = [(p, match(p, query_terms, df, len(pool))) for p in pool]
         scored = [(p, m) for p, m in found if m is not None]
-        # The main word, when some product has it in a strong field, narrows the list (ADR-006).
-        named = {p["product_id"] for p in pool if main and any(f in STRONG for f, _ in fields_hit(p, main))}
-        if named:
-            scored = [(p, m) for p, m in scored if p["product_id"] in named]
+        # The main word narrows the list to the products that have it in a strong field (ADR-006); if
+        # none does, to those that have it anywhere but in the aisle's words (ADR-011).
+        if main:
+            fields_of = {p["product_id"]: {f for f, _ in fields_hit(p, main)} for p in pool}
+            named = {pid for pid, fs in fields_of.items() if fs & STRONG}
+            named = named or {pid for pid, fs in fields_of.items() if fs - {"category"}}
+            if named:
+                scored = [(p, m) for p, m in scored if p["product_id"] in named]
     else:
         scored = [(p, NONE) for p in pool]
     sort = a.get("sort") or ("relevance" if query_terms else "rating")
@@ -323,19 +327,28 @@ def _list(
             out["missing_terms"] = {k: v for k, v in missing.items() if v}
 
     if len(page) < limit:
+        # A relaxed filter must add a product as good as the weakest one listed; with nothing listed and
+        # a query, one that matches in a strong field (ADR-011).
+        listed = {p["product_id"] for p, _ in hits}
+        floor = min((s for _, s in hits), default=None)
+
+        def adds(p: Product, s: tuple[float, ...]) -> bool:
+            if p["product_id"] in listed:
+                return False
+            return s >= floor if floor is not None else not query_terms or s[0] > 0
+
         suggestions = []
         for f in (f for f in REMOVABLE if a.get(f) is not None):
             freed = [p for p, _ in matching(skip=f)]
+            new = [p for p, s in matching(skip=f) if adds(p, s)]
             to: float | None = None
-            if f == "max_price":  # the smallest raise that adds a result
-                above = [p["price_eur"] for p in freed if p["price_eur"] > a["max_price"]]
-                to = min(above) if above else None
+            if f == "max_price":  # the smallest raise that adds such a product
+                to = min((p["price_eur"] for p in new), default=None)
                 freed = [p for p in freed if to is not None and p["price_eur"] <= to]
-            elif f == "min_price":  # the smallest drop that adds a result
-                below = [p["price_eur"] for p in freed if p["price_eur"] < a["min_price"]]
-                to = max(below) if below else None
+            elif f == "min_price":  # the smallest drop that adds such a product
+                to = max((p["price_eur"] for p in new), default=None)
                 freed = [p for p in freed if to is not None and p["price_eur"] >= to]
-            if len(freed) > len(hits):
+            if new:
                 suggestions.append({"change": f, "to": to, "would_match": len(freed)})
         suggestions.sort(key=lambda g: (-g["would_match"], REMOVABLE.index(g["change"])))
         if suggestions:
