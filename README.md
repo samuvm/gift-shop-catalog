@@ -210,7 +210,7 @@ by the benchmark failed here (wrong language; raw tool-call tokens in the chat).
 
 ### Conversation design
 
-The prompt (v7) is written in the platform's fields: description, goal, tone, ten general rules
+The prompt (v8) is written in the platform's fields: description, goal, tone, ten general rules
 and five sections (asking questions, recommendation format, using the catalogue, reading the
 results, outside the shop). The rules that shape a conversation:
 
@@ -272,8 +272,10 @@ the served OpenAPI and a check that the route parameters match the spec.
   reference. Every Fail is then read against the catalogue before a result is recorded; the
   table gives both numbers.
 
-**G-L2-TOOL is not reached, and the threshold was not lowered.** Tool choice on the local model:
-prompt v3 87.3%, v4 81.3%, v5 88.0%, v6 88.7%, v7 87.3%, against ≥ 90%. Most misses are the model answering from
+**G-L2-TOOL sat below its threshold for most of the project, and the threshold was not lowered.** Tool choice on the local model:
+prompt v3 87.3%, v4 81.3%, v5 88.0%, v6 88.7%, v7 87.3%, v8 90.0%, against ≥ 90%. v8 meets it exactly, but
+changes that did not touch tool choice moved this number by up to 6.7 points, so it is read as
+"about 88–90%", not as a pass earned by v8. Most misses are the model answering from
 earlier messages instead of calling a tool. Decided: keep 90%, because lowering it after the
 fact would move the goalpost, and tuning the prompt further for a model that is not in
 production would optimise the wrong thing. The production model passes the core scenarios. The
@@ -286,15 +288,15 @@ All numbers below are the latest run of each command. Reports are in `evals/repo
 
 | Metric | Value | Threshold | n | Command | Artefact |
 |---|---|---|---|---|---|
-| Unit and contract tests | 519 passed | all | 519 | `make test` | — |
+| Unit and contract tests | 522 passed | all | 522 | `make test` | — |
 | Line coverage, domain + ingest | 99.77% | ≥ 85% | 864 lines | `make test` | `coverage-latest.json` |
 | Layer violations (domain ↛ api/mcp, api ↮ mcp) | 0 | 0 | — | `make test` | `arch-latest.json` |
 | Data endpoints rejecting a missing, wrong or empty key | 12/12 | all | 12 | `make test` | `auth-latest.json` |
 | Level 1: exact product IDs | 81/81 | all | 81 | `make eval-l1` | `l1-latest.json` |
 | Level 1: largest response, default / max page | 621 / 1,045 tokens | ≤ 1,150 / 1,800 | 81 | `make eval-l1` | `l1-latest.json` |
 | Level 1: cases approved by the owner | 60 approved, 3 deferred to level 2, 18 pending | — | 81 | review sheet | `evals/golden/l1/REVIEW.md` |
-| Level 2: right tool (gemma4:26b, prompt v7) | 87.3% | ≥ 90% (**not met**) | 150 | `make eval-l2` | `l2-latest.json` |
-| Level 2: right arguments, given the right tool | 95.2% | ≥ 85% | 150 | `make eval-l2` | `l2-latest.json` |
+| Level 2: right tool (gemma4:26b, prompt v8) | 90.0% | ≥ 90% (met at the threshold; see the note on noise) | 150 | `make eval-l2` | `l2-latest.json` |
+| Level 2: right arguments, given the right tool | 95.5% | ≥ 85% | 150 | `make eval-l2` | `l2-latest.json` |
 | Level 2: off-topic cases that call a tool | 0% | ≤ 5% | 36 | `make eval-l2` | `l2-latest.json` |
 | Level 2: replay mismatches | 0 | 0 | 150 | `make eval-l2` | `l2-latest.json` |
 | Simulations, core (gpt-5.6-luna), judge / after reading | 79% / 92% | 100% | 24 (4 runs × 6) | `make sim-report` | `simulations-latest.json` |

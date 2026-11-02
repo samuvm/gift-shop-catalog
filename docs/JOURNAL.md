@@ -1222,3 +1222,9 @@ judge and the reading agree on every verdict (`make sim-report`, runs r9–r11).
 
 **Widget.** The platform would not take the SVG URL as the avatar or launcher icon, so a
 512 px PNG of the same ribbon was rendered for upload.
+
+**Level 2 with prompt v8** (`make eval-l2-refresh`, n=150): tool 90.0%, args 95.5%, negatives 0%,
+replay mismatches 0. G-L2-TOOL is met, exactly at its threshold. Recorded as it is: the line
+added in v8 is about budgets, not tool choice, and layout-only edits earlier moved this number
+by up to 6.7 points. The honest reading is "about 88–90% on this local model", and the README
+says so next to the number.
