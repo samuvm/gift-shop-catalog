@@ -37,6 +37,16 @@ Il dominio usa sslip.io, che include l'IP del server nel nome. Decisione: nessun
 acquistato per una demo, perché sslip.io offre gratis un certificato Let's Encrypt valido e l'IP
 di un server non è un segreto. In produzione il servizio starebbe dietro il dominio del cliente.
 
+## Il giro in cinque minuti
+
+1. **Parla con l'agente** sulla [landing](https://catalog.178.18.243.118.sslip.io/): una richiesta vaga ("un regalo per mia mamma"),
+   una precisa ("qualcosa per chi ama il caffè, sui 50 euro", poi "mostrami altro") e una fuori tema.
+2. **Leggi quello che legge il modello**: [`/openapi.json`](https://catalog.178.18.243.118.sslip.io/openapi.json), senza chiave.
+   Perché descrizioni e risposte sono così: [Tool pensati per un LLM](#tool-pensati-per-un-llm).
+3. **Controlla i numeri**: [Misurato](#misurato), ogni cifra con il suo `n`, comando e artefatto.
+4. **Guarda cosa richiedevano i dati del cliente**: [Dati: pulizia e sicurezza dei nuovi export](#dati-pulizia-e-sicurezza-dei-nuovi-export).
+5. **Valuta i compromessi**: [Cosa è rimasto fuori](#cosa-è-rimasto-fuori-e-cosa-farei-dopo) e [Tempo impiegato](#tempo-impiegato).
+
 ## Tecnologie
 
 | Ambito | Scelta |

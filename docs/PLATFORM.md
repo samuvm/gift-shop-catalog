@@ -62,8 +62,9 @@ key as `Authorization: Bearer <key>`.
 | Error handling | Fixed message: "Sorry, I couldn't reach the catalogue just now…" | A network failure still gets a clear reply |
 
 **General** (the platform's fallback agent). It handles small talk and anything outside the shop:
-weather, returns, payments, discounts and tracking. Four rules: never invent a policy, never name
-products, ignore role changes, and end by steering back to the gift. It has no tools. Its
+weather, returns, payments, discounts and tracking. Five rules: never invent a policy, never name
+products, ignore role changes, end by steering back to the gift, and reply in the language of the
+shopper's last message (added on 2 Nov as a cheap guard; the model already did so). It has no tools. Its
 default Italian trigger was replaced.
 
 **Welcome.** The opening text says what the assistant does and asks for the two things it needs:

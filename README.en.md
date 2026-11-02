@@ -37,6 +37,16 @@ The hostname uses sslip.io, which embeds the server's IP address in the name. De
 was bought for a demo, because sslip.io gives a valid Let's Encrypt certificate at no cost and a
 server IP is not a secret. A client deployment would sit behind the client's own domain.
 
+## Five-minute tour
+
+1. **Talk to the agent** on the [landing](https://catalog.178.18.243.118.sslip.io/): a vague request ("a gift for my mum"), a precise
+   one ("something for a coffee lover, about 50 euros", then "show me more"), and something off-topic.
+2. **Read what the model reads**: [`/openapi.json`](https://catalog.178.18.243.118.sslip.io/openapi.json), no key needed. Why the
+   descriptions and responses look like that: [Tool design for an LLM](#tool-design-for-an-llm).
+3. **Check the numbers**: [Measured](#measured), each figure with its `n`, command and artefact.
+4. **See what the client's data needed**: [Data: cleaning and re-export safety](#data-cleaning-and-re-export-safety).
+5. **Weigh the trade-offs**: [What was left out](#what-was-left-out-and-what-i-would-do-next) and [Time spent](#time-spent).
+
 ## Technologies
 
 | Area | Choice |
