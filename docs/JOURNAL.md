@@ -1284,3 +1284,10 @@ split into three groups:
 
 The first two groups are being fixed test-first in branch `review-v5` (ADR-011); the third is
 recorded as deferred with reasons.
+
+**Level 2 with prompt v9** (n=150): tool 88.7%, args 96.5%, negatives 0%, replay mismatches 0.
+G-L2-TOOL is back below its threshold (v8 had met it at exactly 90.0%). That fits the reading
+already recorded: on this local model the number moves between 87% and 90% with edits that do
+not concern tool choice. The threshold stays, the goal is reported as not met, and v9 is kept,
+because the behaviour it fixes (confirming unstated properties) is real and seen on the
+production model.
