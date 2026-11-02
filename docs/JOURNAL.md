@@ -1251,3 +1251,36 @@ Two smaller platform findings while styling the widget:
 
 Prompt v8 checked in Preview: "about 40" → the Ember candle is listed as "€2 over budget" and
 the agent asks before stretching.
+
+### Block 33 · MCP live on the platform, every goal green, and the owner's review of bank v5 (≈ 45 min)
+
+**MCP on the platform.** With the key's value typed into the MCP header, the server shows
+Connected and the four tools appear in the Agent Block. In Preview, the agent ran on the MCP
+tools alone ("a chef's knife under 100 euros": no chef's knife within budget, the 149-euro one
+named with the gap), and was then switched back to REST. Both transports work end to end.
+
+**Simulations on prompt v8**, three full runs of the 15 scenarios (r12–r14, gpt-5.6-luna):
+- core 18/18, judge and reading agree;
+- extra 9/9 after reading (one judge error, extra-7);
+- extended 16/18.
+
+`make done F=3`: **19/19**. Both extended failures are real and share one cause: confirming a
+property the record does not state. The agent answered "Yes" to "is it definitely vegan?" from
+the materials alone, and called a party game listed for anyone "clearly child-friendly".
+Prompt v9 extends rule 7: never confirm what the record does not state, say what it does state.
+
+**Owner's review of bank v5:** 9 cases ok, 9 with comments. They were pasted into the level-2
+sheet by mistake and moved to the level-1 sheet; the level-2 sheet was restored. The comments
+split into three groups:
+- **Suggestions that contradict the rules.** Dropping `recipient` brings back the dog toy for
+  kids, or human gifts for `pet`. A `max_price` suggestion counts passive wired speakers for
+  "wireless speaker", which the listing correctly leaves out. Another counts a speaker that
+  mentions "small garden" only in its description.
+- **The main-word rule ignores out-of-stock products.** "travel pillow" lists ten 'travel'
+  items because the only pillow is out of stock.
+- **Ranking and data, deferred.** Chess and backgammon for "wooden board game", Home Tech
+  outranking the aisle for "tech gadget" (ranking frozen, ADR-006), and incense listed for
+  kids (the client's data says 'anyone').
+
+The first two groups are being fixed test-first in branch `review-v5` (ADR-011); the third is
+recorded as deferred with reasons.
