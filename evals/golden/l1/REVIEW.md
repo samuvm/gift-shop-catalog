@@ -70,7 +70,7 @@ Review: ok (v4)
 
 *In v4: not reviewed yet.*
 
-Review: 
+Review: ok
 
 ## l1-006 · `get_products_by_category` `{"category": "home-living", "subcategory": "candles"}`
 *subcategory filter, case-insensitive; out-of-stock candle reported*
@@ -96,7 +96,7 @@ Review: ok (v4)
 
 *v3 comment:* `did_you_mean` correcto. El hint es genérico; como en l1-005, nombraría la llamada: "Call get_products_by_category with category 'home-living' and subcategory 'Lighting'." Además remite a `allowed_values`: si ese campo no va en la respuesta, apunta a algo que no existe.
 
-Review: 
+Review: ok
 
 ## l1-008 · `get_products_by_category` `{"category": "pets", "subcategory": "cats"}`
 *the only cat product is out of stock: empty page, reported, not hidden*
@@ -491,7 +491,7 @@ Review: ok (v4)
 
 *v3 comment:* Sigue sobrando `BW-016` Sauna Blanket: es un aparato de sauna por infrarrojos, no una manta de sofá (mismo caso que el molinillo de pimienta en l1-069). Quedaría solo `HL-010`; total_matches `1`. Y sobra la sugerencia `exclude → null`: las exclusiones son una restricción deliberada (vegana), no un filtro que el dependiente propondría quitar; lo que añade es HL-009 alpaca y OT-007 con lana.
 
-Review: 
+Review: ok: las exclusiones funcionan (fuera HL-009 alpaca y OT-007 con lana) y ya no está la sugerencia de quitar exclude; BW-016 sale marcada sin 'throw', el mismo caso que l1-069, aplazado a nivel 2.
 
 ## l1-039 · `search_products` `{"query": "puzzle", "sort": "price_asc"}`
 *explicit sort overrides relevance*
@@ -636,7 +636,7 @@ Review: ok (v4)
 
 *v3 comment:* Mejor que v2: `over_budget_matches` con KI-006 y KI-005 cubre lo que faltaba. Sigue sobrando `HL-027` Incense Set (incienso con soporte, no apto para niños); en su lugar `GP-008` Metal Puzzle Set (€38).
 
-Review: 
+Review: Sobra HL-027 Incense Set (incienso con quemador, no es para un niño), tercero en la página; el resto encaja y KI-006/KI-005 fuera de presupuesto están bien.
 
 ## l1-050 · `search_products` `{"max_shipping_days": 0}`
 *same-day: only digital gift cards*
@@ -746,7 +746,7 @@ Review: ok (v4)
 
 *In v4: not reviewed yet.*
 
-Review: 
+Review: ok
 
 ## l1-061 · `get_product_details` `{"product_id": "Chef's Knife"}`
 *a name instead of an id is a recoverable error*
@@ -759,7 +759,7 @@ Review:
 
 *In v4: not reviewed yet.*
 
-Review: 
+Review: ok
 
 ## l1-062 · `search_products` `{"query": "wooden board game"}`
 *held out: three words; products matching more of them first*
@@ -779,7 +779,7 @@ Review:
 
 *v3 comment:* Mejor que v2 (fuera KI-002). Faltan en la página `GP-009` Chess Set, Weighted (€145, tablero y piezas de nogal y arce, el juego de mesa de madera por excelencia) y `GP-010` Backgammon Roll-Up (€89, madera); irían 2º y 3º, por delante de los juegos de cartas GP-003 y GP-004. Propuesta: GP-001, GP-009, GP-010, GP-002, GP-003. Sigue sobrando `TG-022` en out_of_stock_matches: es una consola, no un juego de mesa.
 
-Review: 
+Review: Total 8 y TG-022 agotado bien, pero esperaba en la página GP-009 Chess Set (tablero en la descripción, nogal y arce) y GP-010 Backgammon (madera en el material), que casan dos palabras como GP-004 y GP-012 y son mejores juegos de mesa de madera; como el orden está congelado (ADR-006), lo apuntaría a nivel 2 como l1-044.
 
 ## l1-063 · `search_products` `{"query": "scented gift", "recipient": "her", "max_price": 60}`
 *held out: word plus filters*
@@ -834,7 +834,7 @@ Review: ok (v4)
 
 *v3 comment:* `missing_terms` de TG-004 está mal: es Bluetooth, o sea inalámbrico; marcarle "wireless" como ausente haría que el agente diga que no lo es. Sobran `TG-025` en over_budget_matches (altavoces pasivos con cable que necesitan amplificador, no inalámbricos) y la sugerencia `max_price: 899`. Quedaría solo TG-004, sin missing_terms, sin over_budget ni sugerencia.
 
-Review: 
+Review: Sobra la sugerencia max_price→899 (would_match 2): solo cuenta TG-025, que con razón ya no sale en over_budget_matches porque son altavoces pasivos con cable; esperaba solo TG-004, sin missing_terms ni sugerencias.
 
 ## l1-067 · `get_products_by_category` `{"category": "outdoor-travel", "recipient": "him"}`
 *held out: recipient filter on a browse*
@@ -866,7 +866,7 @@ Review: ok (v4)
 
 *v3 comment:* Vacío y presupuesto correctos, pero JW-003 y JW-004 son de vermeil dorado, no de plata: en over_budget_matches deberían llevar `missing_terms` `{"JW-003": ["silver"], "JW-004": ["silver"]}`, o el agente los ofrecerá como pendientes de plata. El catálogo no tiene pendientes de plata.
 
-Review: 
+Review: ok
 
 ## l1-069 · `search_products` `{"query": "coffee grinder"}`
 *held out: the first word is itself a kind of product*
@@ -897,7 +897,7 @@ Review: deferred to level 2 (ADR-006 freeze): a pepper mill for 'coffee grinder'
 
 *v3 comment:* Sobra `PT-002` Rope Toy Bundle: es un juguete para perros. Quedaría KI-001, KI-002, KI-006, KI-004; total_matches `4`.
 
-Review: 
+Review: Lista y total bien (PT-002 fuera), pero sobra la sugerencia recipient→null: lo único que añade es PT-002, el juguete de perro que ADR-010 sacó de 'kids'; esperaba sin suggestions.
 
 ## l1-071 · `search_products` `{"query": "travel pillow"}`
 *held out: a product word the catalogue may not use*
@@ -917,7 +917,7 @@ Review:
 
 *v3 comment:* El catálogo no tiene almohada de viaje, y una taza, un atlas, unos auriculares, una bolsa y un juego de cartas no lo son: solo coinciden por "travel", falta la palabra que dice qué producto es (al revés que en l1-064). Debería volver vacío (total_matches `0`) y dejar al agente decir que no hay; como mucho, el más cercano para dormir viajando es `BW-002` Weighted Eye Mask. Sobra también `BW-012` en out_of_stock_matches: es una esterilla de acupresión, su cojín no es de viaje.
 
-Review: 
+Review: Esperaba product_ids vacío y total_matches 0: los 10 solo casan 'travel' y les falta 'pillow', la palabra del producto, que el banco exige en l1-062, l1-064 y l1-069; BW-012 en out_of_stock_matches con missing 'travel' sí cuadra, y lo cercano (BW-002 Weighted Eye Mask) lo tendría que proponer el agente.
 
 ## l1-072 · `get_products_by_category` `{"category": "jewellery", "recipient": "her", "max_price": 60}`
 *held out: browse, recipient and budget*
@@ -977,7 +977,7 @@ Review: ok (v4)
 
 *New in this version.*
 
-Review: 
+Review: ok
 
 ## l1-076 · `search_products` `{"query": "toy", "recipient": "kids", "max_price": 30}`
 *a dog toy is for a pet, not for kids*
@@ -991,7 +991,7 @@ Review:
 
 *New in this version.*
 
-Review: 
+Review: Vacío y over_budget (KI-006, KI-004) bien, y max_price→42 bien, pero sobra recipient→null (would_match 1): ese 1 es PT-002, el juguete de perro que este caso dice que no es para niños; esperaba solo la sugerencia de max_price.
 
 ## l1-077 · `search_products` `{"recipient": "pet"}`
 *a pet gets pet products only, not the ones for any person*
@@ -1006,7 +1006,7 @@ Review:
 
 *New in this version.*
 
-Review: 
+Review: Productos bien (solo PT-001, PT-002 y PT-003 agotado), pero sobra la sugerencia recipient→null con 139: quitar 'pet' solo trae regalos para personas; esperaba sin suggestions, como se quitó la de exclude en l1-038.
 
 ## l1-078 · `search_products` `{"query": "gardening", "recipient": "him", "max_price": 60}`
 *the activity finds the Garden subcategory through a synonym*
@@ -1020,7 +1020,7 @@ Review:
 
 *New in this version.*
 
-Review: 
+Review: Los tres de jardín y el total bien, pero sobra la sugerencia max_price→99 (would_match 4): el cuarto es TG-004, un altavoz que solo dice 'small garden' en la descripción; esperaba sin suggestions.
 
 ## l1-079 · `search_products` `{"query": "cooking", "recipient": "her", "max_price": 50}`
 *the activity finds the cookbook, the herb kit and the kitchen aisle*
@@ -1035,7 +1035,7 @@ Review:
 
 *New in this version.*
 
-Review: 
+Review: ok
 
 ## l1-080 · `search_products` `{"query": "tech gadget", "recipient": "kids", "max_price": 100}`
 *a category word: the tech aisle, after the products that say tech*
@@ -1053,7 +1053,7 @@ Review:
 
 *New in this version.*
 
-Review: 
+Review: Esperaba el pasillo por valoración (TG-010, TG-015, TG-004, TG-016, TG-017) sin over_budget_matches: estar en 'Home Tech' no hace más 'tech gadget' un pack de enchufes, y un medidor de calidad del aire (€139) y un marco de fotos (€169) no son mejores opciones para un niño.
 
 ## l1-081 · `search_products` `{"query": "kitchen", "max_price": 60}`
 *a category word: the aisle after the product tagged kitchen*
@@ -1071,4 +1071,4 @@ Review:
 
 *New in this version.*
 
-Review: 
+Review: ok
