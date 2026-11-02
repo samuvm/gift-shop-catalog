@@ -483,20 +483,22 @@ step), runs as a non-root user and declares its own health check.
 
 ## Time spent
 
-About **33 hours over five days**, from the engineering journal, which records each block of work
-with its approximate duration (to be finalised at submission).
+About **29 hours over five days**. The engineering journal records each block of work with an
+approximate duration written at the time; looking back, those estimates ran about 20 % high, so
+the figures below are scaled down by that much.
 
 | Day | Main work | Time |
 |---|---|---|
-| Thu 29 Oct | Brief, platform guide, goals, hosting choice, data audit, pipeline design | ≈ 7 h |
-| Fri 30 Oct | Ingest and domain test-first, 100-conversation stress test, tool interface, REST and OpenAPI, three reviews of the level-1 cases | ≈ 7 h 20 |
-| Sat 31 Oct | Deployment, level 2 on a local model, prompt v2–v3, platform configuration, first Simulations | ≈ 6 h 15 |
-| Sun 1 – Mon 2 Nov, into the night | Prompt v4–v10, model comparison, re-export safety, MCP, landing page, search vocabulary, latency, MCP on the platform, Simulations, review of bank v5, README, Part 1 | ≈ 12 h 25 |
+| Thu 29 Oct | Brief, platform guide, goals, hosting choice, data audit, pipeline design | ≈ 5 h 35 |
+| Fri 30 Oct | Ingest and domain test-first, 100-conversation stress test, tool interface, REST and OpenAPI, three reviews of the level-1 cases | ≈ 5 h 50 |
+| Sat 31 Oct | Deployment, level 2 on a local model, prompt v2–v3, platform configuration, first Simulations | ≈ 5 h |
+| Sun 1 – Mon 2 Nov, into the night | Prompt v4–v10, model comparison, re-export safety, MCP, landing page, search vocabulary, latency, MCP on the platform, Simulations, review of bank v5, README, Part 1 | ≈ 9 h 55 |
+| Mon 2 Nov | Review against the brief, README tour and screenshot, video | ≈ 2 h 40 |
 
-By area, roughly: the agent (prompt, level 2, platform, model choice, Simulations) ≈ 11.5 h; tool
-interface and search, including the reviews ≈ 8 h; understanding the brief and the platform,
-goals, working rules ≈ 4 h; data ≈ 3.5 h; hosting and latency ≈ 2 h; MCP and landing page ≈ 1.5 h;
-README and Part 1 ≈ 1 h.
+By area, roughly: the agent (prompt, level 2, platform, model choice, Simulations) ≈ 9.5 h; tool
+interface and search, including the reviews ≈ 6.5 h; understanding the brief and the platform,
+goals, working rules ≈ 3.5 h; data ≈ 3 h; hosting and latency ≈ 1.5 h; MCP and landing page ≈ 1.5 h;
+README, Part 1 and the video ≈ 3.5 h.
 
 ## What was left out, and what I would do next
 
@@ -528,8 +530,11 @@ Next, in order:
    game. They become rules only if the agent recommends the wrong product because of the order.
 5. **`over_budget_matches` ordering:** for "coffee" it lists the €115 grinder above the €78
    pour-over set, because a name match beats a tag match. The nearer price is the better offer.
-6. **Reviews still open:** the 6 level-1 cases changed by ADR-011, and the level-2 cases the model
-   passed (only level-2 failures were reviewed by a person).
+6. **Reviews still open:** the 6 level-1 cases changed by ADR-011 (l1-066, 070, 071, 076, 077,
+   078) await a second human review, and so do the level-2 cases the model passed (only level-2
+   failures were reviewed by a person). This does not change the product's quality: the cases
+   pass, and the behaviour they cover is checked end to end by the Simulations. The review
+   confirms the expectations, not the service.
 
 ## Further reading
 

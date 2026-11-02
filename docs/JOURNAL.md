@@ -1380,3 +1380,17 @@ From the same review:
 Kept as is: the `max_price` description, which suggests a margin above the budget. The margin is
 what lets the agent show a product slightly over budget and flag it as such, which the
 Simulations check.
+
+### Block 38 · Video, time and submission (≈ 1 h 45 including the recording)
+
+The walkthrough video was recorded (about an hour with preparation and retakes) and linked in
+the three READMEs. The test page and the video were the last placeholders.
+
+**Time.** The durations in this journal were estimated as each block closed. Looking back,
+Samuel judged them about 20 % high, so the README reports the total and the per-day figures
+scaled by 0.8: about 29 hours. The blocks above keep their original estimates, because this
+journal is append-only.
+
+**Left for after submission:** a second human review of the six level-1 cases rewritten by
+ADR-011 (l1-066, 070, 071, 076, 077, 078). They pass, and the behaviour they cover is checked
+end to end by the Simulations; the review confirms the expectations, not the service.

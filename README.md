@@ -504,20 +504,22 @@ passo di ingest), gira con un utente non-root e dichiara il suo health check.
 
 ## Tempo impiegato
 
-Circa **33 ore in cinque giorni**, dal diario di ingegneria, che registra ogni blocco di lavoro
-con la sua durata approssimativa (da finalizzare alla consegna).
+Circa **29 ore in cinque giorni**. Il diario di ingegneria registra ogni blocco di lavoro con una
+durata approssimativa scritta sul momento; a posteriori quelle stime erano alte di circa il 20 %,
+quindi le cifre qui sotto sono ridotte di tanto.
 
 | Giorno | Lavoro principale | Tempo |
 |---|---|---|
-| Gio 29 ott | Consegna, guida della piattaforma, obiettivi, scelta dell'hosting, audit dei dati, design della pipeline | ≈ 7 h |
-| Ven 30 ott | Ingest e dominio con TDD, stress test di 100 conversazioni, interfaccia dei tool, REST e OpenAPI, tre revisioni dei casi di livello 1 | ≈ 7 h 20 |
-| Sab 31 ott | Deploy, livello 2 su un modello locale, prompt v2–v3, configurazione della piattaforma, prime Simulations | ≈ 6 h 15 |
-| Dom 1 – lun 2 nov, fino a notte | Prompt v4–v10, confronto tra modelli, sicurezza dei nuovi export, MCP, landing, vocabolario di ricerca, latenza, MCP sulla piattaforma, Simulations, revisione del banco v5, README, Parte 1 | ≈ 12 h 25 |
+| Gio 29 ott | Consegna, guida della piattaforma, obiettivi, scelta dell'hosting, audit dei dati, design della pipeline | ≈ 5 h 35 |
+| Ven 30 ott | Ingest e dominio con TDD, stress test di 100 conversazioni, interfaccia dei tool, REST e OpenAPI, tre revisioni dei casi di livello 1 | ≈ 5 h 50 |
+| Sab 31 ott | Deploy, livello 2 su un modello locale, prompt v2–v3, configurazione della piattaforma, prime Simulations | ≈ 5 h |
+| Dom 1 – lun 2 nov, fino a notte | Prompt v4–v10, confronto tra modelli, sicurezza dei nuovi export, MCP, landing, vocabolario di ricerca, latenza, MCP sulla piattaforma, Simulations, revisione del banco v5, README, Parte 1 | ≈ 9 h 55 |
+| Lun 2 nov | Revisione rispetto alla consegna, giro e screenshot nel README, video | ≈ 2 h 40 |
 
 Per area, a grandi linee: l'agente (prompt, livello 2, piattaforma, scelta del modello,
-Simulations) ≈ 11,5 h; interfaccia dei tool e ricerca, revisioni comprese ≈ 8 h; comprensione
-della consegna e della piattaforma, obiettivi, regole di lavoro ≈ 4 h; dati ≈ 3,5 h; hosting e
-latenza ≈ 2 h; MCP e landing ≈ 1,5 h; README e Parte 1 ≈ 1 h.
+Simulations) ≈ 9,5 h; interfaccia dei tool e ricerca, revisioni comprese ≈ 6,5 h; comprensione
+della consegna e della piattaforma, obiettivi, regole di lavoro ≈ 3,5 h; dati ≈ 3 h; hosting e
+latenza ≈ 1,5 h; MCP e landing ≈ 1,5 h; README, Parte 1 e video ≈ 3,5 h.
 
 ## Cosa è rimasto fuori, e cosa farei dopo
 
@@ -554,8 +556,11 @@ Prossimi passi, in ordine:
 5. **Ordine di `over_budget_matches`:** per "coffee" mette il macinino da 115 € sopra il set
    pour-over da 78 €, perché una corrispondenza nel nome batte una nei tag. Il prezzo più vicino è
    l'offerta migliore.
-6. **Revisioni ancora aperte:** i 6 casi di livello 1 cambiati dall'ADR-011, e i casi di livello 2
-   che il modello ha superato (una persona ha rivisto solo i fallimenti).
+6. **Revisioni ancora aperte:** i 6 casi di livello 1 cambiati dall'ADR-011 (l1-066, 070, 071,
+   076, 077, 078) attendono una seconda revisione umana, come i casi di livello 2 che il modello ha
+   superato (una persona ha rivisto solo i fallimenti). Non cambia la qualità del prodotto: i casi
+   passano, e il comportamento che coprono è verificato end-to-end dalle Simulations. La revisione
+   conferma le attese, non il servizio.
 
 ## Per approfondire
 

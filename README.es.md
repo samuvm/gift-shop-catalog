@@ -510,20 +510,22 @@ ingest), se ejecuta con un usuario sin privilegios y declara su propio health ch
 
 ## Tiempo dedicado
 
-Unas **33 horas en cinco días**, según la bitácora de ingeniería, que registra cada bloque de
-trabajo con su duración aproximada (por cerrar en la entrega).
+Unas **29 horas en cinco días**. La bitácora de ingeniería registra cada bloque de trabajo con una
+duración aproximada escrita en el momento; vistas a posteriori, esas estimaciones salían un 20 %
+altas, así que las cifras de abajo están reducidas en esa proporción.
 
 | Día | Trabajo principal | Tiempo |
 |---|---|---|
-| Jue 29 oct | Enunciado, guía de la plataforma, metas, elección del hosting, auditoría de datos, diseño del pipeline | ≈ 7 h |
-| Vie 30 oct | Ingest y dominio con TDD, prueba de estrés de 100 conversaciones, interfaz de herramientas, REST y OpenAPI, tres revisiones de los casos de nivel 1 | ≈ 7 h 20 |
-| Sáb 31 oct | Despliegue, nivel 2 con un modelo local, prompt v2–v3, configuración de la plataforma, primeras Simulations | ≈ 6 h 15 |
-| Dom 1 – lun 2 nov, hasta la noche | Prompt v4–v10, comparación de modelos, seguridad ante nuevos exports, MCP, landing, vocabulario de búsqueda, latencia, MCP en la plataforma, Simulations, revisión del banco v5, README, Parte 1 | ≈ 12 h 25 |
+| Jue 29 oct | Enunciado, guía de la plataforma, metas, elección del hosting, auditoría de datos, diseño del pipeline | ≈ 5 h 35 |
+| Vie 30 oct | Ingest y dominio con TDD, prueba de estrés de 100 conversaciones, interfaz de herramientas, REST y OpenAPI, tres revisiones de los casos de nivel 1 | ≈ 5 h 50 |
+| Sáb 31 oct | Despliegue, nivel 2 con un modelo local, prompt v2–v3, configuración de la plataforma, primeras Simulations | ≈ 5 h |
+| Dom 1 – lun 2 nov, hasta la noche | Prompt v4–v10, comparación de modelos, seguridad ante nuevos exports, MCP, landing, vocabulario de búsqueda, latencia, MCP en la plataforma, Simulations, revisión del banco v5, README, Parte 1 | ≈ 9 h 55 |
+| Lun 2 nov | Revisión frente al enunciado, recorrido y captura en el README, vídeo | ≈ 2 h 40 |
 
 Por áreas, a grandes rasgos: el agente (prompt, nivel 2, plataforma, elección del modelo,
-Simulations) ≈ 11,5 h; interfaz de herramientas y búsqueda, revisiones incluidas ≈ 8 h; entender
-el enunciado y la plataforma, metas, normas de trabajo ≈ 4 h; datos ≈ 3,5 h; hosting y latencia
-≈ 2 h; MCP y landing ≈ 1,5 h; README y Parte 1 ≈ 1 h.
+Simulations) ≈ 9,5 h; interfaz de herramientas y búsqueda, revisiones incluidas ≈ 6,5 h; entender
+el enunciado y la plataforma, metas, normas de trabajo ≈ 3,5 h; datos ≈ 3 h; hosting y latencia
+≈ 1,5 h; MCP y landing ≈ 1,5 h; README, Parte 1 y vídeo ≈ 3,5 h.
 
 ## Qué se quedó fuera, y qué haría después
 
@@ -560,8 +562,11 @@ Siguientes pasos, por orden:
 5. **Orden de `over_budget_matches`:** para "coffee" pone el molinillo de 115 € por encima del set
    pour-over de 78 €, porque una coincidencia en el nombre gana a una en las etiquetas. El precio
    más cercano es la mejor oferta.
-6. **Revisiones aún abiertas:** los 6 casos de nivel 1 que cambió el ADR-011, y los casos de
-   nivel 2 que el modelo acertó (una persona solo revisó los fallos).
+6. **Revisiones aún abiertas:** los 6 casos de nivel 1 que cambió el ADR-011 (l1-066, 070, 071,
+   076, 077, 078) esperan una segunda revisión humana, igual que los casos de nivel 2 que el modelo
+   acertó (una persona solo revisó los fallos). No cambia la calidad del producto: los casos pasan
+   y el comportamiento que cubren se comprueba de punta a punta con las Simulations. La revisión
+   confirma las expectativas, no el servicio.
 
 ## Para saber más
 
