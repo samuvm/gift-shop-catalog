@@ -1291,3 +1291,32 @@ already recorded: on this local model the number moves between 87% and 90% with 
 not concern tool choice. The threshold stays, the goal is reported as not met, and v9 is kept,
 because the behaviour it fixes (confirming unstated properties) is real and seen on the
 production model.
+
+### Block 34 · Bank v6 from the owner's review (merge of `review-v5`, ADR-011, ≈ 15 min to review)
+
+Two rules came out of Samuel's comments. Both were written test-first and applied the same way
+in the oracle.
+
+- **A suggestion must mean the same request.**
+  - `recipient` is no longer offered as a relaxation, as `exclude` already was not
+    (ADR-007): dropping it never finds a better gift for the same person.
+  - A filter is suggested only if relaxing it adds a product that matches at least as well as
+    the weakest one listed. With an empty list and a text query, the product must match in a
+    strong field.
+  - This ended the wireless-speaker suggestion (it counted passive wired speakers) and the
+    "small garden" one.
+  - Samuel's own proposal, counting strong-field matches only, was measured too. It did not fix
+    l1-066 and removed an approved suggestion from l1-079, so it was not taken.
+- **A main word found only in a description still narrows.** "travel pillow" listed ten
+  'travel' items. The cause was not stock, as first thought: the only pillow says "pillow" in
+  its description, a weak field, and ADR-006 narrows only on strong fields. Now, if no product
+  has the main word in a strong field, the search narrows to products that have it in any of
+  their own fields, aisle words excluded. The list is empty and the pillow is reported out of
+  stock.
+
+Six cases changed and go back for review (l1-066, 070, 071, 076, 077, 078). Three comments
+stay deferred with reasons: l1-049, client data; l1-062 and l1-080, ranking frozen.
+
+On main: `make gate-fast` 529 passed; `make eval-l1` 81/81; `make eval-mcp` 81/81 and 16/16;
+`make eval-l2` replays unchanged (the tool descriptions did not change); `make secrets` 0. Level
+1 is re-run against the URL after the webhook deploy.
