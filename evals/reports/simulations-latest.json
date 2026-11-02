@@ -1,63 +1,78 @@
 {
   "source": "evals/simulations/results.csv",
-  "core_pass_rate": 0.8333,
-  "core_judge_pass_rate": 0.8333,
-  "n": 6,
+  "core_pass_rate": 1.0,
+  "core_judge_pass_rate": 1.0,
+  "n": 18,
   "model": "gpt-5.6-luna",
-  "prompt_version": "v7",
+  "prompt_version": "v8",
   "runs": [
-    "r9"
+    "r12c",
+    "r13c",
+    "r14c"
   ],
-  "fails": [
-    {
-      "run": "r9",
-      "scenario": "core-3",
-      "judge": "fail",
-      "after_reading": "fail",
-      "note": "called the 42-euro Ember candle within budget and said it fits a budget of about 40, while also saying it is 2 over (prompt v8)"
-    }
-  ],
+  "fails": [],
   "suites": {
     "core": {
       "model": "gpt-5.6-luna",
-      "prompt_version": "v7",
+      "prompt_version": "v8",
       "runs": [
-        "r9"
+        "r12c",
+        "r13c",
+        "r14c"
       ],
-      "n": 6,
-      "pass_rate": 0.8333,
-      "judge_pass_rate": 0.8333,
-      "fails": [
-        {
-          "run": "r9",
-          "scenario": "core-3",
-          "judge": "fail",
-          "after_reading": "fail",
-          "note": "called the 42-euro Ember candle within budget and said it fits a budget of about 40, while also saying it is 2 over (prompt v8)"
-        }
-      ]
+      "n": 18,
+      "pass_rate": 1.0,
+      "judge_pass_rate": 1.0,
+      "fails": []
     },
     "extra": {
       "model": "gpt-5.6-luna",
-      "prompt_version": "v7",
+      "prompt_version": "v8",
       "runs": [
-        "r10"
+        "r12x",
+        "r13x",
+        "r14x"
       ],
-      "n": 3,
+      "n": 9,
       "pass_rate": 1.0,
-      "judge_pass_rate": 1.0,
-      "fails": []
+      "judge_pass_rate": 0.8889,
+      "fails": [
+        {
+          "run": "r13x",
+          "scenario": "extra-7",
+          "judge": "fail",
+          "after_reading": "pass",
+          "note": "judge: it had said the moka is the only brewing option within budget and marked the pour-over 28 over; the 'within 60' wording was the judge's"
+        }
+      ]
     },
     "extended": {
       "model": "gpt-5.6-luna",
-      "prompt_version": "v7",
+      "prompt_version": "v8",
       "runs": [
-        "r11"
+        "r12e",
+        "r13e",
+        "r14e"
       ],
-      "n": 6,
-      "pass_rate": 1.0,
-      "judge_pass_rate": 1.0,
-      "fails": []
+      "n": 18,
+      "pass_rate": 0.8889,
+      "judge_pass_rate": 0.8889,
+      "fails": [
+        {
+          "run": "r13e",
+          "scenario": "ext-10",
+          "judge": "fail",
+          "after_reading": "fail",
+          "note": "answered 'Yes' to 'definitely vegan' from the materials alone; the catalogue has no vegan label (prompt v9)"
+        },
+        {
+          "run": "r13e",
+          "scenario": "ext-12",
+          "judge": "fail",
+          "after_reading": "fail",
+          "note": "called the Party Game 'clearly child-friendly'; it is listed for anyone, not for kids (prompt v9)"
+        }
+      ]
     }
   }
 }
