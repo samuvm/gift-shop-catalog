@@ -1,164 +1,63 @@
 {
   "source": "evals/simulations/results.csv",
-  "core_pass_rate": 0.9167,
-  "core_judge_pass_rate": 0.7917,
-  "n": 24,
+  "core_pass_rate": 0.8333,
+  "core_judge_pass_rate": 0.8333,
+  "n": 6,
   "model": "gpt-5.6-luna",
-  "prompt_version": "v4",
+  "prompt_version": "v7",
   "runs": [
-    "r1",
-    "r2",
-    "r5",
-    "r6"
+    "r9"
   ],
   "fails": [
     {
-      "run": "r1",
-      "scenario": "core-6",
-      "judge": "fail",
-      "after_reading": "pass",
-      "note": "judge: Notebook Trio A6 unverified; it is in the catalogue (24)"
-    },
-    {
-      "run": "r2",
-      "scenario": "core-6",
-      "judge": "fail",
-      "after_reading": "pass",
-      "note": "judge: same product; weather in one sentence plus a question"
-    },
-    {
-      "run": "r5",
-      "scenario": "core-1",
-      "judge": "fail",
-      "after_reading": "pass",
-      "note": "judge: real products shown before cooking came up; book description is real"
-    },
-    {
-      "run": "r6",
-      "scenario": "core-1",
+      "run": "r9",
+      "scenario": "core-3",
       "judge": "fail",
       "after_reading": "fail",
-      "note": "'cooking' returns only the cookbook; kitchen items not found (vocabulary gap, ADR-010)"
-    },
-    {
-      "run": "r6",
-      "scenario": "core-4",
-      "judge": "fail",
-      "after_reading": "fail",
-      "note": "'gadget' unmatched, 'tech' matches three products by description; Instant Camera 119 not found (ADR-010)"
+      "note": "called the 42-euro Ember candle within budget and said it fits a budget of about 40, while also saying it is 2 over (prompt v8)"
     }
   ],
   "suites": {
     "core": {
       "model": "gpt-5.6-luna",
-      "prompt_version": "v4",
+      "prompt_version": "v7",
       "runs": [
-        "r1",
-        "r2",
-        "r5",
-        "r6"
+        "r9"
       ],
-      "n": 24,
-      "pass_rate": 0.9167,
-      "judge_pass_rate": 0.7917,
+      "n": 6,
+      "pass_rate": 0.8333,
+      "judge_pass_rate": 0.8333,
       "fails": [
         {
-          "run": "r1",
-          "scenario": "core-6",
-          "judge": "fail",
-          "after_reading": "pass",
-          "note": "judge: Notebook Trio A6 unverified; it is in the catalogue (24)"
-        },
-        {
-          "run": "r2",
-          "scenario": "core-6",
-          "judge": "fail",
-          "after_reading": "pass",
-          "note": "judge: same product; weather in one sentence plus a question"
-        },
-        {
-          "run": "r5",
-          "scenario": "core-1",
-          "judge": "fail",
-          "after_reading": "pass",
-          "note": "judge: real products shown before cooking came up; book description is real"
-        },
-        {
-          "run": "r6",
-          "scenario": "core-1",
+          "run": "r9",
+          "scenario": "core-3",
           "judge": "fail",
           "after_reading": "fail",
-          "note": "'cooking' returns only the cookbook; kitchen items not found (vocabulary gap, ADR-010)"
-        },
-        {
-          "run": "r6",
-          "scenario": "core-4",
-          "judge": "fail",
-          "after_reading": "fail",
-          "note": "'gadget' unmatched, 'tech' matches three products by description; Instant Camera 119 not found (ADR-010)"
+          "note": "called the 42-euro Ember candle within budget and said it fits a budget of about 40, while also saying it is 2 over (prompt v8)"
         }
       ]
     },
     "extra": {
       "model": "gpt-5.6-luna",
-      "prompt_version": "v4",
+      "prompt_version": "v7",
       "runs": [
-        "r3",
-        "r4",
-        "r7"
+        "r10"
       ],
-      "n": 9,
-      "pass_rate": 0.8889,
-      "judge_pass_rate": 0.5556,
-      "fails": [
-        {
-          "run": "r3",
-          "scenario": "extra-7",
-          "judge": "fail",
-          "after_reading": "pass",
-          "note": "judge: moka gift wrap; criterion listed it only for the pour-over"
-        },
-        {
-          "run": "r4",
-          "scenario": "extra-7",
-          "judge": "fail",
-          "after_reading": "pass",
-          "note": "judge: 'one-handed open' is the catalogue description"
-        },
-        {
-          "run": "r4",
-          "scenario": "extra-9",
-          "judge": "fail",
-          "after_reading": "fail",
-          "note": "pour-over at 78 not marked over budget after show me more"
-        },
-        {
-          "run": "r7",
-          "scenario": "extra-7",
-          "judge": "fail",
-          "after_reading": "pass",
-          "note": "judge: not pointing to customer service for a gift note; honest answer"
-        }
-      ]
+      "n": 3,
+      "pass_rate": 1.0,
+      "judge_pass_rate": 1.0,
+      "fails": []
     },
     "extended": {
       "model": "gpt-5.6-luna",
-      "prompt_version": "v4",
+      "prompt_version": "v7",
       "runs": [
-        "r8"
+        "r11"
       ],
       "n": 6,
       "pass_rate": 1.0,
-      "judge_pass_rate": 0.8333,
-      "fails": [
-        {
-          "run": "r8",
-          "scenario": "ext-13",
-          "judge": "fail",
-          "after_reading": "pass",
-          "note": "judge: offered to look above 60, did not raise the budget"
-        }
-      ]
+      "judge_pass_rate": 1.0,
+      "fails": []
     }
   }
 }

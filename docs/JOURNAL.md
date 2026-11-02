@@ -1195,3 +1195,30 @@ endpoint, one reused connection): max p95 193.4 ms, medians 60–73 ms. G-LATENC
 The first attempt after the change hit a 502 during a webhook deploy's container switch, so it
 was rerun once the deploy had finished. Level 2 with prompt v7: tool 87.3%, args 95.2%,
 negatives 0%, replay mismatches 0, within the noise of v6 (88.7%).
+
+### Block 31 · The MCP failure explained by its own log, a budget slip, and the first v7 runs (≈ 40 min)
+
+**MCP.** The new request log answered the question in one deploy. Every request from the
+platform's client (`mint/1.9.3`, from AWS addresses) was an `initialize` refused with 401. The
+transport was fine; the credential was not arriving as expected. Two changes:
+- `/mcp` also accepts the same key as `Authorization: Bearer <key>`. The platform describes MCP
+  auth as "a bearer token or an API key", and many MCP clients send the first. REST keeps
+  `X-API-Key` only, as its spec documents.
+- The log line now records which credential header arrived and its length, never its value.
+  So if the next attempt still fails, it shows whether the header is missing, renamed or
+  carries a different value.
+
+Tests first (`TestBearer`, one more `TestRequestLog`). `make gate-fast` 522 passed,
+`make eval-mcp` 81/81 and 16/16.
+
+**Simulations on prompt v7** (gpt-5.6-luna, draft): core 5/6, extra 3/3, extended 6/6. The
+judge and the reading agree on every verdict (`make sim-report`, runs r9–r11).
+- The one Fail is real. core-3, Italian: "budget sui 40". The model used the margin the
+  `max_price` description allows for an approximate budget, then called the 42-euro candle
+  "entro il budget" and said it "rientra", while also saying it was 2 euros over.
+- Prompt v8 adds one line: the budget is the number the shopper said, and anything above it is
+  reported as over, with the amount. The margin stays, because it is what lets the agent show
+  the liked item at all.
+
+**Widget.** The platform would not take the SVG URL as the avatar or launcher icon, so a
+512 px PNG of the same ribbon was rendered for upload.
