@@ -1189,3 +1189,9 @@ the model filled the format line with that phrase. They are now listed as "**Nam
 reference, because the reference is deliberately small, and the change would rewrite the
 expectations of every level-1 case that has one, the night before submission. Level 2 is
 being re-recorded.
+
+**Latency, re-measured with option A** (`make latency URL=…`, 20 warm-up calls, 3 runs × 200 per
+endpoint, one reused connection): max p95 193.4 ms, medians 60–73 ms. G-LATENCY-P95 passes.
+The first attempt after the change hit a 502 during a webhook deploy's container switch, so it
+was rerun once the deploy had finished. Level 2 with prompt v7: tool 87.3%, args 95.2%,
+negatives 0%, replay mismatches 0, within the noise of v6 (88.7%).
