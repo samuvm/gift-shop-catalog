@@ -1,148 +1,157 @@
+🇮🇹 Italiano · [🇪🇸 Español](README.es.md) · [🇬🇧 English](README.en.md)
+
 # Gift Shop Catalog
 
-A catalogue service and a gift-finding agent for a small online gift shop, built for the
-indigo.ai AI Forward Deployed Engineer assignment.
+![Python 3.13](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.162-009688?logo=fastapi&logoColor=white)
+![MCP](https://img.shields.io/badge/MCP-Streamable%20HTTP-6E56CF)
+![tests](https://img.shields.io/badge/tests-529%20passed-2E7D32)
+![coverage](https://img.shields.io/badge/coverage%20domain%2Bingest-99.77%25-2E7D32)
+![mypy](https://img.shields.io/badge/mypy-strict-2A6DB2)
 
-- **Catalog Service** (Python, FastAPI): four read-only tools over REST, described by an
-  OpenAPI document written for a language model, and the same four tools over MCP
-  (Streamable HTTP). It serves a catalogue cleaned from the client's CSV export by a
-  repeatable, guarded ingest.
-- **Gift finder agent** on the indigo.ai platform: it turns a vague or precise request into at
-  most three products, each with a reason, in the shopper's language, inside a narrow web-chat
-  widget.
-- **Landing page** of an invented shop, *Ribbon & Co.*, with the web chat embedded.
+Un servizio di catalogo e un agente che aiuta a trovare regali, per un piccolo negozio online.
+È la prova tecnica di indigo.ai per il ruolo di AI Forward Deployed Engineer. Il **Catalog
+Service** (Python, FastAPI) pulisce l'export CSV del cliente con un ingest ripetibile e
+controllato, ed espone quattro tool di sola lettura: via REST, con un documento OpenAPI scritto
+per un modello linguistico, e via MCP. L'**agente Gift finder**, sulla piattaforma indigo.ai,
+trasforma una richiesta vaga o precisa in al massimo tre prodotti, ciascuno con un motivo, nella
+lingua del cliente. Vive nella chat della landing di un negozio inventato, *Ribbon & Co.*
 
-## Links
+## Link
 
-| What | Where |
+| Cosa | Dove |
 |---|---|
-| Landing page with the chat | https://catalog.178.18.243.118.sslip.io/ |
-| OpenAPI document (no key needed) | https://catalog.178.18.243.118.sslip.io/openapi.json |
-| MCP endpoint (Streamable HTTP) | https://catalog.178.18.243.118.sslip.io/mcp |
+| Landing con la chat | https://catalog.178.18.243.118.sslip.io/ |
+| Pagina di test dell'agente | `<TEST_PAGE_URL>` |
+| Documento OpenAPI (senza chiave) | https://catalog.178.18.243.118.sslip.io/openapi.json |
+| Endpoint MCP (Streamable HTTP) | https://catalog.178.18.243.118.sslip.io/mcp |
 | Health | https://catalog.178.18.243.118.sslip.io/health |
-| Agent test page | `<TEST_PAGE_URL>` |
-| How AI tools were used in this work | [`AI_WORKFLOW.md`](AI_WORKFLOW.md) |
+| Parte 1 · Come lavoro con l'IA | [PDF, una pagina](docs/ai-workflow/AI_WORKFLOW-it.pdf) · [Markdown (inglese)](AI_WORKFLOW.md) |
+| Video | `<VIDEO_URL>` |
 
-Every data endpoint and `/mcp` need the header `X-API-Key`. Without it they answer 401 with a
-body that says how to send it. The landing page, `/openapi.json` and `/health` are public.
+Tutti gli endpoint di dati e `/mcp` richiedono l'header `X-API-Key` (`/mcp` accetta anche
+`Authorization: Bearer <key>`). Senza chiave rispondono 401, con un corpo che spiega come
+inviarla. La landing, `/openapi.json` e `/health` sono pubblici.
 
-The hostname uses sslip.io, which embeds the server's IP address in the name. Decided: no
-domain was bought for a demo, because sslip.io gives a valid Let's Encrypt certificate at no
-cost and a server IP is not a secret. A client deployment would sit behind the client's own
-domain and proxy.
+Il dominio usa sslip.io, che include l'IP del server nel nome. Decisione: nessun dominio
+acquistato per una demo, perché sslip.io offre gratis un certificato Let's Encrypt valido e l'IP
+di un server non è un segreto. In produzione il servizio starebbe dietro il dominio del cliente.
 
-## Repository layout
+## Tecnologie
 
-| Path | What it holds |
+| Ambito | Scelta |
 |---|---|
-| `src/catalog/tools.py` | The four tools, defined once: name, description for the model, parameters, response schema |
-| `src/catalog/service.py` | `execute()`: one entry point per tool call, shared by REST and MCP; input normalisation; response bodies |
-| `src/catalog/domain/` | The catalogue in memory: search, browse, details, ranking, near misses. No web framework imports |
-| `src/catalog/ingest/` | CSV + decisions → served catalogue and report, with every stopping rule |
-| `src/catalog/api/` | FastAPI app (`app.py`), generated OpenAPI (`openapi.py`), MCP server (`mcp.py`), landing page |
-| `data/gift-shop-catalog.csv` | The client's export, as received. Never edited |
-| `data/decisions.yaml` | Human judgements with a reason each: categories, cross-listings, sentinels, guards, search vocabulary |
-| `data/build/` | `catalog.json` (what the service serves) and `ingest-report.json`. Committed, so a new export is a diff |
-| `agent/system-prompt.md` | The agent's prompt, field by field as the platform takes it, with a version history |
-| `evals/` | Level-1 tool cases, level-2 cases and recordings, simulation scenarios, ingest and MCP evals, reports |
-| `docs/adr/` | Architecture decisions (append-only) |
-| `docs/GOALS.yaml` | Every goal with its threshold, command and artefact, sealed by `docs/thresholds.lock` |
-| `docs/PLATFORM.md` | How the agent is configured on the platform, and the model comparison |
-| `docs/JOURNAL.md` | Engineering journal: what was tried, measured, kept and discarded, block by block |
-| `scripts/` | Spec lint, secrets check, coverage summary, remote checks, scale probe, raw CSV audit |
+| Linguaggio e runtime | Python 3.13 (fissato in `.python-version`), [uv](https://docs.astral.sh/uv/) per le dipendenze, versioni esatte (`==`) |
+| Servizio | FastAPI e Pydantic, servito da Uvicorn |
+| MCP | MCP Python SDK 2.3.0, trasporto Streamable HTTP, senza stato |
+| Qualità | pytest + hypothesis (test di proprietà), ruff, mypy strict, tiktoken (`o200k_base`) per misurare le risposte in token, detect-secrets |
+| Deploy | Docker (immagine non-root con il suo health check), Coolify su un VPS Contabo, Traefik con Let's Encrypt via sslip.io; un push su `main` rifà il deploy |
+| Agente | Piattaforma indigo.ai: Gift finder su **gpt-5.6-luna**, agenti General e Jailbreak, Security layer, widget della web chat |
+| Eval di livello 2 | Ollama con **gemma4:26b**, in locale, temperatura 0, ogni risposta registrata |
 
-## Architecture
+## Come funziona
 
+```mermaid
+flowchart LR
+    shopper(["Cliente"]) --> widget["Landing Ribbon #amp; Co.<br/>widget della web chat"]
+    widget --> route{{"Instradamento indigo.ai<br/>+ Security layer (Shadow)"}}
+    route -->|richiesta di regalo| gift["Agente Gift finder<br/>gpt-5.6-luna · prompt v10"]
+    route -->|fuori tema| general["Agente General<br/>senza tool"]
+    route -->|jailbreak| jail["Agente Jailbreak"]
+    gift -->|Tool Collection| rest["REST<br/>/openapi.json"]
+    gift -.->|oppure| mcp["MCP<br/>/mcp"]
+    subgraph service["Catalog Service · FastAPI · Docker su Coolify"]
+        rest --> exec["service.execute()<br/>4 tool definiti una volta in tools.py"]
+        mcp --> exec
+        exec --> mem[("Catalogo in memoria<br/>data/build/catalog.json")]
+    end
+    csv["Export CSV del cliente"] --> ingest["make ingest<br/>regole + controlli"]
+    decisions["data/decisions.yaml<br/>giudizi umani"] --> ingest
+    ingest -->|"catalog.json + report<br/>(nel repo e nell'immagine)"| mem
+    ingest -.->|anomalia non spiegata| stop["Si ferma: exit 1<br/>resta il catalogo precedente"]
 ```
- client CSV ──┐
-              ├─ make ingest ──► data/build/catalog.json ──► (image) ──► Catalog in memory
- decisions ───┘   rules + guards     + ingest-report.json                      │
-                  stop on anything                                             ▼
-                  not explained                                service.execute(tool, args)
-                                                                 ▲                   ▲
-                               tools.py ──► OpenAPI (REST) ──────┘                   │
-                                   └──────► MCP tool list (/mcp) ────────────────────┘
-```
 
-**One service, one tool definition, two transports.** `tools.py` holds each tool's name,
-descriptions and parameters once. The OpenAPI document and the MCP tool list are both generated
-from it, and every REST route and every MCP `tools/call` goes through `service.execute`.
-Decided: generate both from one source, because two hand-written copies of a tool description
-drift, and the model's behaviour depends on every word of it. `make eval-mcp` checks that MCP
-returns the same bytes as REST on every level-1 case (ADR-002, ADR-008).
+- **Una sola definizione dei tool, due trasporti.** `tools.py` contiene una volta sola nome,
+  descrizioni e parametri di ogni tool. Il documento OpenAPI e la lista di tool MCP si generano
+  da lì, e ogni rotta REST e ogni `tools/call` MCP passa da `service.execute`. Decisione:
+  generarli da un'unica fonte, perché due copie scritte a mano divergono, e il comportamento del
+  modello dipende da ogni parola della descrizione. `make eval-mcp` verifica che MCP restituisca
+  lo stesso risultato di REST su ogni caso di livello 1 (ADR-002, ADR-008).
+- **L'ingest è l'unico codice che legge il CSV** (ADR-001, ADR-009). Tutto ciò che non sa
+  spiegare lo ferma, e resta in servizio il catalogo precedente.
+- **Snapshot in memoria** (ADR-004). All'avvio il servizio carica `catalog.json` (152 schede, 150
+  prodotti) e risponde dalla memoria; il p95 della ricerca è 0,20 ms in processo. La ricerca è
+  una scansione lineare: un catalogo sintetico ×100 ha dato 35–39 ms di p95 e 64 MB. Decisione:
+  nessun database, perché a questa scala aggiunge un componente senza un guadagno misurabile. Il
+  vero limite è la freschezza dello stock: è aggiornato quanto l'ultimo export. Ogni risposta
+  porta `meta.catalog_version`, così ogni risposta si può ricondurre all'export da cui viene.
 
-**The ingest is the only code that reads the CSV** (ADR-001, ADR-009). General rules live in
-code with tests (trim, case, `and` → `&`, empty means missing, never zero). One-off judgements
-live in `data/decisions.yaml`, each with its reason (11 categories, two cross-listed products,
-stock 999 = unlimited gift card, the search vocabulary). Anything else stops the ingest with a
-named code and keeps the previous catalogue: unknown category, duplicate ID, invalid value,
-instruction-like product copy, wrong schema, non-UTF-8 or empty file, ragged row, mass removal
-or mass price change. Each export is a full snapshot, diffed against the current catalogue, and
-the output is byte-identical for the same inputs.
+## Tool pensati per un LLM
 
-**In-memory snapshot** (ADR-004). The service loads `catalog.json` (152 listings, 150 products)
-at startup and answers from memory; search p95 is 0.20 ms in process. Search is a linear scan:
-a ×100 synthetic catalogue measured 35–39 ms p95 and 64 MB. Decided: no database, because at
-this size it adds a component and no measurable gain. The real weakness is stock freshness:
-stock is as fresh as the last export. Every response carries `meta.catalog_version`, so any
-answer traces back to the export behind it.
+La piattaforma trasforma ogni operazione OpenAPI in un tool, e il modello decide cosa chiamare
+**solo da nomi e descrizioni**. Le descrizioni sono quindi l'interfaccia. Le risposte sono
+scritte per un modello che non deve inventare nulla (ADR-002).
 
-## Tool design for an LLM
+### Quattro tool, un compito ciascuno
 
-The platform turns each OpenAPI operation into a tool, and the model decides what to call
-**from the names and descriptions alone**. So the descriptions are the interface, and the
-responses are written to be read by a model that must not invent anything (ADR-002).
-
-### Four tools, one job each
-
-| Tool | Route | Job |
+| Tool | Rotta | Compito |
 |---|---|---|
-| `get_categories` | `GET /categories` | What the shop sells: categories, subcategories, counts, price ranges, allowed filter values |
-| `get_products_by_category` | `GET /categories/{category}/products` | Browse one category the shopper named |
-| `search_products` | `GET /products/search` | Find products across the catalogue from a description |
-| `get_product_details` | `GET /products/{product_id}` | Everything about one product, including caveats and in-stock alternatives |
+| `get_categories` | `GET /categories` | Cosa vende il negozio: categorie, sottocategorie, conteggi, fasce di prezzo, valori ammessi nei filtri |
+| `get_products_by_category` | `GET /categories/{category}/products` | Sfogliare una categoria nominata dal cliente |
+| `search_products` | `GET /products/search` | Trovare prodotti in tutto il catalogo partendo da una descrizione |
+| `get_product_details` | `GET /products/{product_id}` | Tutto su un prodotto, avvertenze e alternative disponibili comprese |
 
-The brief requires the first, second and fourth. Decided: add `search_products`, because a
-100-conversation stress test (671 shopper messages in English, Spanish and Italian) showed that most requests
-name a kind of product, a hobby or a brand, not a category. Search takes no `category`
-parameter on purpose, so the model never chooses between two tools that do the same thing.
-Rejected, with reasons in ADR-002: similar-products, batch details, shop policies (there is no
-policy data, and a tool would invite the model to fill the gap), `recommend_gift` (that is the
-agent's job and it would hide the reasoning), and a "guard" tool for injection (it only runs if
-the manipulated model chooses to call it).
+La consegna chiede il primo, il secondo e il quarto. Decisione: aggiungere `search_products`,
+perché uno stress test di 100 conversazioni (671 messaggi in inglese, spagnolo e italiano) ha
+mostrato che quasi tutte le richieste nominano un tipo di prodotto, un hobby o una marca, non una
+categoria. La ricerca non ha di proposito un parametro `category`: così il modello non deve mai
+scegliere tra due tool che fanno la stessa cosa.
 
-Shared filters: price range, `recipient` (one or several, `her,couple`), `occasion`,
-`max_shipping_days`, `exclude` (words matched in name, subcategory, tags and material, never the
-description), `include_out_of_stock`, `sort`, `limit` (1–10, default 5) and `offset`.
+Filtri comuni: fascia di prezzo, `recipient` (uno o più, `her,couple`), `occasion`,
+`max_shipping_days`, `exclude` (parole cercate in nome, sottocategoria, tag e materiale, mai
+nella descrizione), `include_out_of_stock`, `sort`, `limit` (1–10, default 5) e `offset`.
 
-### What a response tells the model
+<details>
+<summary>Tool valutati e scartati</summary>
 
-A list item carries everything a recommendation needs without a second call: price,
-availability, rating and review count, recipient, occasions, shipping days, gift wrap and the
-shop's own description, where the caveats live ("needs an amplifier"). Optional blocks appear
-only when they carry information:
+Con le ragioni in ADR-002: prodotti simili, dettagli in blocco, politiche del negozio (non ci
+sono dati sulle politiche, e un tool inviterebbe il modello a riempire il vuoto),
+`recommend_gift` (è il lavoro dell'agente, e nasconderebbe il ragionamento) e un tool di
+"guardia" contro le injection (verrebbe eseguito solo se il modello manipolato decidesse di
+chiamarlo).
 
-| Block | Answers |
+</details>
+
+### Cosa dice una risposta al modello
+
+Ogni elemento della lista contiene tutto ciò che serve per consigliarlo, senza una seconda
+chiamata: prezzo, disponibilità, valutazione e numero di recensioni, destinatario, occasioni,
+giorni di spedizione, confezione regalo e la descrizione del negozio, dove stanno le avvertenze
+("richiede un amplificatore"). I blocchi opzionali compaiono solo quando portano informazione:
+
+| Blocco | Risponde a |
 |---|---|
-| `out_of_stock_matches` | "Do you have the City Map jigsaw?" It exists but is out of stock, so the agent never says the shop does not sell it |
-| `in_stock_alternatives` (details) | What to offer instead of an out-of-stock product: same subcategory first, closest in price |
-| `over_budget_matches` | "A chef's knife under €100": the only one costs €149. Better matches above the budget, with `over_by_eur` |
-| `unmatched_terms` | "Sony headphones": the shop does not carry Sony, so the agent says so, then offers the closest |
-| `missing_terms` | Per product, the query words its record does not mention. The plain notebook for "leather notebook" says `["leather"]` |
-| `suggestions` | When results are few: the filter change that adds results, e.g. `max_price` → 149 adds 3. An exclusion is never suggested for removal |
-| `meta` | `total_matches`, `returned`, `next_offset` for "show me more", the filters applied, today's date, catalogue version |
+| `missing_terms` | Per ogni prodotto, le parole della richiesta che la sua scheda non menziona. Il quaderno semplice per "leather notebook" dice `["leather"]` |
+| `over_budget_matches` | "Un coltello da chef sotto i 100 €": l'unico costa 149 €. Risultati migliori oltre il budget, con `over_by_eur` |
+| `out_of_stock_matches` | "Avete il puzzle City Map?" Esiste ma è esaurito, quindi l'agente non dice mai che il negozio non lo vende |
+| `in_stock_alternatives` (dettagli) | Cosa offrire al posto di un prodotto esaurito: prima la stessa sottocategoria, poi il prezzo più vicino |
+| `unmatched_terms` | "Cuffie Sony": il negozio non tratta Sony, l'agente lo dice e propone la cosa più vicina |
+| `suggestions` | Con pochi risultati: il cambio di filtro che ne aggiunge, ad esempio `max_price` → 149 ne aggiunge 3. Solo cambi che conservano il senso della richiesta: mai togliere un'esclusione o il destinatario (ADR-011) |
+| `meta` | `total_matches`, `returned`, `next_offset` per "mostrami altro", filtri applicati, data di oggi, versione del catalogo |
 
-An empty result is a 200 with `total_matches: 0` and suggestions, not an error. Page size is
-measured in tokens (`o200k_base`) on every level-1 case, against limits of 1,150 (default page)
-and 1,800 (10 items); see *Measured*.
+Un risultato vuoto è un 200 con `total_matches: 0` e dei suggerimenti, non un errore. **Budget di
+token:** ogni risposta di livello 1 viene misurata in token (`o200k_base`). La più grande è di
+621 con la pagina di default e di 1.045 con 10 elementi, contro limiti sigillati di 1.150 e
+1.800.
 
-### Tolerant inputs, recoverable errors
+### Input tolleranti, errori recuperabili
 
-The server resolves what it can and says so in a `note`: a category by slug, name in any
-spelling or one word ("kitchen"); a product ID as `kd-7`, `KD7` or `kd-007`; closed-set values
-in any case (`HER`, `Birthday`); a `limit` above 10 clamped. Decided: tolerate these, because a
-model that capitalises a value should not pay a round trip for it. What cannot be resolved is a
-4xx with one shape:
+Il server risolve quello che può e lo segnala in una `note`: una categoria per slug, per nome in
+qualsiasi grafia o per una sola parola ("kitchen"); un ID prodotto come `kd-7`, `KD7` o `kd-007`;
+valori di insiemi chiusi in maiuscolo o minuscolo (`HER`, `Birthday`); un `limit` oltre 10 viene
+ridotto. Decisione: tollerarli, perché un modello che scrive un valore in maiuscolo non deve
+pagarlo con un'altra chiamata. Ciò che non si può risolvere è un 4xx sempre con la stessa forma,
+che dice al modello come correggere la chiamata:
 
 ```json
 {"error": {"code": "unknown_category",
@@ -151,275 +160,404 @@ model that capitalises a value should not pay a round trip for it. What cannot b
            "allowed_values": ["beauty-wellness", "..."], "did_you_mean": ["home-living"]}}
 ```
 
-Strict where strictness informs: `nan`, `inf` and `min_price > max_price` are 400s with a hint.
-An inverted range used to return an empty 200, which a model reads as "the shop has nothing".
+Rigido dove la rigidità informa: `nan`, `inf` e `min_price > max_price` sono 400 con un
+suggerimento. Prima un intervallo invertito restituiva un 200 vuoto, che un modello legge come
+"il negozio non ha niente".
 
-### Search, deterministic
+<details>
+<summary>Ricerca: deterministica, nessun modello nel ciclo</summary>
 
-Keyword scoring, called that, with no model in the loop (ADR-003, ADR-005, ADR-006, ADR-007).
-Strong fields say what a product is (name, subcategory, tags, occasions, brand); weak fields
-describe it (material, colour, description). Results order by coverage of the query in strong
-fields, then any coverage, then word rarity, then rating. In a multi-word query the last
-specific word names the product ("leather *notebook*"), so a leather watch strap is not
-listed. A small, reviewed vocabulary in `decisions.yaml` maps shopper words to catalogue words
-("noise cancelling" → `anc`, "kindle" → e-reader). Ranking was frozen after three human
-reviews. What words cannot settle (open-ear buds are not noise cancelling) is left to the agent,
-which sees `missing_terms` for exactly that reason.
+Punteggio per parole chiave, e lo chiamiamo così (ADR-003, ADR-005, ADR-006, ADR-007, ADR-010,
+ADR-011). I campi forti dicono cos'è un prodotto (nome, sottocategoria, tag, occasioni, marca);
+quelli deboli lo descrivono (materiale, colore, descrizione). I risultati si ordinano per
+copertura della richiesta nei campi forti, poi per copertura in qualsiasi campo, poi per rarità
+delle parole, poi per valutazione.
 
-### What the platform taught us
+- In una richiesta di più parole, l'ultima parola specifica nomina il prodotto ("leather
+  *notebook*"), quindi un cinturino da orologio in pelle non compare. Se nessun prodotto ha
+  quella parola in un campo forte, la ricerca si restringe ai prodotti che l'hanno in uno
+  qualsiasi dei loro campi ("travel pillow").
+- Un piccolo vocabolario rivisto in `decisions.yaml` traduce le parole del cliente in quelle del
+  catalogo ("noise cancelling" → `anc`, "kindle" → e-reader, `cooking` ↔ `kitchen`). I prodotti
+  per animali hanno il loro destinatario, così un gioco per cani non risponde a "giocattolo per
+  bambini".
+- Il ranking è stato congelato dopo tre revisioni umane dei casi di livello 1. Ciò che le parole
+  non possono decidere (gli auricolari open-ear non hanno la cancellazione del rumore) resta
+  all'agente, che per questo vede `missing_terms`.
 
-Found on screen, acted on, recorded in `docs/PLATFORM.md`:
+</details>
 
-- **The platform reads `summary`, not `description`.** The first import gave the model
-  one-line summaries. The served spec now puts the full text in both, so a fresh import needs no
-  hand edits.
-- **An enum can stop the model from searching.** Asked for "the garden category", the model
-  picked the nearest enum value (`outdoor-travel`). The browse tool now tells it to search when
-  the shopper's word is not a category.
-- **4xx bodies reach the model.** Asked for "lamps", the agent got the 404 and called again with
-  `Lighting`, the subcategory the error names.
-- The served spec is OpenAPI 3.0.3 with every schema and enum inline (no `$ref`, `oneOf`), so
-  the platform's form editor can still edit each operation. `make spec-lint` enforces it.
+## L'agente
 
-## The agent
+### Configurazione sulla piattaforma
 
-### Platform setup
-
-| Piece | Configuration |
+| Pezzo | Configurazione |
 |---|---|
-| **Gift finder** | The only agent with tools. Prompt fields from `agent/system-prompt.md`. Model gpt-5.6-luna (EU), reasoning Low, creativity Low, short memory 20 messages, all tool calls kept in memory, 600 answer tokens |
-| **General** | The platform's fallback agent, no tools: small talk, weather, returns, payments, tracking. Never invents a policy, never names products, steers back to the gift |
-| **Jailbreak agent** | Receives jailbreak attempts routed by the Security layer |
-| **Security layer** | On, in **Shadow** mode: it classifies and records every message, blocks nothing yet |
-| **Tools** | One Tool Collection from `/openapi.json`, header `X-API-Key: [[CATALOG_API_KEY]]` from a workspace secret |
+| **Gift finder** | L'unico agente con tool. Campi del prompt da [`agent/system-prompt.md`](agent/system-prompt.md) (v10). gpt-5.6-luna (EU), reasoning Low, creatività Low, memoria breve di 20 messaggi, tutte le chiamate ai tool in memoria, 600 token di risposta |
+| **General** | L'agente di fallback della piattaforma, senza tool: chiacchiere, meteo, resi, pagamenti, tracciamento. Non inventa mai una politica, non nomina prodotti, riporta la conversazione al regalo |
+| **Agente Jailbreak** | Riceve i tentativi di jailbreak instradati dal Security layer |
+| **Security layer** | Attivo, in modalità **Shadow**: classifica e registra ogni messaggio, per ora non blocca nulla |
+| **Tool** | Una Tool Collection da `/openapi.json`, con header `X-API-Key: [[CATALOG_API_KEY]]` da un secret del workspace. Anche il server MCP è stato collegato e provato da capo a fondo in Preview; l'agente gira su REST |
 
-Decided: Shadow before Enforce, because Enforce on "out of scope" can block a mixed message that
-also holds a real gift request, and the false positives should be read first. The platform's
-Hallucination guardrail is not available in this workspace; the prompt rule "every product fact
-comes from a tool call" covers that risk, and level 2 measures it.
+Decisione: prima Shadow, poi Enforce, perché Enforce su "fuori tema" può bloccare un messaggio
+misto che contiene anche una vera richiesta di regalo, e i falsi positivi vanno letti prima. Il
+guardrail Hallucination della piattaforma non è disponibile in questo workspace; copre quel
+rischio la regola del prompt "ogni dato di prodotto viene da una chiamata a un tool", che il
+livello 2 misura.
 
-### Model choice, by controlled comparison
+### Design della conversazione
 
-gpt-4.1-mini padded answers and misread results ("nothing under 80" beside a 78-euro match),
-and no prompt rule fixed it. Five models then ran the same nine scenarios with everything else
-fixed; a public benchmark (τ²-Bench Airline) chose which to try, the scenarios decided.
-**gpt-5.6-luna** passed the core six after reading every Fail, flagged over-budget items with
-the gap and kept the shopper's language, at half gpt-4.1-mini's price. Two models ranked higher
-by the benchmark failed here (wrong language; raw tool-call tokens in the chat). Full table:
-`docs/PLATFORM.md`.
+Il prompt è scritto nei campi della piattaforma: descrizione, obiettivo, tono, dieci regole
+generali e cinque sezioni (fare domande, formato delle raccomandazioni, uso del catalogo, lettura
+dei risultati, fuori dal negozio). Le regole che danno forma alla conversazione:
 
-### Conversation design
+- **Al massimo una domanda per messaggio, e al massimo due prima di mostrare prodotti.** Appena
+  si conosce la persona, un budget o un tipo di prodotto, l'agente cerca e mostra, poi chiede. A
+  un vago "mi serve un regalo" risponde con una sola domanda leggera: per chi è, e più o meno
+  quanto vuoi spendere?
+- **Fino a tre prodotti per messaggio**, il migliore per primo, in una lista numerata con una
+  riga per prodotto: `1. **Nome** · €prezzo · di solito spedito in N giorni — un motivo legato a
+  ciò che ha detto il cliente`. "Ne restano solo N" quando lo stock è basso, poi un breve passo
+  successivo. Decisione: una lista, perché il widget univa i blocchi di due righe comunque si
+  mettessero le righe vuote, e i numeri permettono al cliente di dire "il secondo".
+- **Ogni dato di prodotto viene da una chiamata a un tool.** Se cambia una condizione, l'agente
+  cerca di nuovo; prima di dire che il negozio ha o non ha qualcosa, lo cerca.
+- **Risponde nella lingua dell'ultimo messaggio del cliente**; le query ai tool restano in
+  inglese, con le parole del catalogo.
+- **Non garantisce mai la consegna.** I giorni di spedizione sono una stima del negozio: "di
+  solito spedito in 3 giorni".
+- **Legge i blocchi:** "esaurito", mai "non lo vendiamo"; di quanto un prodotto gradito supera il
+  budget (il budget è la cifra detta dal cliente); dice chiaramente quando il negozio non tratta
+  una marca; "mostrami altro" pagina con `offset` e gli stessi filtri, e non alza mai il budget
+  di sua iniziativa.
+- **Non conferma mai una proprietà che la scheda non riporta.** A "è sicuramente vegano?"
+  risponde "il catalogo non dice se è vegano", poi indica i materiali.
 
-The prompt (v10) is written in the platform's fields: description, goal, tone, ten general rules
-and five sections (asking questions, recommendation format, using the catalogue, reading the
-results, outside the shop). The rules that shape a conversation:
+### Messaggi fuori tema e tentativi di manipolazione
 
-- **At most one question per message, and at most two before showing products.** As soon as
-  the person, a budget or a kind of product is known, search and show, then ask. A vague
-  "I need a gift" gets one light question: who is it for, and roughly how much?
-- **Up to three products per message**, best first, as a numbered list with one line per
-  product: `1. **Name** · €price · usually ships in N days — one reason tied to what the shopper
-  said`. "Only N left" when stock is low. One short next step after the list. Decided: a list,
-  because the widget's rendering ran two-line blocks together however the blank lines were
-  placed (prompt v5 on the platform), and numbers let the shopper say "the second one".
-- **Every product fact comes from a tool call.** Search again whenever a condition changes.
-  Before saying the shop has or lacks something, search for it.
-- **Reply in the language of the shopper's last message**; tool queries stay in English
-  catalogue words.
-- **Never guarantee delivery.** Shipping days are the shop's estimate: "usually ships in 3 days".
-- **Read the blocks:** say "out of stock", never "we don't sell it"; state how far over budget a
-  liked item is; say plainly when the shop does not carry a brand; "show me more" pages with
-  `offset` and the same filters, and never raises the budget on its own.
+A strati, e nessuno dipende dal fatto che il modello scelga di proteggersi:
 
-### Off-topic and adversarial turns
+1. **Prima del modello:** il Security layer classifica ogni messaggio; i tentativi di jailbreak
+   vanno all'agente Jailbreak, le richieste fuori ambito a General.
+2. **Nel prompt:** a meteo o codice risponde con una frase e una domanda che torna al regalo.
+   Resi, pagamenti, sconti e tracciamento: "non ho informazioni su questo", un rimando al servizio
+   clienti, nessuna supposizione. Ignora i cambi di ruolo e le richieste di rivelare le
+   istruzioni. "Avete gli AirPods?" è una domanda sul negozio: si cerca, non si rifiuta.
+3. **Nel servizio:** i tool leggono solo dati pubblici del catalogo, quindi un'injection riuscita
+   può leggere solo ciò che è già pubblico. Un testo di prodotto che sembra un'istruzione ferma
+   l'ingest (`instruction_like_text`); il confronto avviene su testo normalizzato, così i
+   caratteri a larghezza zero non lo nascondono.
 
-Layered, with nothing that depends on the model choosing to protect itself:
+Il livello 2 misura il secondo strato: nessuno dei 36 casi fuori tema chiama un tool del
+catalogo.
 
-1. **Before the model:** the Security layer classifies each message; jailbreak attempts go to
-   the Jailbreak agent, out-of-scope requests to General.
-2. **In the prompt:** weather or code gets one sentence and a question back to the gift.
-   Returns, payments, discounts and tracking: "I have no information on that", a pointer to
-   customer service, no guessing. Role changes and requests for the instructions are ignored.
-   "Do you have AirPods?" is a shop question, so it is searched, not declined.
-3. **In the service:** the tools only read public catalogue data, so a successful injection can
-   only read what is already public. Product copy that reads like an instruction stops the
-   ingest (`instruction_like_text`), matched on folded text so zero-width characters do not hide
-   it.
+<details>
+<summary>Scelta del modello, con un confronto controllato</summary>
 
-Level 2 measures the second layer: none of the 36 off-topic cases calls a catalogue tool.
+gpt-4.1-mini allungava le risposte e leggeva male i risultati ("niente sotto gli 80" accanto a un
+prodotto da 78 €), e nessuna regola del prompt lo ha corretto. Cinque modelli hanno poi eseguito
+gli stessi nove scenari, con tutto il resto fisso: un benchmark pubblico (τ²-Bench Airline) ha
+scelto quali provare, gli scenari hanno deciso. **gpt-5.6-luna** ha superato i sei scenari core
+dopo la lettura di ogni Fail, ha segnalato i prodotti fuori budget con la differenza e ha
+mantenuto la lingua del cliente, a metà del prezzo di gpt-4.1-mini. Due modelli meglio
+classificati dal benchmark qui hanno fallito (lingua sbagliata; token grezzi di chiamate ai tool
+nella chat). Tabella completa in [`docs/PLATFORM.md`](docs/PLATFORM.md).
 
-## Evaluation
+</details>
 
-Test ≠ eval. Tests pin code behaviour and must always pass (`make gate-fast`). Evals measure
-quality against a threshold, each with its command and artefact in `docs/GOALS.yaml`. TDD was
-mandatory in `domain` and `ingest`; the API layer is contract-tested, including a snapshot of
-the served OpenAPI and a check that the route parameters match the spec.
+## Dati: pulizia e sicurezza dei nuovi export
 
-- **Level 1, the tools (deterministic).** Cases across the four tools: arguments → exact product
-  IDs, blocks and errors, run over HTTP. Expectations come from an independent reference
-  implementation (`evals/golden/l1/oracle.py`, stdlib only). The owner then reviewed every case
-  as a shop assistant would, in three rounds (`evals/golden/l1/review-v*.md`); the comments
-  drove ADR-005 to ADR-007, and held-out cases were registered before each round of rules.
-- **Level 2, sentence → tool and arguments, with a real model.** 150 cases (36 off-topic), each a
-  conversation so far plus the latest message. The model reads only the served spec and the
-  prompt, through function calling. It runs on Gemma 4 26B locally (the platform offers
-  gemma-4-26b), temperature 0, and every response is recorded so the numbers re-score offline
-  with no model and no key.
-- **Level 3, conversations: the platform's Simulations.** 15 scenarios in
-  `evals/simulations/scenarios.csv`: the brief's six (`core`), three more (`extra`) and six
-  built from the tools' real output (`extended`). The judge sees the conversation, not the
-  catalogue, so criteria judge behaviour and treat a fact as wrong only when it contradicts the
-  reference. Every Fail is then read against the catalogue before a result is recorded; the
-  table gives both numbers.
+L'export del cliente (`data/gift-shop-catalog.csv`, 152 righe) non si modifica mai. `make ingest`
+lo trasforma nel catalogo servito (ADR-001, ADR-009):
 
-**G-L2-TOOL sat below its threshold for most of the project, and the threshold was not lowered.** Tool choice on the local model:
-prompt v3 87.3%, v4 81.3%, v5 88.0%, v6 88.7%, v7 87.3%, v8 90.0%, v9 88.7%, v10 85.3%, against ≥ 90%. v8
-met it exactly and the next two fell back below; changes that did not touch tool choice moved this number by up
-to 6.7 points, so it reads as "about 85–90% on this local model", and the goal stays not met. Most misses are the model answering from
-earlier messages instead of calling a tool. Decided: keep 90%, because lowering it after the
-fact would move the goalpost, and tuning the prompt further for a model that is not in
-production would optimise the wrong thing. The production model passes the core scenarios. The
-6.7-point swing from a layout-only change (v4 → v5) is recorded as this model's sensitivity to
-wording, not claimed as an improvement.
+- **Le regole generali stanno nel codice, con i test:** spazi, maiuscole, `and` → `&`, vuoto
+  significa mancante (mai zero).
+- **I giudizi puntuali stanno in [`data/decisions.yaml`](data/decisions.yaml)**, ognuno con il
+  suo motivo: 11 categorie, due prodotti in doppia categoria, stock 999 = buono regalo illimitato,
+  il vocabolario di ricerca.
+- **Tutto il resto ferma l'ingest** con un codice preciso e mantiene il catalogo precedente:
+  categoria sconosciuta, ID duplicato, valore non valido, testo di prodotto che sembra
+  un'istruzione, schema errato, file non UTF-8 o vuoto, riga con colonne in più o in meno, oltre
+  il 20% dei prodotti rimossi, più della metà con prezzo o stock cambiati in un colpo solo. Un
+  cambio massivo legittimo (i saldi) si accetta per un solo file, identificato dal suo sha256.
+- **Ogni export è una fotografia completa**, confrontata con il catalogo attuale, e a parità di
+  input l'output è identico byte per byte. `data/build/` è nel repo, quindi un nuovo export è un
+  diff rivisto, un commit e un nuovo deploy.
 
-### Measured
+Diciassette anomalie seminate (una colonna di prezzo duplicata, UTF-16, una riga sbilanciata, uno
+spazio a larghezza zero dentro "Ignore previous instructions", un cambio di prezzi massivo…)
+fermano ciascuna l'ingest con il proprio codice esatto: 17/17.
 
-All numbers below are the latest run of each command. Reports are in `evals/reports/`.
+## Valutazione
 
-| Metric | Value | Threshold | n | Command | Artefact |
+Test ≠ eval. I test fissano il comportamento del codice e devono passare sempre (`make
+gate-fast`). Le eval misurano la qualità rispetto a una soglia, ciascuna con il suo comando e il
+suo artefatto in [`docs/GOALS.yaml`](docs/GOALS.yaml), sigillato da un lock sha256. `make done
+F=3` legge ogni artefatto e lo confronta con la sua soglia.
+
+```mermaid
+flowchart LR
+    tests["Test<br/>TDD in domain + ingest<br/>contratto OpenAPI"] --> done{{"make done F=3<br/>19 obiettivi sigillati"}}
+    l1["Livello 1 · tool<br/>81 casi, ID esatti<br/>deterministico"] --> done
+    l2["Livello 2 · frase → tool + argomenti<br/>150 casi, gemma4:26b<br/>registrato e riproducibile"] --> done
+    l3["Livello 3 · Simulations della piattaforma<br/>15 scenari, gpt-5.6-luna<br/>ogni Fail riletto"] --> done
+```
+
+<details>
+<summary>Cosa fa ogni livello</summary>
+
+- **Test.** TDD obbligatorio in `domain` e `ingest`; lo strato API è testato sul contratto, con
+  uno snapshot della OpenAPI servita e un controllo che i parametri delle rotte coincidano con la
+  specifica.
+- **Livello 1, i tool (deterministico).** Argomenti → ID di prodotto esatti, blocchi ed errori,
+  eseguiti via HTTP. I risultati attesi vengono da un'implementazione di riferimento indipendente
+  (`evals/golden/l1/oracle.py`, solo libreria standard). Poi il titolare ha rivisto i casi come
+  farebbe un commesso, in più round (`evals/golden/l1/review-v*.md`); i suoi commenti hanno
+  portato agli ADR da 005 a 007 e all'ADR-011, e prima di ogni round di regole sono stati
+  registrati casi di controllo esclusi dallo sviluppo.
+- **Livello 2, frase → tool e argomenti, con un modello reale.** 150 casi (36 fuori tema),
+  ciascuno con la conversazione fin lì e l'ultimo messaggio. Il modello legge solo la specifica
+  servita e il prompt, tramite function calling. Gira in locale su Gemma 4 26B (la piattaforma
+  offre gemma-4-26b), a temperatura 0, e ogni risposta viene registrata: i numeri si ricalcolano
+  offline, senza modello e senza chiave.
+- **Livello 3, conversazioni: le Simulations della piattaforma.** 15 scenari in
+  [`evals/simulations/scenarios.csv`](evals/simulations/scenarios.csv): i sei della consegna
+  (`core`), altri tre (`extra`) e sei costruiti sull'output reale dei tool (`extended`). Il
+  giudice vede la conversazione ma non il catalogo, quindi i criteri giudicano il comportamento e
+  considerano sbagliato un dato solo se contraddice il riferimento. Ogni Fail viene riletto contro
+  il catalogo prima di registrare il risultato, e la tabella riporta entrambi i verdetti.
+
+</details>
+
+### Misurato
+
+L'ultima esecuzione di ogni comando. I report sono in [`evals/reports/`](evals/reports/).
+
+| Metrica | Valore | Soglia | n | Comando | Artefatto |
 |---|---|---|---|---|---|
-| Unit and contract tests | 522 passed | all | 522 | `make test` | — |
-| Line coverage, domain + ingest | 99.77% | ≥ 85% | 864 lines | `make test` | `coverage-latest.json` |
-| Layer violations (domain ↛ api/mcp, api ↮ mcp) | 0 | 0 | — | `make test` | `arch-latest.json` |
-| Data endpoints rejecting a missing, wrong or empty key | 12/12 | all | 12 | `make test` | `auth-latest.json` |
-| Level 1: exact product IDs | 81/81 | all | 81 | `make eval-l1` | `l1-latest.json` |
-| Level 1: largest response, default / max page | 621 / 1,045 tokens | ≤ 1,150 / 1,800 | 81 | `make eval-l1` | `l1-latest.json` |
-| Level 1: cases approved by the owner | 60 approved, 3 deferred to level 2, 18 pending | — | 81 | review sheet | `evals/golden/l1/REVIEW.md` |
-| Level 2: right tool (gemma4:26b, prompt v10) | 85.3% | ≥ 90% (**not met**; see the note on noise) | 150 | `make eval-l2` | `l2-latest.json` |
-| Level 2: right arguments, given the right tool | 96.2% | ≥ 85% | 150 | `make eval-l2` | `l2-latest.json` |
-| Level 2: off-topic cases that call a tool | 0% | ≤ 5% | 36 | `make eval-l2` | `l2-latest.json` |
-| Level 2: replay mismatches | 0 | 0 | 150 | `make eval-l2` | `l2-latest.json` |
-| Simulations, core (gpt-5.6-luna), judge / after reading | 79% / 92% | 100% | 24 (4 runs × 6) | `make sim-report` | `simulations-latest.json` |
-| Simulations, extra, judge / after reading | 56% / 89% | — | 9 (3 runs × 3) | `make sim-report` | `simulations-latest.json` |
-| Simulations, extended, judge / after reading | 5/6 / 6/6 | — | 6 (1 run) | `make sim-report` | `simulations-latest.json` |
-| Ingest: client export, decisions pending | 0 | 0 | 152 rows | `make ingest` | `data/build/ingest-report.json` |
-| Ingest: seeded anomalies stopped exactly | 17/17 | all | 17 | `make eval-ingest` | `ingest-latest.json` |
-| MCP: same result as REST | 81/81 | all | 81 | `make eval-mcp` | `mcp-latest.json` |
-| MCP: protocol checks over Streamable HTTP | 16/16 | all | 16 | `make eval-mcp` | `mcp-latest.json` |
-| OpenAPI rule violations | 0 | 0 | — | `make spec-lint` | `spec-lint-latest.json` |
-| New secrets outside the reviewed baseline | 0 | 0 | — | `make secrets` | `secrets-latest.json` |
-| Deployed p95 latency, list and search | 193.4 ms over one reused connection (357.9–384.9 ms opening a new TLS connection per call) | ≤ 300 ms | 3 runs × 200 calls, 20 warm-up |  `make latency URL=…` | `latency-latest.json` |
-| Public checks from outside | 7/7 | all | 7 | `make check-public URL=…` | `public-latest.json` |
+| Test unitari e di contratto | 529 superati | tutti | 529 | `make test` | — |
+| Copertura di righe, domain + ingest | 99,77% | ≥ 85% | 872 istruzioni | `make test` | `coverage-latest.json` |
+| Violazioni di strato (domain ↛ api/mcp, api ↮ mcp) | 0 | 0 | — | `make test` | `arch-latest.json` |
+| Endpoint di dati che rifiutano una chiave assente, errata o vuota | 12/12 | tutti | 12 | `make test` | `auth-latest.json` |
+| Livello 1: ID di prodotto esatti (URL pubblico) | 81/81 | tutti | 81 | `make eval-l1` | `l1-latest.json` |
+| Livello 1: risposta più grande, pagina di default / massima | 621 / 1.045 token | ≤ 1.150 / 1.800 | 81 | `make eval-l1` | `l1-latest.json` |
+| Livello 1: casi rivisti dal titolare | 69 approvati, 6 rinviati, 6 in attesa (cambiati dall'ADR-011) | — | 81 | foglio di revisione | `evals/golden/l1/REVIEW.md` |
+| Livello 2: tool giusto (gemma4:26b, prompt v10) | 85,3% | ≥ 90% (**non raggiunto**, vedi sotto) | 150 | `make eval-l2` | `l2-latest.json` |
+| Livello 2: argomenti giusti, dato il tool giusto | 96,2% | ≥ 85% | 150 | `make eval-l2` | `l2-latest.json` |
+| Livello 2: casi fuori tema che chiamano un tool | 0% | ≤ 5% | 36 | `make eval-l2` | `l2-latest.json` |
+| Livello 2: differenze nel replay | 0 | 0 | 150 | `make eval-l2` | `l2-latest.json` |
+| Simulations, core (gpt-5.6-luna, prompt v10) | 6/6 | 100% | 6 (1 run) | `make sim-report` | `simulations-latest.json` |
+| Simulations, extended / extra (prompt v10) | 6/6 · 2/3 | — | 6 · 3 (1 run) | `make sim-report` | `simulations-latest.json` |
+| Simulations, prompt v8: core / extra / extended, dopo la lettura | 18/18 · 9/9 · 16/18 | — | 3 run | registrato per run | `evals/simulations/results.csv` |
+| Ingest: export del cliente, decisioni in sospeso | 0 | 0 | 152 righe | `make ingest` | `data/build/ingest-report.json` |
+| Ingest: anomalie seminate fermate con il codice esatto | 17/17 | tutte | 17 | `make eval-ingest` | `ingest-latest.json` |
+| MCP: stesso risultato di REST (in processo e URL pubblico) | 81/81 | tutti | 81 | `make eval-mcp` | `mcp-latest.json` |
+| MCP: controlli di protocollo su Streamable HTTP | 16/16 | tutti | 16 | `make eval-mcp` | `mcp-latest.json` |
+| Violazioni delle regole OpenAPI | 0 | 0 | — | `make spec-lint` | `spec-lint-latest.json` |
+| Nuovi segreti fuori dalla baseline rivista | 0 | 0 | — | `make secrets` | `secrets-latest.json` |
+| Latenza p95 in produzione, lista e ricerca | 193,4 ms su una connessione riutilizzata (357,9–384,9 ms aprendo una nuova connessione TLS a ogni chiamata) | ≤ 300 ms | 3 run × 200 chiamate, 20 di riscaldamento | `make latency URL=…` | `latency-latest.json` |
+| Controlli pubblici dall'esterno | 7/7 | tutti | 7 | `make check-public URL=…` | `public-latest.json` |
+| Definizione di fatto, fase 3 | 18/19 (fallisce solo G-L2-TOOL) | 19/19 | 19 obiettivi | `make done F=3` | — |
 
-Simulations are recorded per run in `evals/simulations/results.csv` with both verdicts; runs
-of the same model and agent version count together, so re-running cannot turn a result green.
-The numbers above are prompt v4 on gpt-5.6-luna. The only real core failures (one run) share one
-cause, vocabulary: "she likes cooking" found only the cookbook, and "tech gadgets" missed the
-speaker and the camera because category names were not searched. ADR-010 fixes both. Latency is measured over one reused connection, as a server-to-server client such as the
-platform calls; from the client machine a new TCP and TLS handshake per call adds about 115 ms
-(journal blocks 29–30).
+**G-L2-TOOL non è raggiunto, e la soglia non è stata abbassata.** Scelta del tool sul modello
+locale, per versione del prompt: v3 87,3%, v4 81,3%, v5 88,0%, v6 88,7%, v7 87,3%, v8 90,0%, v9
+88,7%, v10 85,3%, contro ≥ 90%. Nessuna di queste modifiche riguardava la scelta del tool,
+eppure il numero si è mosso fino a 6,7 punti (da v4 a v5 è cambiato solo il layout): va letto
+come "circa 85–90% su questo modello locale". Quasi tutti gli errori sono il modello che risponde
+dai messaggi precedenti invece di chiamare un tool. Decisione: tenere il 90%, perché abbassarlo a
+posteriori sposterebbe la porta, e rifinire il prompt per un modello che non è in produzione
+ottimizzerebbe la cosa sbagliata. Il modello di produzione supera gli scenari core.
 
-## Running it locally
+<details>
+<summary>Come si contano le Simulations, e cosa hanno trovato</summary>
 
-Requirements: [uv](https://docs.astral.sh/uv/) (Python 3.13 is pinned in `.python-version`).
-Level 2 refresh also needs Ollama with `gemma4:26b`; replaying the recordings does not.
+Ogni run è registrato in `evals/simulations/results.csv` con entrambi i verdetti (quello del
+giudice e quello dopo la lettura). I run dello stesso modello e della stessa versione
+dell'agente si contano insieme, così ripetere un run non può far diventare verde un risultato. I
+fallimenti reali, e cosa ha portato ciascuno:
+
+- **v4**, "le piace cucinare" trovava solo il libro di cucina, e "tech gadgets" non trovava la
+  cassa e la fotocamera: un buco di vocabolario, corretto nei dati (ADR-010).
+- **v7**, "budget sui 40": una candela da 42 € definita "entro il budget". v8: il budget è la
+  cifra detta dal cliente, e tutto ciò che la supera si segnala come fuori budget, con
+  l'importo.
+- **v8**, "è sicuramente vegano?" con risposta "Sì" in base ai materiali, e un gioco da festa
+  definito "chiaramente adatto ai bambini". v9 e v10: mai confermare ciò che la scheda non dice.
+- **v10**, extra-9: un prodotto da 52 € segnalato come esaurito senza dire che supera anche di 2 €
+  un budget "sui 50". Reale ma minore; qui si è smesso di iterare sul prompt, perché ogni riga in
+  più corregge una formulazione e ne rischia un'altra.
+
+La latenza si misura su una connessione riutilizzata, come fa un client server-to-server quale la
+piattaforma; dalla macchina del cliente, un nuovo handshake TCP e TLS a ogni chiamata aggiunge
+circa 115 ms.
+
+</details>
+
+## Cosa ci ha insegnato la piattaforma
+
+Visto a schermo, corretto e documentato in [`docs/PLATFORM.md`](docs/PLATFORM.md):
+
+- **La piattaforma importa il `summary` di un'operazione, non la sua `description`.** Il primo
+  import dava al modello riassunti di una riga. Ora la specifica servita mette il testo completo
+  in entrambi i campi, e un nuovo import non richiede modifiche a mano.
+- **Un enum può impedire al modello di cercare.** Alla richiesta "la categoria giardino", il
+  modello sceglieva il valore dell'enum più vicino (`outdoor-travel`). Ora il tool di navigazione
+  gli dice di cercare quando la parola del cliente non è una categoria.
+- **I corpi dei 4xx arrivano al modello.** Chiedendo "lampade", l'agente riceveva il 404 e
+  richiamava con `Lighting`, la sottocategoria indicata dall'errore.
+- **Il client MCP inviava il segnaposto del secret, non il suo valore.** Un log per richiesta su
+  `/mcp` (mai la chiave) mostrava una chiave di 19 caratteri: la lunghezza di
+  `[[CATALOG_API_KEY]]`. Nel sandbox si è aggirato scrivendo la chiave nell'header MCP; `/mcp`
+  accetta anche `Authorization: Bearer`.
+- **Il widget rifiuta l'URL di un'icona SVG** (si carica un PNG) e mostra la `&` del nome
+  dell'assistente come `Ribbon &amp; Co.`, per cui si chiama "Ribbon and Co.".
+- **Il Markdown del widget univa i blocchi prodotto di due righe**: da qui una riga numerata per
+  prodotto.
+- La specifica servita è OpenAPI 3.0.3, con ogni schema ed enum inline (niente `$ref`, niente
+  `oneOf`), così l'editor a form della piattaforma può ancora modificare ogni operazione. `make
+  spec-lint` lo garantisce.
+
+## Eseguirlo in locale
+
+Requisiti: [uv](https://docs.astral.sh/uv/) (Python 3.13 è fissato in `.python-version`). Per
+rigenerare il livello 2 serve anche Ollama con `gemma4:26b`; per rieseguire le registrazioni no.
 
 ```bash
 uv sync
-cp .env.example .env          # set CATALOG_API_KEY
+cp .env.example .env          # imposta CATALOG_API_KEY
 make run                      # http://localhost:8000
 curl -H "X-API-Key: $CATALOG_API_KEY" "localhost:8000/products/search?query=candle&max_price=40"
+make gate-fast                # lint, tipi e tutti i test
 ```
 
-| Variable | Required | Meaning |
+**Docker:** `docker build -t gift-shop-catalog . && docker run -p 8000:8000 -e
+CATALOG_API_KEY=change-me gift-shop-catalog`. L'immagine include il catalogo del repo (nessun
+passo di ingest), gira con un utente non-root e dichiara il suo health check.
+
+<details>
+<summary>Variabili d'ambiente</summary>
+
+| Variabile | Obbligatoria | Significato |
 |---|---|---|
-| `CATALOG_API_KEY` | yes | The key callers send in `X-API-Key`. The service refuses to start without one |
-| `WIDGET_TOKEN` | no | The platform's workspace token for the web chat on `/`. Without a valid one, the page renders without the chat |
-| `SHOP_TIMEZONE` | no | The zone for `meta.today`. Default `Europe/Rome` |
-| `CATALOG_URL` | no | Runs `make eval-l1` against a deployment instead of in process |
-| `TEST_PAGE_URL` | no | The agent's test page, checked by `make check-public` |
+| `CATALOG_API_KEY` | sì | La chiave che i client inviano in `X-API-Key`. Senza, il servizio non parte |
+| `WIDGET_TOKEN` | no | Il token del workspace della piattaforma per la web chat su `/`. Senza un token valido, la pagina si apre senza chat |
+| `SHOP_TIMEZONE` | no | Il fuso orario di `meta.today`. Default `Europe/Rome` |
+| `CATALOG_URL` | no | Esegue `make eval-l1` contro un deploy invece che in processo |
+| `TEST_PAGE_URL` | no | La pagina di test dell'agente, verificata da `make check-public` |
 
-| Target | What it does |
+</details>
+
+<details>
+<summary>Target del Makefile</summary>
+
+| Target | Cosa fa |
 |---|---|
-| `make gate-fast` | Lint, types and the full test suite: what must stay green after each change |
-| `make test` | pytest with the coverage, auth and layer reports (`make lint`, `make typecheck` run the rest) |
-| `make ingest` | CSV + `decisions.yaml` → `data/build/catalog.json` and the report; exit 1 means a decision is needed |
-| `make eval-ingest` | Seeded-anomaly fixtures must each stop the ingest with exactly their anomaly |
-| `make eval-l1` | Level-1 cases over HTTP: exact match and response size in tokens |
-| `make golden-l1` | Rebuild the level-1 cases from the reference implementation, plus the review sheet |
-| `make eval-l2` | Level 2 replayed from the recorded model responses |
-| `make eval-l2-refresh` | Level 2 calling the local model for cases without a recording |
-| `make eval-mcp` | MCP against REST on the level-1 cases, plus protocol checks; `URL=` for a deployment |
-| `make spec-lint` | Lint the served OpenAPI against the platform's rules |
-| `make secrets` | Secrets in tracked files that are not in the reviewed baseline |
-| `make latency URL=…` · `make check-public URL=…` | p95 latency and public checks against a deployment |
-| `make audit-csv` | Independent audit of the raw export, standard library only |
+| `make gate-fast` | Lint, tipi e tutti i test: ciò che deve restare verde dopo ogni modifica |
+| `make test` | pytest con i report di copertura, autenticazione e strati (`make lint` e `make typecheck` fanno il resto) |
+| `make ingest` | CSV + `decisions.yaml` → `data/build/catalog.json` e il report; exit 1 significa che serve una decisione |
+| `make eval-ingest` | Ogni fixture con un'anomalia seminata deve fermare l'ingest con esattamente quell'anomalia |
+| `make eval-l1` | Casi di livello 1 via HTTP: corrispondenza esatta e dimensione della risposta in token |
+| `make golden-l1` | Ricostruisce i casi di livello 1 dall'implementazione di riferimento, più il foglio di revisione |
+| `make eval-l2` | Livello 2 rieseguito dalle risposte registrate del modello |
+| `make eval-l2-refresh` | Livello 2 chiamando il modello locale per i casi senza registrazione |
+| `make eval-mcp` | MCP contro REST sui casi di livello 1, più i controlli di protocollo; `URL=` per un deploy |
+| `make sim-report` | Verdetti delle Simulations registrati per run → report |
+| `make spec-lint` | Controlla la OpenAPI servita rispetto alle regole della piattaforma |
+| `make secrets` | Segreti nei file tracciati che non sono nella baseline rivista |
+| `make latency URL=…` · `make check-public URL=…` | Latenza p95 e controlli pubblici contro un deploy |
+| `make done F=<n>` | Definizione di fatto di una fase: l'artefatto di ogni obiettivo contro la sua soglia sigillata |
+| `make audit-csv` | Audit indipendente dell'export grezzo, solo libreria standard |
 
-**Docker.** `docker build -t gift-shop-catalog . && docker run -p 8000:8000 -e
-CATALOG_API_KEY=change-me gift-shop-catalog`. The image ships the committed catalogue (no ingest
-step), runs as a non-root user and declares its own health check. It is deployed on a Contabo VPS
-with Coolify and Traefik. A new export is `make ingest`, a reviewed diff, a commit and a redeploy.
+</details>
 
-## Time spent
+<details>
+<summary>Struttura del repository</summary>
 
-Approximate durations from the engineering journal, which records each block of work.
+| Percorso | Contenuto |
+|---|---|
+| `src/catalog/tools.py` | I quattro tool, definiti una volta: nome, descrizione per il modello, parametri, schema della risposta |
+| `src/catalog/service.py` | `execute()`: un unico punto d'ingresso per ogni chiamata, condiviso da REST e MCP; normalizzazione degli input; corpi delle risposte |
+| `src/catalog/domain/` | Il catalogo in memoria: ricerca, navigazione, dettagli, ranking, quasi-risultati. Nessun import del framework web |
+| `src/catalog/ingest/` | CSV + decisioni → catalogo servito e report, con ogni regola di arresto |
+| `src/catalog/api/` | App FastAPI (`app.py`), OpenAPI generata (`openapi.py`), server MCP (`mcp.py`), landing |
+| `data/gift-shop-catalog.csv` | L'export del cliente, così come è arrivato. Mai modificato |
+| `data/decisions.yaml` | Giudizi umani, ognuno con il suo motivo: categorie, doppie categorie, valori sentinella, controlli, vocabolario di ricerca |
+| `data/build/` | `catalog.json` (ciò che il servizio serve) e `ingest-report.json`. Nel repo, così un nuovo export è un diff |
+| `agent/system-prompt.md` | Il prompt dell'agente, campo per campo come lo prende la piattaforma, con lo storico delle versioni |
+| `evals/` | Casi di livello 1, casi e registrazioni di livello 2, scenari e risultati delle Simulations, eval di ingest e MCP, report |
+| `docs/` | ADR, obiettivi e relativo lock, configurazione della piattaforma, diario di ingegneria, PDF della Parte 1 |
+| `scripts/` | Lint della specifica, controllo dei segreti, riepilogo della copertura, controlli remoti, definizione di fatto, prova di scala, audit del CSV grezzo |
 
-| Day | Main work | Time |
+</details>
+
+## Tempo impiegato
+
+Circa **32 ore in quattro giorni**, dal diario di ingegneria, che registra ogni blocco di lavoro
+con la sua durata approssimativa (da finalizzare alla consegna).
+
+| Giorno | Lavoro principale | Tempo |
 |---|---|---|
-| Thu 29 Oct | Brief, platform guide, goals, hosting choice, data audit, pipeline design | ≈ 7 h |
-| Fri 30 Oct | Ingest and domain test-first, 100-conversation stress test, tool interface, REST and OpenAPI, three human reviews of the level-1 cases | ≈ 7 h 20 |
-| Sat 31 Oct | Deployment, level 2 on a local model, prompt v2–v3, platform configuration, first simulations | ≈ 6 h 15 |
-| Sun 1 Nov | Prompt v4–v5, model comparison, simulation criteria, re-export safety, MCP, landing page, 15-scenario run | ≈ 5 h 55 |
-| **Total so far** | | **≈ 26 h 30** (to be finalised at submission) |
+| Gio 29 ott | Consegna, guida della piattaforma, obiettivi, scelta dell'hosting, audit dei dati, design della pipeline | ≈ 7 h |
+| Ven 30 ott | Ingest e dominio con TDD, stress test di 100 conversazioni, interfaccia dei tool, REST e OpenAPI, tre revisioni dei casi di livello 1 | ≈ 7 h 20 |
+| Sab 31 ott | Deploy, livello 2 su un modello locale, prompt v2–v3, configurazione della piattaforma, prime Simulations | ≈ 6 h 15 |
+| Dom 1 nov, fino a notte | Prompt v4–v10, confronto tra modelli, sicurezza dei nuovi export, MCP, landing, vocabolario di ricerca, latenza, MCP sulla piattaforma, Simulations, revisione del banco v5, README, Parte 1 | ≈ 11 h 25 |
 
-| Area | Time |
-|---|---|
-| Understanding the brief and the platform, goals, working rules | ≈ 4 h 15 |
-| Data: audit, ingest, re-export safety | ≈ 3 h 25 |
-| Tool interface and search, including three review rounds | ≈ 6 h 55 |
-| Hosting and deployment | ≈ 1 h 30 |
-| Agent: prompt, level 2, platform setup, model choice, simulations | ≈ 9 h 50 |
-| Extensions: MCP and landing page (review and merge time) | ≈ 35 min |
+Per area, a grandi linee: l'agente (prompt, livello 2, piattaforma, scelta del modello,
+Simulations) ≈ 11,5 h; interfaccia dei tool e ricerca, revisioni comprese ≈ 8 h; comprensione
+della consegna e della piattaforma, obiettivi, regole di lavoro ≈ 4 h; dati ≈ 3,5 h; hosting e
+latenza ≈ 2 h; MCP e landing ≈ 1,5 h; README e Parte 1 ≈ 1 h.
 
-## What was left out, and what I would do next
+## Cosa è rimasto fuori, e cosa farei dopo
 
-Left out on purpose, each with its reason in the ADR named:
+Lasciato fuori di proposito, ognuno con la sua ragione nell'ADR indicato:
 
-- **A `/catalog/report` page** showing anomalies, decisions and the catalogue version. Cut for
-  time; the same information is in `data/build/ingest-report.json`. A data-upload portal was
-  rejected outright: a write path and a second auth scheme on a public sandbox (ADR-001).
-- **LLM enrichment of product data** (ADR-003). Revisit when the catalogue reaches thousands of
-  products or level 1 shows misses from vocabulary no column holds, with a grounding check by
-  code and human review of changed rows.
-- **A real search engine** (ADR-004): SQLite FTS5 at tens of thousands of products, then a search
-  service with incremental ingest, live stock and cursor pagination.
-- **Ingest gaps** (ADR-009): the removal guard has no per-export acceptance, only its ratio;
-  header names are not normalised (`PRICE_EUR` stops, on purpose); look-alike letters from other
-  scripts (Cyrillic `а`) can still hide an injection phrase.
-- **Mutation testing.** Dropped from the goals: a new dependency, and it blocks nothing.
+- **Una pagina `/catalog/report`** con anomalie, decisioni e versione del catalogo. Tagliata per
+  tempo; la stessa informazione è in `data/build/ingest-report.json`. Un portale per caricare i
+  dati è stato scartato del tutto: un percorso di scrittura e un secondo schema di autenticazione
+  su un sandbox pubblico (ADR-001).
+- **Arricchimento dei dati di prodotto con un LLM** (ADR-003). Da riconsiderare quando il catalogo
+  arriverà a migliaia di prodotti, o quando il livello 1 mostrerà errori dovuti a parole che
+  nessuna colonna contiene, con una verifica di grounding nel codice e una revisione umana delle
+  righe cambiate.
+- **Un vero motore di ricerca** (ADR-004): SQLite FTS5 a decine di migliaia di prodotti, poi un
+  servizio di ricerca con ingest incrementale, stock in tempo reale e paginazione a cursore.
+- **Lacune dell'ingest** (ADR-009): il controllo sulle rimozioni non ha un'accettazione per
+  singolo export, solo la sua soglia; i nomi delle colonne non vengono normalizzati (`PRICE_EUR`
+  ferma l'ingest, di proposito); lettere simili di altri alfabeti (la `а` cirillica) possono
+  ancora nascondere una frase di injection.
+- **Mutation testing.** Tolto dagli obiettivi: una dipendenza in più, e non blocca nulla.
 
-Next, in order:
+Prossimi passi, in ordine:
 
-1. **Enforce mode for the Security layer**, after reading the Shadow logs for false positives on
-   mixed messages.
-2. **More simulation repetitions.** One or two runs per suite can be luck; a pass rate needs
-   several runs per scenario.
-3. **Ranking comments deferred by the freeze** (ADR-006): a sauna blanket as a throw, incense for
-   children (a client data issue), a pepper mill for "coffee grinder", chess as a wooden board
-   game. They become rules only if the agent recommends the wrong product because of the order.
-4. **`over_budget_matches` ordering:** for "coffee" it lists the €115 grinder above the €78
-   pour-over set, because a name match beats a tag match. The nearer price is the better offer.
-5. **The General agent's language:** it answers off-topic turns in the workspace language
-   (Italian), not the shopper's.
-6. **Bold product names:** the model rarely writes the `**` the format asks for, so names are
-   not bold in the widget.
-7. **Review the level-2 cases the model passed**, and the pending level-1 cases. Only level-2
-   failures were reviewed by a person.
+1. **Modalità Enforce per il Security layer**, dopo aver letto i log di Shadow in cerca di falsi
+   positivi sui messaggi misti.
+2. **Più run delle Simulations sul prompt v10.** Un solo run per suite può essere fortuna; un
+   tasso di successo richiede più run per scenario.
+3. **Segnalare alla piattaforma il segnaposto del secret in MCP**, e tornare a un secret del
+   workspace invece della chiave scritta nell'header.
+4. **Commenti sul ranking rinviati dal congelamento** (ADR-006): una coperta da sauna come plaid,
+   incenso per bambini (un problema dei dati del cliente), un macinapepe per "coffee grinder", gli
+   scacchi come gioco da tavolo in legno. Diventano regole solo se l'agente consiglia il prodotto
+   sbagliato a causa dell'ordine.
+5. **Ordine di `over_budget_matches`:** per "coffee" mette il macinino da 115 € sopra il set
+   pour-over da 78 €, perché una corrispondenza nel nome batte una nei tag. Il prezzo più vicino è
+   l'offerta migliore.
+6. **La lingua dell'agente General:** risponde ai messaggi fuori tema nella lingua del workspace
+   (italiano), non in quella del cliente.
+7. **Nomi dei prodotti in grassetto:** il modello scrive di rado i `**` che il formato chiede,
+   quindi nel widget i nomi non sono in grassetto.
+8. **Revisioni ancora aperte:** i 6 casi di livello 1 cambiati dall'ADR-011, e i casi di livello 2
+   che il modello ha superato (una persona ha rivisto solo i fallimenti).
 
-## Further reading
+## Per approfondire
 
-The decisions are in [`docs/adr/`](docs/adr/): data cleaning (001), tool interface (002), no LLM
-enrichment (003), in-memory catalogue (004), search relevance (005–007), MCP server (008),
-re-export safety (009). The reasoning behind them, including what failed, is in the
-[engineering journal](docs/JOURNAL.md). Also: [platform configuration](docs/PLATFORM.md),
-[goals](docs/GOALS.yaml), [agent prompt](agent/system-prompt.md), [AI workflow](AI_WORKFLOW.md).
+- [`docs/adr/`](docs/adr/): pulizia dei dati (001), interfaccia dei tool (002), niente
+  arricchimento con LLM (003), catalogo in memoria (004), rilevanza della ricerca (005–007), server
+  MCP (008), sicurezza dei nuovi export (009), vocabolario di ricerca e animali (010),
+  suggerimenti e parola principale (011).
+- [Diario di ingegneria](docs/JOURNAL.md): il ragionamento dietro ogni decisione, compreso ciò
+  che non ha funzionato, con i numeri e i loro comandi.
+- [Configurazione della piattaforma](docs/PLATFORM.md), [obiettivi](docs/GOALS.yaml),
+  [prompt dell'agente](agent/system-prompt.md), [Parte 1 · Come lavoro con l'IA](AI_WORKFLOW.md).
+
+I documenti in `docs/` e il codice sono in inglese.
