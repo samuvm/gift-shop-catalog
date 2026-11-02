@@ -30,7 +30,7 @@ motivo, en el idioma del cliente. Vive en el chat de la landing de una tienda in
 | Endpoint MCP (Streamable HTTP) | https://catalog.178.18.243.118.sslip.io/mcp |
 | Health | https://catalog.178.18.243.118.sslip.io/health |
 | Parte 1 · Cómo trabajo con IA | [PDF, una página](docs/ai-workflow/AI_WORKFLOW-es.pdf) · [Markdown (inglés)](AI_WORKFLOW.md) |
-| Vídeo | `<VIDEO_URL>` |
+| Vídeo | https://drive.google.com/file/d/1m3NdjqQwMkuvs_3z5iWJyU38j2ObOtzl/view?usp=sharing |
 
 Todos los endpoints de datos y `/mcp` exigen la cabecera `X-API-Key` (`/mcp` acepta también
 `Authorization: Bearer <key>`). Sin ella responden 401, con un cuerpo que explica cómo enviarla.

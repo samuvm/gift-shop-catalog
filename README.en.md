@@ -29,7 +29,7 @@ landing page of an invented shop, *Ribbon & Co.*
 | MCP endpoint (Streamable HTTP) | https://catalog.178.18.243.118.sslip.io/mcp |
 | Health | https://catalog.178.18.243.118.sslip.io/health |
 | Part 1 · How I work with AI | [PDF, one page](docs/ai-workflow/AI_WORKFLOW-en.pdf) · [Markdown](AI_WORKFLOW.md) |
-| Video | `<VIDEO_URL>` |
+| Video | https://drive.google.com/file/d/1m3NdjqQwMkuvs_3z5iWJyU38j2ObOtzl/view?usp=sharing |
 
 Every data endpoint and `/mcp` need the header `X-API-Key` (`/mcp` also accepts
 `Authorization: Bearer <key>`). Without it they answer 401 with a body that says how to send it.

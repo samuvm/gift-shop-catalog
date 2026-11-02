@@ -29,7 +29,7 @@ lingua del cliente. Vive nella chat della landing di un negozio inventato, *Ribb
 | Endpoint MCP (Streamable HTTP) | https://catalog.178.18.243.118.sslip.io/mcp |
 | Health | https://catalog.178.18.243.118.sslip.io/health |
 | Parte 1 · Come lavoro con l'IA | [PDF, una pagina](docs/ai-workflow/AI_WORKFLOW-it.pdf) · [Markdown (inglese)](AI_WORKFLOW.md) |
-| Video | `<VIDEO_URL>` |
+| Video | https://drive.google.com/file/d/1m3NdjqQwMkuvs_3z5iWJyU38j2ObOtzl/view?usp=sharing |
 
 Tutti gli endpoint di dati e `/mcp` richiedono l'header `X-API-Key` (`/mcp` accetta anche
 `Authorization: Bearer <key>`). Senza chiave rispondono 401, con un corpo che spiega come
