@@ -2,75 +2,52 @@
   "source": "evals/simulations/results.csv",
   "core_pass_rate": 1.0,
   "core_judge_pass_rate": 1.0,
-  "n": 18,
+  "n": 6,
   "model": "gpt-5.6-luna",
-  "prompt_version": "v8",
+  "prompt_version": "v9",
   "runs": [
-    "r12c",
-    "r13c",
-    "r14c"
+    "r15c"
   ],
   "fails": [],
   "suites": {
     "core": {
       "model": "gpt-5.6-luna",
-      "prompt_version": "v8",
+      "prompt_version": "v9",
       "runs": [
-        "r12c",
-        "r13c",
-        "r14c"
+        "r15c"
       ],
-      "n": 18,
+      "n": 6,
       "pass_rate": 1.0,
       "judge_pass_rate": 1.0,
       "fails": []
     },
     "extra": {
       "model": "gpt-5.6-luna",
-      "prompt_version": "v8",
+      "prompt_version": "v9",
       "runs": [
-        "r12x",
-        "r13x",
-        "r14x"
+        "r15x"
       ],
-      "n": 9,
+      "n": 3,
       "pass_rate": 1.0,
-      "judge_pass_rate": 0.8889,
-      "fails": [
-        {
-          "run": "r13x",
-          "scenario": "extra-7",
-          "judge": "fail",
-          "after_reading": "pass",
-          "note": "judge: it had said the moka is the only brewing option within budget and marked the pour-over 28 over; the 'within 60' wording was the judge's"
-        }
-      ]
+      "judge_pass_rate": 1.0,
+      "fails": []
     },
     "extended": {
       "model": "gpt-5.6-luna",
-      "prompt_version": "v8",
+      "prompt_version": "v9",
       "runs": [
-        "r12e",
-        "r13e",
-        "r14e"
+        "r15e"
       ],
-      "n": 18,
-      "pass_rate": 0.8889,
-      "judge_pass_rate": 0.8889,
+      "n": 6,
+      "pass_rate": 0.8333,
+      "judge_pass_rate": 0.8333,
       "fails": [
         {
-          "run": "r13e",
+          "run": "r15e",
           "scenario": "ext-10",
           "judge": "fail",
           "after_reading": "fail",
-          "note": "answered 'Yes' to 'definitely vegan' from the materials alone; the catalogue has no vegan label (prompt v9)"
-        },
-        {
-          "run": "r13e",
-          "scenario": "ext-12",
-          "judge": "fail",
-          "after_reading": "fail",
-          "note": "called the Party Game 'clearly child-friendly'; it is listed for anyone, not for kids (prompt v9)"
+          "note": "still answered 'Sì' to 'is it vegan?' before listing the materials; the general clause in rule 7 was not enough (prompt v10)"
         }
       ]
     }

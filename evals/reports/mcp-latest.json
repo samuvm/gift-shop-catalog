@@ -5,7 +5,7 @@
     "parity_cases": 81,
     "conformance_checks": 16
   },
-  "target": "in-process, today pinned to 2026-10-30",
+  "target": "https://catalog.178.18.243.118.sslip.io",
   "failures": [],
   "checks": {
     "initialize_2025_11_25": true,
